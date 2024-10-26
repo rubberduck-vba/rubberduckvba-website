@@ -1,0 +1,48 @@
+<div class="card  my-4">
+  <div class="card-header bg-light-subtle">
+    <div *ngIf="tag">
+      <h3><fa-icon class="mx-2" [icon]="['fas', 'code-branch']"></fa-icon><span [innerHtml]="tag.isPreRelease ? 'next' : 'main'"></span></h3>
+    </div>
+    <div *ngIf="!tag">
+      <h3><span class="spinner-border text-primary"></span></h3>
+    </div>
+  </div>
+  <div *ngIf="tag != null" class="card-body">
+    {{text}}
+    <div class="row justify-content-center">
+      <button *ngIf="canDownload" class="btn btn-dark btn-download btn-ducky rounded-pill mt-2" type="button" (click)="confirmDownload()">
+        <span><fa-icon class="mx-2" [icon]="['fas', 'download']"></fa-icon>{{info?.name}}</span>
+      </button>
+      <button *ngIf="!canDownload" class="btn btn-dark btn-download btn-ducky rounded-pill mt-2 disabled" type="button">
+        <span><fa-icon class="mx-2" [icon]="['fas', 'ban']"></fa-icon>download from a Windows desktop</span>
+      </button>
+    </div>
+  </div>
+  <div *ngIf="tag" class="card-footer bg-light-subtle">
+      <fa-icon class="mx-1" [icon]="['fas', 'user-xmark']"></fa-icon>
+      <span title="Installer downloads" class="fw-bold" [innerHtml]="tag.installerDownloads | number"></span>
+      <span class="float-end text-muted" title="Release date" [innerHtml]="tag.dateCreated | date"></span>
+  </div>
+</div>
+
+<ng-template #content let-modal>
+  <div *ngIf="info != undefined" class="modal-lg">
+    <div class="modal-header align-content-center">
+      <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;Download Rubberduck</h4>
+      <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+    </div>
+    <div class="modal-body">
+      <p>
+        <strong>You are about to download an executable file</strong> that is hosted on github.com, where the Rubberduck project lives.
+      </p>
+      <p>
+        Please note that malware detection software (e.g. Windows Defender, Symantec) may <strong>falsely</strong> flag the download as potentially harmful, requiring additional explicit confirmation steps before the download can proceed.
+      </p>
+      <p>{{info.filename}}</p>
+    </div>
+    <div class="modal-footer align-content-end">
+      <button type="button" ngbAutofocus class="btn btn-outline-secondary" (click)="modal.dismiss('cancel')">Cancel</button>
+      <a role="button" ngbAutofocus class="btn btn-success" (click)="modal.close('confirm')" [href]="info.downloadUrl">Download</a>
+    </div>
+  </div>
+</ng-template>

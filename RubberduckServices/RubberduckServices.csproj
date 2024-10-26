@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Rubberduck.Parsing">
+      <HintPath>Libs\Rubberduck.Parsing.dll</HintPath>
+    </Reference>
+    <Reference Include="Rubberduck.SmartIndenter">
+      <HintPath>Libs\Rubberduck.SmartIndenter.dll</HintPath>
+    </Reference>
+    <Reference Include="Rubberduck.VBEditor">
+      <HintPath>Libs\Rubberduck.VBEditor.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

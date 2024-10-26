@@ -1,0 +1,92 @@
+<div class="accordion" id="featureBoxAccordion">
+    <div class="card my-2">
+        <div class="card-header bg-light-subtle" id="featureBoxHeading">
+            <div *ngIf="!feature" class="row">
+                <h4 *ngIf="!feature"><span class="spinner-border text-primary"></span> Loading...</h4>
+            </div>
+            <div *ngIf="feature">
+                <button class="btn btn-link text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureBoxCollapseBody" aria-controls="featureBoxCollapseBody" (click)="feature.isCollapsed = !feature.isCollapsed">
+                    <div class="row">
+                        <div class="col-1">
+                            &nbsp;
+                        </div>
+                        <div class="col-10">
+                            <h4>{{feature.title}}</h4>
+                        </div>
+                        <div class="col-1">
+                            <div class="float-end">
+                                <h4>
+                                    <fa-icon *ngIf="!feature.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                                    <fa-icon *ngIf="feature.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+        <div *ngIf="feature" class="collapse" id="featureBoxCollapseBody" [ngClass]="{'show': !feature.isCollapsed}" aria-labelledby="featureBoxHeading" data-parent="featureBoxAccordion">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-1"></div>
+                    <div class="col-9">
+                        <p [innerHtml]="feature.shortDescription"></p>
+                    </div>
+                    <div class="col-2 align-content-center">
+                        <a *ngIf="hasOwnDetailsPage == true" role="button" class="btn btn-outline-dark btn-ducky rounded-pill" href="features/{{feature.name.toLowerCase()}}">Details</a>
+                        <!--button *ngIf="hasOwnDetailsPage != true" role="button" class="btn btn-outline-dark btn-ducky rounded-pill" (click)="showDetails()">Details</button-->
+                    </div>
+                </div>
+                <div class="row" *ngIf="feature.hasImage">
+                    <div class="col-12">
+                        <img alt="{{feature.title}}" src='../../../assets/{{feature.name.toLowerCase()}}.gif' class="w-50" />
+                    </div>
+                </div>
+                <div class="row my-3" *ngIf="hasOwnDetailsPage != true">
+                    <div class="col-1"></div>
+                    <div class="col-10 text-center">
+                        <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureBoxDetailsBody" aria-controls="featureBoxDetailsBody" (click)="feature.isDetailsCollapsed = !feature.isDetailsCollapsed">
+                            <div *ngIf="feature.isDetailsCollapsed">
+                                Show more
+                            </div>
+                            <div *ngIf="!feature.isDetailsCollapsed">
+                                Show less
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                <div id="featureBoxDetailsBody" class="collapse" [ngClass]="{'show': !feature.isDetailsCollapsed}">
+                    <div class="row">
+                        <div class="col-1"></div>
+                        <div class="col-10">
+                            <p [innerHtml]="feature.description"></p>
+                        </div>
+                        <div class="col-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<ng-template #content let-modal>
+    <div *ngIf="feature != undefined" class="modal-featurebox modal-fullscreen modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header align-content-center">
+                <h2><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{feature.title}}</h2>
+                <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+            </div>
+            <div class="modal-body px-5">
+                <div class="row">
+                    <div class="col-1">
+                    </div>
+                    <div class="col-10">
+                        <p [innerHtml]="feature.description"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer align-content-end">
+                <button type="button" ngbAutofocus class="btn btn-outline-dark" (click)="modal.dismiss('close')">Close</button>
+            </div>
+        </div>
+    </div>
+</ng-template>

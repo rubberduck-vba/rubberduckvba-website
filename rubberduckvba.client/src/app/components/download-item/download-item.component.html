@@ -1,0 +1,34 @@
+<div>
+  <span>
+    <button *ngIf="info != null && (info.kind == 'tag' || info.kind == 'pre')" type="button" class="btn btn-link p-0" (click)="confirmDownload()" [title]="info.title">
+      <fa-icon *ngIf="info != null && (info.kind == 'tag' || info.kind == 'pre')" class="mx-2" [icon]="['fas', 'tag']"></fa-icon>
+      {{info.name}}
+    </button>
+    <a *ngIf="info != null && (info.kind == 'pdf')" [href]="info.downloadUrl" role="button" class="btn btn-link p-0" [title]="info.title">
+      <fa-icon *ngIf="info != null && info.kind == 'pdf'" class="mx-2" [icon]="['fas', 'file-pdf']"></fa-icon>
+      {{info.name}}
+    </a>
+  </span>
+</div>
+
+<ng-template #content let-modal>
+  <div *ngIf="info != undefined" class="modal-lg">
+    <div class="modal-header align-content-center">
+      <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;Download Rubberduck</h4>
+      <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+    </div>
+    <div class="modal-body">
+      <p>
+        <strong>You are about to download an executable file</strong> that is hosted on github.com, where the Rubberduck project lives.
+      </p>
+      <p>
+        Please note that malware detection software (e.g. Windows Defender, Symantec) may <strong>falsely</strong> flag the download as potentially harmful, requiring additional explicit confirmation steps before the download can proceed.
+      </p>
+      <p>{{info.filename}}</p>
+    </div>
+    <div class="modal-footer align-content-end">
+      <button type="button" ngbAutofocus class="btn btn-outline-secondary" (click)="modal.dismiss('cancel')">Cancel</button>
+      <a role="button" ngbAutofocus class="btn btn-success" (click)="modal.close('confirm')" [href]="info.downloadUrl">Download</a>
+    </div>
+  </div>
+</ng-template>

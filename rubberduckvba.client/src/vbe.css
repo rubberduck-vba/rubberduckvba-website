@@ -1,0 +1,80 @@
+.vbe-mock-debugger {
+    text-align: left;
+    border: 1px solid #696969;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 0;
+}
+
+    .vbe-mock-debugger .code-area {
+        border-left: 20px solid #f0f0f0;
+        font-family: monospace;
+        font-size: 12px;
+        position: relative;
+        background: white;
+    }
+
+    .vbe-mock-debugger .comment {
+        color: #008000;
+    }
+
+    .vbe-mock-debugger .keyword {
+        color: #000096;
+    }
+
+    .vbe-mock-debugger .string-literal {
+        color: #800000;
+    }
+
+    .vbe-mock-debugger .annotation {
+        color: #008000;
+        font-style: italic;
+        font-weight: bold;
+    }
+
+    .vbe-mock-debugger .annotation-args {
+        color: #008000;
+        font-style: italic;
+    }
+
+    .vbe-mock-debugger .attribute {
+        color: #b0b0b0;
+        font-style: italic;
+        font-weight: bold;
+    }
+
+    .vbe-mock-debugger .attribute-value {
+        color: #b0b0b0;
+        font-style: italic;
+    }
+
+    .vbe-mock-debugger .code {
+        border-left: 1px solid #000;
+    }
+
+        .vbe-mock-debugger .code .block {
+            padding-left: 12px;
+            margin-top: 12px;
+            border-bottom: 1px solid #808080;
+        }
+
+            .vbe-mock-debugger .code .block:first-child {
+                margin-top: 0;
+            }
+
+            .vbe-mock-debugger .code .block:last-child {
+                border-bottom: none;
+            }
+
+            .vbe-mock-debugger .code .block .error {
+                background-color: #ff0;
+                position: relative;
+                padding: 0;
+                margin: 0;
+            }
+
+                .vbe-mock-debugger .code .block .error img {
+                    background-color: #f0f0f0;
+                    top: 1px;
+                    position: absolute;
+                }

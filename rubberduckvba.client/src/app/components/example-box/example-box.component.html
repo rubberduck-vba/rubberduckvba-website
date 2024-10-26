@@ -1,0 +1,55 @@
+<div class="accordion" id="exampleBoxAccordion">
+    <div class="card my-2">
+        <div class="card-header bg-light-subtle my-0 py-0" id="exampleBoxHeading">
+            <div *ngIf="!inspectionExample" class="row my-0 py-0">
+                <h4><span class="spinner-border text-primary"></span> Loading...</h4>
+            </div>
+            <div *ngIf="inspectionExample" class="btn btn-link text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="inspectionExample.isCollapsed = !inspectionExample.isCollapsed">
+                <div class="row my-0 py-0">
+                    <div class="col-1">
+                        &nbsp;
+                    </div>
+                    <div class="col-10">
+                        <h4>Example {{inspectionExample.sortOrder + 1}}</h4>
+                    </div>
+                    <div class="col-1">
+                        <div class="float-end">
+                            <h4>
+                                <fa-icon *ngIf="!inspectionExample.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                                <fa-icon *ngIf="inspectionExample.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!--TODO:QuickFixes-->
+                <!--TODO:Annotations-->
+            </div>
+        </div>
+        <div *ngIf="inspectionExample">
+            <div class="collapse" id="exampleBoxCollapseBody" [ngClass]="{'show': !inspectionExample.isCollapsed}" aria-labelledby="exampleBoxHeading" data-parent="exampleBoxAccordion">
+                <div class="card-body">
+                    <p *ngIf="inspectionExample.hasResult"><fa-icon class="text-warning" [icon]="'lightbulb'"></fa-icon> This inspection would produce a result with the code in this example.</p>
+                    <p *ngIf="!inspectionExample.hasResult"><fa-icon class="text-success" [icon]="'circle-check'"></fa-icon> This inspection would <strong>NOT</strong> produce a result with the code in this example.</p>
+
+                    <div *ngFor="let module of inspectionExample.modules" class="row mx-1">
+                        <div class="col-12">
+                            <div class="card mb-1 border-primary border-2">
+                                <div class="card-header btn-primary">
+                                    <!--TODO icon for module.moduleType-->
+                                    <h6 class="align-text-bottom" title="{{module.moduleName}} ({{module.moduleTypeName}})">
+                                        <span class="icon {{module.moduleTypeIconClass}}"></span>
+                                        <span>{{module.moduleName}}</span>
+                                    </h6>
+                                </div>
+                                <div class="card-body bg-primary-subtle">
+                                    <div class="code" [innerHtml]="module.htmlContent"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

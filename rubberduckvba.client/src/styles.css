@@ -1,0 +1,73 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Provide sufficient contrast against white background */
+
+body {
+  color: #424649;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Ink Free';
+  font-weight: bold;
+}
+
+.document-img {
+    width: 40%;
+}
+
+.modal-featurebox {
+    
+}
+
+.modal-header {
+  font-family: 'Ink Free';
+  font-weight: bold;
+}
+
+a {
+  color: #0366d6;
+}
+
+.pill-panel {
+  background-color: var(--bs-card-bg);
+  border-style: solid;
+  border-color: var(--bs-card-border-color);
+  border-width: var(--bs-card-border-width);
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.btn-download {
+  min-height: 56px;
+  width: 75%;
+}
+
+.btn-ducky {
+  background: #ffb10a;
+  color: white;
+  font-weight: bold;
+}
+
+.card-highlight {
+  border-width: 1px !important;
+  border-color: lightsteelblue;
+  border-style: solid !important;
+  text-decoration: none;
+}
+
+.card-highlight:hover {
+  border-width: 1px !important;
+  border-color: highlight !important;
+  border-style: solid !important;
+  text-decoration: none;
+  color: midnightblue;
+  background-color: #1e90ff1b;
+}
