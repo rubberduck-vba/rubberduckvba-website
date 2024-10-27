@@ -1,4 +1,6 @@
 ﻿using Hangfire;
+using Hangfire.Annotations;
+using Hangfire.Dashboard;
 using Hangfire.SqlServer;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
@@ -17,6 +19,11 @@ using rubberduckvba.com.Server.Services;
 using System.Reflection;
 
 namespace rubberduckvba.com.Server;
+
+public class HangfireAuthenticationFilter : IDashboardAuthorizationFilter
+{
+    public bool Authorize([NotNull] DashboardContext context) => true;
+}
 
 public class Program
 {
@@ -120,7 +127,7 @@ public class Program
                     hangfireOptions.UpdateXmldocContentSchedule);
             }
 
-            app.UseHangfireDashboard(HangfireConstants.DashboardUrl, storage: scheduler.Storage);
+            app.UseHangfireDashboard(HangfireConstants.DashboardUrl, new DashboardOptions { DarkModeEnabled = true, Authorization = [new HangfireAuthenticationFilter()] }, scheduler.Storage);
             CleanStartHangfire(scheduler.Storage);
         }
     }
