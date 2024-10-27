@@ -1,8 +1,5 @@
 name: dotnet-CD
 
-env:
-  DOTNET_VERSION: '8'
-
 on:
   push:
     branches: [ "main" ]
@@ -18,11 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up .NET Core
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
       - name: Set up dependency caching for faster builds
         uses: actions/cache@v3
         with:
@@ -35,7 +27,7 @@ jobs:
         run: dotnet build rubberduckvba.Server --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish rubberduckvba.Server\rubberduckvba.Server --configuration Release --output ${{env.DOTNET_ROOT}}\pub
+        run: dotnet publish --target rubberduckvba.Server\rubberduckvba.Server.csproj --configuration Release --output ${{env.DOTNET_ROOT}}\pub
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
