@@ -13,6 +13,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "rubberduckvba.database", "r
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4F5F292F-9F99-47E7-9D88-0DC0D886424F}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet-cd.yml = .github\workflows\dotnet-cd.yml
+		.github\workflows\dotnet-ci.yml = .github\workflows\dotnet-ci.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
