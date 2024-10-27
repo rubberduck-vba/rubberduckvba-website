@@ -171,7 +171,7 @@ public class Program
                 (NLog.LogLevel.Trace, "*", new DebuggerTarget("DebuggerLog")),
                 (NLog.LogLevel.Info, "rubberduckvba.*", new FileTarget("FileLog")
                 {
-                    FileName = "rubberduckvba.Server.log",
+                    FileName = "logs/rubberduckvba.Server.log",
                     DeleteOldFileOnStartup = true,
                     CreateDirs = true,
                     ArchiveEvery = FileArchivePeriod.Day,
