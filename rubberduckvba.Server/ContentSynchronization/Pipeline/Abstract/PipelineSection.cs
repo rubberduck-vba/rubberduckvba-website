@@ -45,26 +45,27 @@ public abstract class PipelineSection<TContext> : PipelineBase<TContext, bool>
                     break;
             }
             Logger.LogTrace(Context.Parameters, $"{GetType().Name} | ✅ Dataflow block completion task completed | {name} ({block.GetType().Name}) | {status}");
-        })
-            .ContinueWith(t =>
-            {
-                var details = Blocks.Select(
-                    block => $"{(block.Value.Completion.IsCompletedSuccessfully ? "✔️" :
-                                 block.Value.Completion.IsFaulted ? "✖️" :
-                                 block.Value.Completion.IsCanceled ? "⛔" : "🕑")} {block.Key} : {block.Value.Completion.Status}");
-                Logger.LogTrace(Context.Parameters, "Pipeline block completion status details" + Environment.NewLine + string.Join(Environment.NewLine, details));
-            }));
+        }).ContinueWith(t =>
+        {
+            var details = Blocks.Select(
+                block => $"{(
+                      block.Value.Completion.IsCompletedSuccessfully ? "✔️"
+                    : block.Value.Completion.IsFaulted ? "✖️"
+                    : block.Value.Completion.IsCanceled ? "⛔"
+                    : "🕑")} {block.Key} : {block.Value.Completion.Status}");
+            Logger.LogTrace(Context.Parameters, "Pipeline block completion status details" + Environment.NewLine + string.Join(Environment.NewLine, details));
+        }));
     }
 
     public void FaultPipelineBlock(IDataflowBlock block, Exception exception)
     {
+        block.Fault(exception);
+        Logger.LogWarning(Context.Parameters, $"{GetType().Name} | ⚠️ Block ({block.GetType().Name}) was faulted");
+
         if (Exception is null)
         {
             Exception = exception;
             Result.AddException(exception);
-
-            block.Fault(exception);
-            Logger.LogWarning(Context.Parameters, $"{GetType().Name} | ⚠️ Block ({block.GetType().Name}) was faulted");
 
             try
             {
@@ -76,6 +77,10 @@ public abstract class PipelineSection<TContext> : PipelineBase<TContext, bool>
             {
                 Logger.LogWarning(Context.Parameters, $"{GetType().Name} |  ⚠️ Token source disposed: cancellation already happened");
             }
+        }
+        else
+        {
+            Exception = new AggregateException([Exception, exception]);
         }
     }
 

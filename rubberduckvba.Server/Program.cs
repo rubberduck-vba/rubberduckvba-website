@@ -169,6 +169,16 @@ public class Program
 
             (NLog.LogLevel MinLevel, string, Target Target)[] targets = [
                 (NLog.LogLevel.Trace, "*", new DebuggerTarget("DebuggerLog")),
+                (NLog.LogLevel.Info, "rubberduckvba.*", new FileTarget("FileLog")
+                {
+                    FileName = "rubberduckvba.Server.log",
+                    DeleteOldFileOnStartup = true,
+                    CreateDirs = true,
+                    ArchiveEvery = FileArchivePeriod.Day,
+                    ArchiveOldFileOnStartup = true,
+                    EnableFileDelete = true,
+                    MaxArchiveDays = 10,
+                }),
                 (NLog.LogLevel.Error, "*", new EventLogTarget("EventLog")
                 {
                     Source = "rubberduckvba.Server",

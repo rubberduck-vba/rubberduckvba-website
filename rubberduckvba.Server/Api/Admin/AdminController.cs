@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using rubberduckvba.com.Server.ContentSynchronization;
@@ -7,6 +8,7 @@ using rubberduckvba.com.Server.Hangfire;
 namespace rubberduckvba.com.Server.Api.Admin;
 
 
+[Authorize("github")]
 [ApiController]
 public class AdminController(ConfigurationOptions options, IBackgroundJobClient backgroundJob, ILogger<AdminController> logger) : ControllerBase
 {
@@ -14,6 +16,7 @@ public class AdminController(ConfigurationOptions options, IBackgroundJobClient 
     /// Enqueues a job that updates xmldoc content from the latest release/pre-release tags.
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
+    [Authorize("github")]
     [HttpPost("admin/update/xmldoc")]
     public async ValueTask<IActionResult> UpdateXmldocContent()
     {
@@ -28,6 +31,7 @@ public class AdminController(ConfigurationOptions options, IBackgroundJobClient 
     /// Enqueues a job that gets the latest release/pre-release tags and their respective assets, and updates the installer download stats.
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
+    [Authorize("github")]
     [HttpPost("admin/update/tags")]
     public async ValueTask<IActionResult> UpdateTagMetadata()
     {
@@ -38,6 +42,7 @@ public class AdminController(ConfigurationOptions options, IBackgroundJobClient 
         return await ValueTask.FromResult(Ok(jobId));
     }
 
+    [Authorize("github")]
     [HttpGet("admin/config/current")]
     public async ValueTask<IActionResult> Config()
     {
