@@ -3,13 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rubberduckvba.Server", "rubberduckvba.Server\rubberduckvba.Server.csproj", "{1FC19F39-8298-4B5F-95B1-BF59A381E402}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rubberduckvba.Server", "rubberduckvba.Server\rubberduckvba.Server.csproj", "{1FC19F39-8298-4B5F-95B1-BF59A381E402}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "rubberduckvba.client", "rubberduckvba.client\rubberduckvba.client.esproj", "{C90E2866-19B4-4D69-9F10-130C57CA7F2C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubberduckServices", "RubberduckServices\RubberduckServices.csproj", "{98341328-1519-4B07-A6DF-50BD0B12FE87}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "rubberduckvba.database", "rubberduckvba.database\rubberduckvba.database.sqlproj", "{5EE831E5-10F4-46F4-8D3C-E5E539019F0F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4F5F292F-9F99-47E7-9D88-0DC0D886424F}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
