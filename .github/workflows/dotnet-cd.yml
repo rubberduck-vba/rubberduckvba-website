@@ -35,7 +35,7 @@ jobs:
         run: dotnet build rubberduckvba.Server/rubberduckvba.Server.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -t rubberduckvba.Server/rubberduckvba.Server.csproj -c Release -o ${{env.DOTNET_ROOT}}/pub
+        run: dotnet publish rubberduckvba.Server/rubberduckvba.Server.csproj --configuration Release --output ${{env.DOTNET_ROOT}}/pub
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -44,6 +44,9 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/pub
 
   deploy:
+    environment:
+      name: AZ-TEST
+      url: https://test.rubberduckvba.com
     permissions:
       contents: none
     runs-on: windows-latest
