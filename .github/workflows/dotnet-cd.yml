@@ -35,7 +35,7 @@ jobs:
         run: dotnet build rubberduckvba.Server --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish rubberduckvba.Server\\rubberduckvba.Server.csproj --configuration Release --output ${{env.DOTNET_ROOT}}/pub
+        run: dotnet publish rubberduckvba.Server\rubberduckvba.Server --configuration Release --output ${{env.DOTNET_ROOT}}\pub
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
