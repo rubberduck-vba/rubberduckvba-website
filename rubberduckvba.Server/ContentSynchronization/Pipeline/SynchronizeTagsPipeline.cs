@@ -1,13 +1,11 @@
-﻿using System.Threading.Tasks.Dataflow;
-
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
+﻿using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
 using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
+using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
 using rubberduckvba.com.Server.Services;
 
 namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline;
 
-public class SynchronizeTagsPipeline : PipelineBase<SyncContext, bool>, ISynchronizationPipeline<SyncContext>
+public class SynchronizeTagsPipeline : PipelineBase<SyncContext, bool>, ISynchronizationPipeline<SyncContext, bool>
 {
     private readonly IRubberduckDbService _content;
     private readonly IGitHubClientService _github;
@@ -23,7 +21,7 @@ public class SynchronizeTagsPipeline : PipelineBase<SyncContext, bool>, ISynchro
         _staging = staging;
     }
 
-    public async Task<SyncContext> ExecuteAsync(SyncRequestParameters parameters, CancellationTokenSource tokenSource)
+    public async Task<IPipelineResult<bool>> ExecuteAsync(SyncRequestParameters parameters, CancellationTokenSource tokenSource)
     {
         if (_isDisposed)
         {
@@ -42,6 +40,8 @@ public class SynchronizeTagsPipeline : PipelineBase<SyncContext, bool>, ISynchro
         Start(synchronizeTags.InputBlock, parameters);
 
         // 04. await completion
-        return await synchronizeTags.OutputTask.ContinueWith(t => Context, tokenSource.Token);
+        await synchronizeTags.OutputTask;
+
+        return Result;
     }
 }

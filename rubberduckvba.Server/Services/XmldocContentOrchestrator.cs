@@ -9,6 +9,25 @@ public class XmldocContentOrchestrator(ISynchronizationPipelineFactory<SyncConte
     public async Task UpdateContentAsync(XmldocSyncRequestParameters request, CancellationTokenSource tokenSource)
     {
         var pipeline = factory.Create(request, tokenSource);
-        await pipeline.ExecuteAsync(request, tokenSource);
+        try
+        {
+            await pipeline.ExecuteAsync(request, tokenSource);
+        }
+        catch (TaskCanceledException)
+        {
+            var exceptions = pipeline.Exceptions.ToList();
+            if (exceptions.Count > 0)
+            {
+                if (exceptions.Count == 1)
+                {
+                    throw exceptions[0];
+                }
+                else
+                {
+                    throw new AggregateException(exceptions);
+                }
+            }
+            throw;
+        }
     }
 }

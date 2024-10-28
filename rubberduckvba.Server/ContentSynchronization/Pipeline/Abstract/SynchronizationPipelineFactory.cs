@@ -23,7 +23,7 @@ public class SynchronizationPipelineFactory : ISynchronizationPipelineFactory<Sy
         _markdown = markdown;
     }
 
-    public ISynchronizationPipeline<SyncContext> Create<TParameters>(TParameters parameters, CancellationTokenSource tokenSource) where TParameters : IRequestParameters
+    public ISynchronizationPipeline<SyncContext, bool> Create<TParameters>(TParameters parameters, CancellationTokenSource tokenSource) where TParameters : IRequestParameters
     {
         return parameters switch
         {

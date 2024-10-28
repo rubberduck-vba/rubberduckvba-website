@@ -24,7 +24,7 @@ public class AuthController(IOptions<GitHubSettings> configuration, IOptions<Api
 {
     [HttpGet("auth")]
     [AllowAnonymous]
-    public async Task<ActionResult<UserViewModel>> Index()
+    public ActionResult<UserViewModel> Index()
     {
         var claims = HttpContext.User.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
         var hasName = claims.TryGetValue(ClaimTypes.Name, out var name);

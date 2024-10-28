@@ -1,21 +1,21 @@
-﻿using System.Reflection;
-using System.Xml.Linq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Schema;
 using rubberduckvba.com.Server.Data;
+using System.Reflection;
+using System.Xml.Linq;
 
 namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
 
 public class AnnotationProperties
 {
-    public AnnotationArgInfo[] Parameters { get; set; }
+    public AnnotationArgInfo[] Parameters { get; set; } = [];
 }
 
 public class XmlDocAnnotation
 {
     public XmlDocAnnotation(string name, XElement node, bool isPreRelease)
     {
-        SourceObject = node.Attribute("name").Value.Substring(2).Substring(name.LastIndexOf(".", StringComparison.Ordinal) + 1);
+        SourceObject = node.Attribute("name")!.Value.Substring(2).Substring(name.LastIndexOf(".", StringComparison.Ordinal) + 1);
         IsPreRelease = isPreRelease;
 
         AnnotationName = name;
@@ -84,7 +84,7 @@ public class XmlDocAnnotation
                 */
                 var modules = example.Elements(XmlDocSchema.Annotation.Example.Module.ElementName).AsParallel();
                 var simpleExamples = modules.Where(m => m.Nodes().OfType<XCData>().Any())
-                    .Select((e, i) => new BeforeAndAfterCodeExample(new[] { ExtractCodeModule(e, i) }, modulesAfter: null))
+                    .Select((e, i) => new BeforeAndAfterCodeExample([ExtractCodeModule(e, i)], modulesAfter: []))
                     .ToArray();
                 if (simpleExamples.Length > 0)
                 {
@@ -93,7 +93,7 @@ public class XmlDocAnnotation
                 }
 
                 IEnumerable<ExampleModule> before = Enumerable.Empty<ExampleModule>();
-                IEnumerable<ExampleModule> after = null;
+                IEnumerable<ExampleModule>? after = null;
 
                 if (modules.Any())
                 {
@@ -110,8 +110,8 @@ public class XmlDocAnnotation
                      *   </module>
                      * </example>
                     */
-                    before = modules.Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Module.Before.ElementName), i, "(code pane)"));
-                    after = modules.Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Module.After.ElementName), i, "(synchronized, hidden attributes shown)"));
+                    before = modules.Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Module.Before.ElementName)!, i, "(code pane)"));
+                    after = modules.Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Module.After.ElementName)!, i, "(synchronized, hidden attributes shown)"));
                 }
 
                 if (example.Elements(XmlDocSchema.Annotation.Example.Before.ElementName).Any())
@@ -132,9 +132,9 @@ public class XmlDocAnnotation
                      * </example>
                     */
                     before = example.Elements(XmlDocSchema.Annotation.Example.Before.ElementName)
-                        .Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Before.Module.ElementName), i, "(code pane)"));
+                        .Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Before.Module.ElementName)!, i, "(code pane)"));
                     after = example.Elements(XmlDocSchema.Annotation.Example.After.ElementName)
-                        .Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.After.Module.ElementName), i, "(synchronized, hidden attributes shown)"));
+                        .Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.After.Module.ElementName)!, i, "(synchronized, hidden attributes shown)"));
                 }
 
                 if (before.Any() && after.Any())
@@ -156,7 +156,7 @@ public class XmlDocAnnotation
             .GetMembers()
             .Select(m => (m.Name, m.GetCustomAttributes().OfType<System.ComponentModel.DescriptionAttribute>().SingleOrDefault()?.Description))
             .Where(m => m.Description != null)
-            .ToDictionary(m => m.Description, m => (ExampleModuleType)Enum.Parse(typeof(ExampleModuleType), m.Name, true));
+            .ToDictionary(m => m.Description!, m => (ExampleModuleType)Enum.Parse(typeof(ExampleModuleType), m.Name, true));
 
     private static string GetDefaultModuleName(ExampleModuleType type, int index = 1)
     {
@@ -174,12 +174,11 @@ public class XmlDocAnnotation
         }
     }
 
-    private ExampleModule ExtractCodeModule(XElement cdataParent, int index, string description = null)
+    private ExampleModule ExtractCodeModule(XElement cdataParent, int index, string? description = null)
     {
         var module = cdataParent.AncestorsAndSelf(XmlDocSchema.Annotation.Example.Module.ElementName).Single();
-        var moduleType = ModuleTypes.TryGetValue(module.Attribute(XmlDocSchema.Annotation.Example.Module.ModuleTypeAttribute)?.Value, out var type) ? type : ExampleModuleType.Any;
-        var name = module.Attribute(XmlDocSchema.Annotation.Example.Module.ModuleNameAttribute)?.Value
-            ?? GetDefaultModuleName(moduleType, index);
+        var moduleType = ModuleTypes.TryGetValue(module.Attribute(XmlDocSchema.Annotation.Example.Module.ModuleTypeAttribute)?.Value ?? string.Empty, out var type) ? type : ExampleModuleType.Any;
+        var name = module.Attribute(XmlDocSchema.Annotation.Example.Module.ModuleNameAttribute)?.Value ?? GetDefaultModuleName(moduleType, index);
         var code = cdataParent.Nodes().OfType<XCData>().Single().Value;
 
         var model = new ExampleModule
@@ -194,17 +193,9 @@ public class XmlDocAnnotation
     }
 }
 
-public class AnnotationArgInfo
+public class AnnotationArgInfo(string name, string type, string description)
 {
-    public AnnotationArgInfo() { }
-    public AnnotationArgInfo(string name, string type, string description)
-    {
-        Name = name;
-        Type = type;
-        Description = description;
-    }
-
-    public string Name { get; set; }
-    public string Type { get; set; }
-    public string Description { get; set; }
+    public string Name { get; set; } = name;
+    public string Type { get; set; } = type;
+    public string Description { get; set; } = description;
 }

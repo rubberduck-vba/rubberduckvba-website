@@ -22,7 +22,7 @@ namespace rubberduckvba.com.Server;
 
 public class HangfireAuthenticationFilter : IDashboardAuthorizationFilter
 {
-    public bool Authorize([NotNull] DashboardContext context) => true;
+    public bool Authorize([NotNull] DashboardContext context) => context.Request.RemoteIpAddress == context.Request.LocalIpAddress;
 }
 
 public class Program

@@ -6,6 +6,7 @@ public interface IPipeline<TContext, TResult>
 {
     TContext Context { get; }
     IPipelineResult<TResult> Result { get; }
+    IEnumerable<Exception> Exceptions { get; }
 
     void Start<TInput>(ITargetBlock<TInput> entryBlock, TInput input);
 }

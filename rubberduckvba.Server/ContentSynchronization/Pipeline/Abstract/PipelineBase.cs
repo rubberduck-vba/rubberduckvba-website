@@ -13,14 +13,14 @@ public abstract class PipelineBase<TContext, TResult> : IDisposable, IPipeline<T
         Context = context;
         TokenSource = tokenSource;
         Token = TokenSource.Token;
+
+        Result = Parent?.Result ?? new PipelineResult<TResult>();
     }
 
     protected PipelineBase(IPipeline<TContext, TResult> parent, CancellationTokenSource tokenSource, ILogger logger)
         : this(parent.Context, tokenSource, logger)
     {
-        Logger = logger;
         Parent = parent;
-        Result = new PipelineResult<TResult>();
     }
 
     protected ILogger Logger { get; }
@@ -30,6 +30,7 @@ public abstract class PipelineBase<TContext, TResult> : IDisposable, IPipeline<T
     public TContext Context { get; }
 
     public IPipelineResult<TResult> Result { get; }
+    public IEnumerable<Exception> Exceptions => _sections.SelectMany(section => section.Result.Exceptions).ToList();
 
     public virtual void Start<TInput>(ITargetBlock<TInput> entryBlock, TInput input)
     {
@@ -38,12 +39,12 @@ public abstract class PipelineBase<TContext, TResult> : IDisposable, IPipeline<T
         entryBlock.Complete();
     }
 
-    protected IPipeline<TContext, TResult> Parent { get; }
+    protected IPipeline<TContext, TResult>? Parent { get; }
 
     private readonly IList<PipelineSection<TContext>> _sections = new List<PipelineSection<TContext>>();
     protected IEnumerable<PipelineSection<TContext>> Sections => _sections;
 
-    public void AddSections(SyncRequestParameters parameters, params PipelineSection<TContext>[] sections)
+    protected void AddSections(SyncRequestParameters parameters, params PipelineSection<TContext>[] sections)
     {
         foreach (var section in sections)
         {
@@ -57,12 +58,12 @@ public abstract class PipelineBase<TContext, TResult> : IDisposable, IPipeline<T
         _links.Add(exitBlock.LinkTo(entryBlock, new DataflowLinkOptions { PropagateCompletion = true }));
     }
 
-    protected void LinkSections(Task exitTask, ITargetBlock<TContext> successEntryBlock, ITargetBlock<TContext> faultedEntryBlock = null)
+    protected void LinkSections(Task exitTask, ITargetBlock<TContext> successEntryBlock, ITargetBlock<TContext>? faultedEntryBlock = null)
     {
         LinkSections(exitTask, Context, successEntryBlock, faultedEntryBlock);
     }
 
-    protected void LinkSections<TTarget>(Task exitTask, TTarget input, ITargetBlock<TTarget> entryBlock, ITargetBlock<TTarget> faultedEntryBlock = null)
+    protected void LinkSections<TTarget>(Task exitTask, TTarget input, ITargetBlock<TTarget> entryBlock, ITargetBlock<TTarget>? faultedEntryBlock = null)
     {
         Task.WhenAll(exitTask).ContinueWith(t =>
         {

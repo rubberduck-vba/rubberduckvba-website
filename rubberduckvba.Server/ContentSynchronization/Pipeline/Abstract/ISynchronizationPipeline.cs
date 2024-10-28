@@ -1,8 +1,7 @@
 ﻿namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
 
-public interface ISynchronizationPipeline<TContext>
+public interface ISynchronizationPipeline<TContext, TResult> : IPipeline<TContext, TResult>
     where TContext : class
 {
-    TContext Context { get; }
-    Task<TContext> ExecuteAsync(SyncRequestParameters parameters, CancellationTokenSource tokenSource);
+    Task<IPipelineResult<TResult>> ExecuteAsync(SyncRequestParameters parameters, CancellationTokenSource tokenSource);
 }

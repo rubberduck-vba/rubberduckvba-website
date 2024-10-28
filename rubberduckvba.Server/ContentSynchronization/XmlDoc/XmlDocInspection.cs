@@ -1,12 +1,11 @@
-﻿using System.ComponentModel;
+﻿using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Schema;
+using rubberduckvba.com.Server.Data;
+using rubberduckvba.com.Server.Services;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json;
 using System.Xml.Linq;
-using RubberduckServices;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Schema;
-using rubberduckvba.com.Server.Data;
-using rubberduckvba.com.Server.Services;
 
 namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
 
@@ -29,7 +28,6 @@ public class XmlDocInspection
     private static readonly string _defaultInspectionType = "CodeQualityIssues";
     private readonly IMarkdownFormattingService _markdownService;
 
-    private InspectionProperties _properties;
     public XmlDocInspection(IMarkdownFormattingService markdownService)
     {
         _markdownService = markdownService;

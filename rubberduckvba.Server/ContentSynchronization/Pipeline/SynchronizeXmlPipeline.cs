@@ -1,13 +1,11 @@
-﻿using System.Threading.Tasks.Dataflow;
-
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
+﻿using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
 using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
+using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
 using rubberduckvba.com.Server.Services;
 
 namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline;
 
-public class SynchronizeXmlPipeline : PipelineBase<SyncContext, bool>, ISynchronizationPipeline<SyncContext>
+public class SynchronizeXmlPipeline : PipelineBase<SyncContext, bool>, ISynchronizationPipeline<SyncContext, bool>
 {
     private readonly IRubberduckDbService _content;
     private readonly IGitHubClientService _github;
@@ -25,7 +23,7 @@ public class SynchronizeXmlPipeline : PipelineBase<SyncContext, bool>, ISynchron
         _markdown = markdown;
     }
 
-    public async Task<SyncContext> ExecuteAsync(SyncRequestParameters parameters, CancellationTokenSource tokenSource)
+    public async Task<IPipelineResult<bool>> ExecuteAsync(SyncRequestParameters parameters, CancellationTokenSource tokenSource)
     {
         if (_isDisposed)
         {
@@ -45,6 +43,8 @@ public class SynchronizeXmlPipeline : PipelineBase<SyncContext, bool>, ISynchron
         Start(synchronizeFeatureItems.InputBlock!, xmldocRequest);
 
         // 04. await completion
-        return await synchronizeFeatureItems.OutputBlock.Completion.ContinueWith(t => Context);
+        await synchronizeFeatureItems.OutputBlock.Completion;
+
+        return Result;
     }
 }
