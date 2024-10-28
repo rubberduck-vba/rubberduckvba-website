@@ -1,10 +1,10 @@
-﻿using System.Text;
-using Antlr4.Runtime;
+﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Atn;
 using Rubberduck.Parsing.Grammar;
 using Rubberduck.SmartIndenter;
 using RubberduckServices.Internal;
 using RubberduckServices.Parsing;
+using System.Text;
 
 namespace RubberduckServices;
 
@@ -35,7 +35,7 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
     private readonly string _attributeValueClass;
 
     public SyntaxHighlighterService(
-        string cssKeywords = DefaultKeywordClass, 
+        string cssKeywords = DefaultKeywordClass,
         string cssStringLiterals = DefaultStringLiteralClass,
         string cssComments = CommentIntervalsListener.DefaultCommentClass,
         string cssAnnotations = AnnotationIntervalsListener.DefaultAnnotationClass,
@@ -93,7 +93,7 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
         var tree = parser.startRule();
         FormatTokens(builder, tokens, listeners);
 
-        var lines = builder.ToString().Split(Environment.NewLine).ToArray();
+        var lines = builder.ToString().Split("\n").ToArray();
         var indent = lines.LastOrDefault()?.TakeWhile(char.IsWhiteSpace)?.Count() ?? 0;
         var formattedLines = from line in lines
                              let trimmed = line.Substring(indent)

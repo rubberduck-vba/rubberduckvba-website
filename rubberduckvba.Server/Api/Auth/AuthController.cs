@@ -51,7 +51,7 @@ public class AuthController(IOptions<GitHubSettings> configuration, IOptions<Api
         }
     }
 
-    [HttpPost("signin")]
+    [HttpPost("auth/signin")]
     [AllowAnonymous]
     public async Task<ActionResult> SignIn()
     {
@@ -81,7 +81,7 @@ public class AuthController(IOptions<GitHubSettings> configuration, IOptions<Api
         return RedirectToAction("Index", "Home");
     }
 
-    [HttpGet("github")]
+    [HttpGet("auth/github")]
     [AllowAnonymous]
     public async Task<ActionResult> GitHubCallback(string code, string state)
     {
