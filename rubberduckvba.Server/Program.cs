@@ -16,13 +16,14 @@ using rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
 using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
 using rubberduckvba.com.Server.Hangfire;
 using rubberduckvba.com.Server.Services;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace rubberduckvba.com.Server;
 
 public class HangfireAuthenticationFilter : IDashboardAuthorizationFilter
 {
-    public bool Authorize([NotNull] DashboardContext context) => context.Request.RemoteIpAddress == "20.220.30.154";
+    public bool Authorize([NotNull] DashboardContext context) => Debugger.IsAttached || context.Request.RemoteIpAddress == "20.220.30.154";
 }
 
 public class Program

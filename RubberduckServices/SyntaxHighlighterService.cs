@@ -99,7 +99,8 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
                              let trimmed = line.Substring(indent)
                              select FormatIndents(trimmed);
 
-        return await Task.FromResult(string.Join("<br/>", formattedLines));
+        var reconstructed = string.Join("<br/>", formattedLines);
+        return await Task.FromResult(reconstructed);
     }
 
     private void FormatTokens(StringBuilder builder, ITokenStream tokens, IntervalListener[] listeners)

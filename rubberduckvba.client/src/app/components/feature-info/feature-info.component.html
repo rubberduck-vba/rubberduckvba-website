@@ -1,11 +1,4 @@
-<section *ngIf="!feature" class="row">
-    <div class="col-12">
-        <img class="ducky my-2 w-25" alt="Rubberduck logo" src="../../assets/vector-ducky-540.png" />
-    </div>
-    <div class="col-12">
-        <h3><span class="spinner-border text-primary"></span> loading...</h3>
-    </div>
-</section>
+<loading-content [show]="!feature"></loading-content>
 <section class="row">
     <h2>{{feature?.title}}</h2>
     <div class="row">
@@ -19,7 +12,7 @@
 
 <section *ngIf="(feature?.features?.length ?? 0) > 0 || (feature?.items?.length ?? 0) > 0" class="row text-center mb-3">
     <div class="col-12">
-        <img class="ducky my-2 w-25" alt="Rubberduck logo" src="../../assets/vector-ducky-540.png" />
+        <img class="ducky my-2 w-10" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
     </div>
 </section>
 <section class="row">

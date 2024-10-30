@@ -13,14 +13,14 @@ public class InstallerDownloadStatsOrchestrator(ISynchronizationPipelineFactory<
         {
             await pipeline.ExecuteAsync(request, tokenSource);
         }
-        catch (TaskCanceledException)
+        catch (TaskCanceledException e)
         {
             var exceptions = pipeline.Exceptions.ToList();
             if (exceptions.Count > 0)
             {
                 if (exceptions.Count == 1)
                 {
-                    throw exceptions[0];
+                    throw new OperationCanceledException(e.Message, exceptions[0]);
                 }
                 else
                 {

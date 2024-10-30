@@ -48,6 +48,9 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
         return Ok(model);
     }
 
+    private static readonly IDictionary<string, string> _moduleTypeNames = typeof(ExampleModuleType).GetMembers().Where(e => e.GetCustomAttribute<DescriptionAttribute>() != null)
+        .ToDictionary(member => member.Name, member => member.GetCustomAttribute<DescriptionAttribute>()?.Description ?? member.Name);
+
     [HttpGet("features/{name}")]
     [AllowAnonymous]
     public async Task<ActionResult<FeatureViewModel>> Info([FromRoute] string name)
@@ -63,12 +66,10 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
             return NotFound();
         }
 
-        var moduleTypeNames = typeof(ExampleModuleType).GetMembers().Where(e => e.GetCustomAttribute<DescriptionAttribute>() != null).ToDictionary(member => member.Name, member => member.GetCustomAttribute<DescriptionAttribute>()?.Description ?? member.Name);
-
         var model = new FeatureViewModel(feature with
         {
             Description = await md.FormatMarkdownDocument(feature.Description, true),
-            ShortDescription = feature.ShortDescription,
+            ShortDescription = await md.FormatMarkdownDocument(feature.ShortDescription),
 
             ParentId = feature.Id,
             ParentName = feature.Name,
@@ -76,8 +77,8 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
 
             Features = feature.Features.Select(subFeature => subFeature with
             {
-                Description = subFeature.Description,
-                ShortDescription = subFeature.ShortDescription
+                Description = md.FormatMarkdownDocument(subFeature.Description).ConfigureAwait(false).GetAwaiter().GetResult(),
+                ShortDescription = md.FormatMarkdownDocument(subFeature.ShortDescription).ConfigureAwait(false).GetAwaiter().GetResult()
             }).ToArray(),
 
             Inspections = feature.Items.Select(item =>
@@ -108,11 +109,14 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
                     DefaultSeverity = info.DefaultSeverity,
                     QuickFixes = info.QuickFixes,
                     Serialized = item.Serialized,
-                    Examples = info.Examples ?? []
+                    Examples = info.Examples.Select(e => e with
+                    {
+                        Modules = e.Modules.Select(module => module with { ModuleTypeName = _moduleTypeNames[module.ModuleType.ToString()] }).ToList()
+                    }).ToList() ?? []
                 };
             }).ToArray(),
 
-            Items = feature.Items
+            //Items = feature.Items
         });
 
         //cache.Write(HttpContext.Request.Path, model);

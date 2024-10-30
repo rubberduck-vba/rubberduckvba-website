@@ -18,7 +18,7 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
             return string.Empty;
         }
 
-        var markdown = content.Replace("\n","\r\n");
+        var markdown = content.Replace("\n", "\r\n");
         if (withSyntaxHighlighting)
         {
             markdown = await PreProcessMarkdownString(markdown);
@@ -63,7 +63,7 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
             node.AppendChild(codeAreaDiv);
         }
 
-        return document.DocumentNode.FirstChild.InnerHtml;
+        return document.DocumentNode.InnerHtml;
     }
 
     private async Task<string> PostProcessHtml(string html)

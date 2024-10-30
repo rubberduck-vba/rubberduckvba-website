@@ -42,7 +42,6 @@ public class AdminController(ConfigurationOptions options, IBackgroundJobClient 
         return await ValueTask.FromResult(Ok(jobId));
     }
 
-    [Authorize("github")]
     [HttpGet("admin/config/current")]
     public async ValueTask<IActionResult> Config()
     {

@@ -50,6 +50,6 @@ export class HomeComponent implements OnInit, OnChanges {
   }
 
   public get tagTimestamp(): string {
-    return this.main != null ? new Date(this.main.dateTimeUpdated).toISOString().replace('T', ' ') : '';
+    return this.main != null ? this.main.dateTimeUpdated.replace('T', ' ') : '';
   }
 }

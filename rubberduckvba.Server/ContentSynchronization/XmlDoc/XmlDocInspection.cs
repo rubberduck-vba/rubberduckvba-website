@@ -163,13 +163,13 @@ public class XmlDocInspection
                             {
                                 HtmlContent = await _markdownService.FormatMarkdownDocument("<code>" + m.Nodes().OfType<XCData>().Single().Value.Trim().Replace("  ", " ") + "</code>", withSyntaxHighlighting: true),
                                 ModuleName = m.Attribute(XmlDocSchema.Inspection.Example.Module.ModuleNameAttribute)?.Value ?? string.Empty,
-                                ModuleType = ModuleTypes.TryGetValue(m.Attribute(XmlDocSchema.Inspection.Example.Module.ModuleTypeAttribute)?.Value ?? string.Empty, out var type) ? type : ExampleModuleType.Any,
+                                ModuleType = ModuleTypes.TryGetValue(m.Attribute(XmlDocSchema.Inspection.Example.Module.ModuleTypeAttribute)?.Value.Trim() ?? string.Empty, out var type) ? type : ExampleModuleType.Any,
                             })
                         .Select(t => t.GetAwaiter().GetResult())
                         .Concat(e.Nodes().OfType<XCData>().Select(async x =>
                             new ExampleModule
                             {
-                                HtmlContent = await _markdownService.FormatMarkdownDocument(x.Value, withSyntaxHighlighting: true),
+                                HtmlContent = await _markdownService.FormatMarkdownDocument("<code>" + x.Value.Trim().Replace("  ", " ") + "</code>", withSyntaxHighlighting: true),
                                 ModuleName = "Module1",
                                 ModuleType = ExampleModuleType.Any
                             })
