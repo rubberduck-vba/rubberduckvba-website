@@ -50,6 +50,10 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
                     html += section + block;
                 }
             }
+            else
+            {
+                html = _service.Transform(markdown);
+            }
         }
         else
         {
