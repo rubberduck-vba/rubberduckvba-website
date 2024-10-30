@@ -11,6 +11,8 @@ public interface IMarkdownFormattingService
 
 public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMarkdownFormattingService
 {
+    private static readonly Markdown _service = new();
+
     public async Task<string> FormatMarkdownDocument(string content, bool withSyntaxHighlighting = false)
     {
         if (string.IsNullOrWhiteSpace(content))
@@ -19,14 +21,42 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
         }
 
         var markdown = content.Replace("\n", "\r\n");
+        var html = string.Empty;
+
         if (withSyntaxHighlighting)
         {
             markdown = await PreProcessMarkdownString(markdown);
+
+            var lastSectionStart = markdown.LastIndexOf("</code>");
+            if (lastSectionStart > 0)
+            {
+                var sectionStart = 0;
+                while (sectionStart < lastSectionStart)
+                {
+                    var sectionEnd = markdown.IndexOf("<code", sectionStart) - 1;
+                    if (sectionEnd < 0)
+                    {
+                        sectionEnd = markdown.Length - sectionStart - 1;
+                    }
+
+                    var sectionLength = sectionEnd - sectionStart + 1;
+
+                    var section = _service.Transform(markdown.Substring(sectionStart, sectionLength));
+                    sectionStart = markdown.IndexOf("</code>", sectionEnd) > 0
+                        ? markdown.IndexOf("</code>", sectionEnd) + 8
+                        : lastSectionStart;
+
+                    var block = markdown.Substring(sectionEnd, sectionStart - sectionEnd).Replace("<code", "<div").Replace("</code>", "</div>");
+                    html += section + block;
+                }
+            }
+        }
+        else
+        {
+            html = _service.Transform(markdown);
         }
 
-        var html = new Markdown().Transform(markdown);
         var result = await PostProcessHtml(html);
-
         return await Task.FromResult(result);
     }
 
@@ -40,8 +70,8 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
         {
             var code = await service.FormatAsync(node.InnerText);
 
-            node.Name = "div";
-            node.EndNode.Name = "div";
+            //node.Name = "div";
+            //node.EndNode.Name = "div";
             node.AddClass("vbe-mock-debugger");
             node.InnerHtml = string.Empty;
 
