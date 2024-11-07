@@ -18,11 +18,9 @@
 <section class="row">
     <!-- subfeatures -->
     <div *ngIf="feature != null && (feature.features?.length ?? 0) > 0" class="col-12">
-        <ul class="navbar-nav">
-            <li class="nav-item" *ngFor="let subFeature of feature?.features">
-                <feature-box *ngIf="!feature.isHidden" [parentFeatureName]="feature.name" [feature]="subFeature" [quickFixes]="quickFixes" [hasOwnDetailsPage]="subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations'"></feature-box>
-            </li>
-        </ul>
+        <div *ngFor="let subFeature of feature?.features">
+            <feature-box *ngIf="!feature.isHidden" [parentFeatureName]="feature.name" [feature]="subFeature" [quickFixes]="quickFixes" [hasOwnDetailsPage]="subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations'"></feature-box>
+        </div>
     </div>
     <!-- xmldoc items -->
     <div *ngIf="(feature?.items?.length ?? 0) > 0" class="col-12">

@@ -1,6 +1,6 @@
-﻿using rubberduckvba.com.Server.Services;
+﻿using rubberduckvba.Server.Services;
 
-namespace rubberduckvba.com.Server.ContentSynchronization;
+namespace rubberduckvba.Server.ContentSynchronization;
 
 public interface IRequestParameters
 {
@@ -18,11 +18,11 @@ public record class SyncRequestParameters : IRequestParameters
     public string? Token { get; init; }
 }
 
-public record class XmldocSyncRequestParameters : SyncRequestParameters 
+public record class XmldocSyncRequestParameters : SyncRequestParameters
 {
 }
 
-public record class TagSyncRequestParameters : SyncRequestParameters 
+public record class TagSyncRequestParameters : SyncRequestParameters
 {
     public string? Tag { get; init; }
 }

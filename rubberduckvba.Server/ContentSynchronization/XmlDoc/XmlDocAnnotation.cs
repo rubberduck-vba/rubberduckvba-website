@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Schema;
-using rubberduckvba.com.Server.Data;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
+using rubberduckvba.Server.Model;
 using System.Reflection;
 using System.Xml.Linq;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
+namespace rubberduckvba.Server.ContentSynchronization.XmlDoc;
 
 public class AnnotationProperties
 {
@@ -31,7 +31,7 @@ public class XmlDocAnnotation
 
         Properties = JsonConvert.SerializeObject(Parameters);
 
-        Examples = ParseExamples(node).ToArray();
+        Examples = [];
     }
 
     public string SourceObject { get; }
@@ -45,110 +45,104 @@ public class XmlDocAnnotation
     public IReadOnlyList<AnnotationArgInfo> Parameters { get; }
     public IReadOnlyList<BeforeAndAfterCodeExample> Examples { get; }
 
-    public FeatureXmlDoc Parse(int assetId, int featureId)
+    public Annotation Parse(int assetId, int featureId)
     {
         var parameters = new AnnotationProperties
         {
             Parameters = Parameters.ToArray()
         };
 
-        return new FeatureXmlDoc
+        return new Annotation
         {
             FeatureId = featureId,
             Name = AnnotationName,
             IsNew = IsPreRelease,
-            Title = $"@{AnnotationName}",
-            Summary = Summary,
             TagAssetId = assetId,
             SourceUrl = SourceObject,
-            Serialized = JsonConvert.SerializeObject(parameters, Formatting.None),
 
-            Examples = Examples.Select((e, i) => e.AsExample(string.Empty, i)).ToList()
+            Examples = []
         };
     }
 
-    private BeforeAndAfterCodeExample[] ParseExamples(XElement node)
+    private AnnotationExample[] ParseExamples(XElement node)
     {
-        try
-        {
-            var examples = new List<BeforeAndAfterCodeExample>();
-            var exampleNodes = node.Elements(XmlDocSchema.Annotation.Example.ElementName);
-            foreach (var example in exampleNodes)
-            {
-                /* <example>
-                 *   <module><![CDATA[
-                 *   'VBA CODE
-                 *   ]]>
-                 *   </module>
-                 * </example>
-                */
-                var modules = example.Elements(XmlDocSchema.Annotation.Example.Module.ElementName).AsParallel();
-                var simpleExamples = modules.Where(m => m.Nodes().OfType<XCData>().Any())
-                    .Select((e, i) => new BeforeAndAfterCodeExample([ExtractCodeModule(e, i)], modulesAfter: []))
-                    .ToArray();
-                if (simpleExamples.Length > 0)
-                {
-                    examples.AddRange(simpleExamples.ToArray());
-                    continue;
-                }
+        //try
+        //{
+        //    var examples = new List<BeforeAndAfterCodeExample>();
+        //    var exampleNodes = node.Elements(XmlDocSchema.Annotation.Example.ElementName);
+        //    foreach (var example in exampleNodes)
+        //    {
+        //        /* <example>
+        //         *   <module><![CDATA[
+        //         *   'VBA CODE
+        //         *   ]]>
+        //         *   </module>
+        //         * </example>
+        //        */
+        //        var modules = example.Elements(XmlDocSchema.Annotation.Example.Module.ElementName).AsParallel();
+        //        var simpleExamples = modules.Where(m => m.Nodes().OfType<XCData>().Any())
+        //            .Select((e, i) => new AnnotationExample { Modules = [ExtractCodeModule(e, i)] })
+        //            .ToArray();
+        //        if (simpleExamples.Length > 0)
+        //        {
+        //            examples.AddRange(simpleExamples.ToArray());
+        //            continue;
+        //        }
 
-                IEnumerable<ExampleModule> before = Enumerable.Empty<ExampleModule>();
-                IEnumerable<ExampleModule>? after = null;
+        //        IEnumerable<ExampleModule> before = Enumerable.Empty<ExampleModule>();
+        //        IEnumerable<ExampleModule>? after = null;
 
-                if (modules.Any())
-                {
-                    /* <example>
-                     *   <module>
-                     *     <before><![CDATA[
-                     *   'VBA CODE
-                     *   ]]>
-                     *     </before>
-                     *     <after><![CDATA[
-                     *   'VBA CODE
-                     *   ]]>
-                     *     </after>
-                     *   </module>
-                     * </example>
-                    */
-                    before = modules.Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Module.Before.ElementName)!, i, "(code pane)"));
-                    after = modules.Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Module.After.ElementName)!, i, "(synchronized, hidden attributes shown)"));
-                }
+        //        if (modules.Any())
+        //        {
+        //            /* <example>
+        //             *   <module>
+        //             *     <before><![CDATA[
+        //             *   'VBA CODE
+        //             *   ]]>
+        //             *     </before>
+        //             *     <after><![CDATA[
+        //             *   'VBA CODE
+        //             *   ]]>
+        //             *     </after>
+        //             *   </module>
+        //             * </example>
+        //            */
+        //            before = modules.Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Module.Before.ElementName)!, i, "(code pane)"));
+        //        }
 
-                if (example.Elements(XmlDocSchema.Annotation.Example.Before.ElementName).Any())
-                {
-                    /* <example>
-                     *   <before>
-                     *     <module><![CDATA[
-                     *   'VBA CODE
-                     *   ]]>
-                     *     </module>
-                     *   </before>
-                     *   <after>
-                     *     <module><![CDATA[
-                     *   'VBA CODE
-                     *   ]]>
-                     *     </module>
-                     *   </after>
-                     * </example>
-                    */
-                    before = example.Elements(XmlDocSchema.Annotation.Example.Before.ElementName)
-                        .Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Before.Module.ElementName)!, i, "(code pane)"));
-                    after = example.Elements(XmlDocSchema.Annotation.Example.After.ElementName)
-                        .Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.After.Module.ElementName)!, i, "(synchronized, hidden attributes shown)"));
-                }
+        //        if (example.Elements(XmlDocSchema.Annotation.Example.Before.ElementName).Any())
+        //        {
+        //            /* <example>
+        //             *   <before>
+        //             *     <module><![CDATA[
+        //             *   'VBA CODE
+        //             *   ]]>
+        //             *     </module>
+        //             *   </before>
+        //             *   <after>
+        //             *     <module><![CDATA[
+        //             *   'VBA CODE
+        //             *   ]]>
+        //             *     </module>
+        //             *   </after>
+        //             * </example>
+        //            */
+        //            before = example.Elements(XmlDocSchema.Annotation.Example.Before.ElementName)
+        //                .Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Before.Module.ElementName)!, i, "(code pane)"));
+        //        }
 
-                if (before.Any() && after.Any())
-                {
-                    examples.Add(new BeforeAndAfterCodeExample(before, after));
-                }
-            }
-            return examples.ToArray();
-        }
-        catch (Exception)
-        {
-            var errorExample = new[] { ExampleModule.ParseError("AnnotationExample") };
-            return new[] { new BeforeAndAfterCodeExample(errorExample, errorExample) };
-        }
+        //        if (before.Any() && after.Any())
+        //        {
+        //            examples.Add(new BeforeAndAfterCodeExample(before, after));
+        //        }
+        //    }
+        return [];
+        //}
+        //catch (Exception)
+        //{
+        //    var errorExample = new[] { ExampleModule.ParseError("AnnotationExample") };
+        //    return [new AnnotationExample { Modules = errorExample }];
+        //}
     }
 
     private static readonly IDictionary<string, ExampleModuleType> ModuleTypes =
@@ -185,7 +179,7 @@ public class XmlDocAnnotation
         {
             ModuleName = name,
             ModuleType = moduleType,
-            Properties = $"\"Description\": \"{description}\"".Replace("  ", " "),
+            Description = description,
             HtmlContent = code.Trim().Replace("  ", " ")
         };
 

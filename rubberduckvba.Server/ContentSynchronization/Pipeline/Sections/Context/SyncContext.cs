@@ -1,7 +1,7 @@
-﻿using System.Collections.Immutable;
-using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.Model;
+using System.Collections.Immutable;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 
 public interface IPipelineContext
 {
@@ -17,11 +17,10 @@ public class SyncContext : IPipelineContext
 
     private IRequestParameters? _parameters;
     public IRequestParameters Parameters => ContextNotInitializedException.ThrowIfNull(_parameters);
-    IRequestParameters IPipelineContext.Parameters => Parameters;    
+    IRequestParameters IPipelineContext.Parameters => Parameters;
     public void LoadParameters(SyncRequestParameters parameters)
     {
         InvalidContextParameterException.ThrowIfNull(nameof(parameters), parameters);
-        //ContextAlreadyInitializedException.ThrowIfNotNull(_parameters);
         _parameters = parameters;
         _staging = new StagingContext(parameters);
     }
@@ -31,7 +30,7 @@ public class SyncContext : IPipelineContext
 
 
     private TagGraph? _main;
-    public TagGraph RubberduckDbMain 
+    public TagGraph RubberduckDbMain
         => ContextNotInitializedException.ThrowIfNull(_main);
 
     public void LoadRubberduckDbMain(TagGraph main)
@@ -42,7 +41,7 @@ public class SyncContext : IPipelineContext
     }
 
     private TagGraph? _next;
-    public TagGraph RubberduckDbNext 
+    public TagGraph RubberduckDbNext
         => ContextNotInitializedException.ThrowIfNull(_next);
 
     public void LoadRubberduckDbNext(TagGraph next)
@@ -67,7 +66,7 @@ public class SyncContext : IPipelineContext
     }
 
     private ImmutableDictionary<string, InspectionDefaultConfig>? _inspectionConfig;
-    public ImmutableDictionary<string, InspectionDefaultConfig> InspectionDefaultConfig 
+    public ImmutableDictionary<string, InspectionDefaultConfig> InspectionDefaultConfig
         => ContextNotInitializedException.ThrowIfNull(_inspectionConfig);
     public void LoadInspectionDefaultConfig(IEnumerable<InspectionDefaultConfig> config)
     {
@@ -76,21 +75,42 @@ public class SyncContext : IPipelineContext
         _inspectionConfig = config.ToImmutableDictionary(e => e.InspectionName);
     }
 
-    private ImmutableHashSet<FeatureXmlDoc>? _featureItems;
-    public ImmutableHashSet<FeatureXmlDoc> FeatureItems
-        => ContextNotInitializedException.ThrowIfNull(_featureItems);
+    private ImmutableHashSet<Inspection>? _inspections;
+    public ImmutableHashSet<Inspection> Inspections
+        => ContextNotInitializedException.ThrowIfNull(_inspections);
 
-    public void LoadFeatureItems(IEnumerable<FeatureXmlDoc> items)
+    private ImmutableHashSet<QuickFix>? _quickfixes;
+    public ImmutableHashSet<QuickFix> Quickfixes
+        => ContextNotInitializedException.ThrowIfNull(_quickfixes);
+
+    private ImmutableHashSet<Annotation>? _annotations;
+    public ImmutableHashSet<Annotation> Annotations
+        => ContextNotInitializedException.ThrowIfNull(_annotations);
+
+
+    public void LoadInspections(IEnumerable<Inspection> inspections)
     {
-        ContextAlreadyInitializedException.ThrowIfNotNull(_featureItems);
-        _featureItems = items.ToImmutableHashSet();
+        ContextAlreadyInitializedException.ThrowIfNotNull(_inspections);
+        _inspections = inspections.ToImmutableHashSet();
+    }
+
+    public void LoadQuickFixes(IEnumerable<QuickFix> quickfixes)
+    {
+        ContextAlreadyInitializedException.ThrowIfNotNull(_quickfixes);
+        _quickfixes = quickfixes.ToImmutableHashSet();
+    }
+
+    public void LoadAnnotations(IEnumerable<Annotation> annotations)
+    {
+        ContextAlreadyInitializedException.ThrowIfNotNull(_annotations);
+        _annotations = annotations.ToImmutableHashSet();
     }
 
     private TagGraph? _githubMain;
     private TagGraph? _githubNext;
     private ImmutableHashSet<TagGraph>? _githubOthers;
 
-    public TagGraph GitHubMain 
+    public TagGraph GitHubMain
         => ContextNotInitializedException.ThrowIfNull(_githubMain);
     public TagGraph GitHubNext
         => ContextNotInitializedException.ThrowIfNull(_githubNext);
@@ -142,12 +162,12 @@ public class InvalidContextParameterException : ArgumentOutOfRangeException
         }
     }
 
-    private InvalidContextParameterException(string paramName, string message) 
-        : base(paramName, message) 
+    private InvalidContextParameterException(string paramName, string message)
+        : base(paramName, message)
     { }
 }
 
-public class ContextNotInitializedException : InvalidOperationException 
+public class ContextNotInitializedException : InvalidOperationException
 {
     public static T ThrowIfNull<T>(T? value)
         => value ?? throw new ContextNotInitializedException();

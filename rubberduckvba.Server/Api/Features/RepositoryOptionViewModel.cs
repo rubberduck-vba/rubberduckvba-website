@@ -1,6 +1,6 @@
-﻿using rubberduckvba.com.Server.Services;
+﻿using rubberduckvba.Server.Services;
 
-namespace rubberduckvba.com.Server.Api.Features;
+namespace rubberduckvba.Server.Api.Features;
 
 public class RepositoryOptionViewModel
 {

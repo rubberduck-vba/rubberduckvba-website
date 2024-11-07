@@ -4,15 +4,15 @@ using NLog.Config;
 using NLog.Extensions.Logging;
 using NLog.Targets;
 using RubberduckServices;
-using rubberduckvba.com.Server.ContentSynchronization;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
-using rubberduckvba.com.Server.Services;
+using rubberduckvba.Server.ContentSynchronization;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
+using rubberduckvba.Server.Services;
 using System.Diagnostics;
 
-namespace rubberduckvba.com.Server.Hangfire;
+namespace rubberduckvba.Server.Hangfire;
 
 public static class QueuedUpdateOrchestrator
 {
@@ -97,7 +97,6 @@ public static class QueuedUpdateOrchestrator
         services.AddSingleton<ISyntaxHighlighterService, SyntaxHighlighterService>();
 
         services.AddSingleton<IRubberduckDbService, RubberduckDbService>();
-        services.AddSingleton<ISynchronizationService, SynchronizationDbService>();
         services.AddSingleton<IGitHubClientService, GitHubClientService>();
         services.AddSingleton<ISynchronizationPipelineFactory<SyncContext>, SynchronizationPipelineFactory>();
         services.AddSingleton<IXmlDocMerge, XmlDocMerge>();

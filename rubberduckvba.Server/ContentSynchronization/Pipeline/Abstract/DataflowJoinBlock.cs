@@ -1,12 +1,13 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using System.Threading.Tasks.Dataflow;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 
-public class DataflowJoinBlock<T1,T2> : DataflowBlockBase<JoinBlock<T1, T2>, SyncContext>, IDisposable
+public class DataflowJoinBlock<T1, T2> : DataflowBlockBase<JoinBlock<T1, T2>, SyncContext>, IDisposable
 {
     private readonly ICollection<IDisposable> _links = [];
 
-    public DataflowJoinBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger, string name) 
+    public DataflowJoinBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger, string name)
         : base(parent, tokenSource, logger)
     {
         Name = name;

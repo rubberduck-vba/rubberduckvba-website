@@ -1,6 +1,6 @@
-﻿using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.Model;
 
-namespace rubberduckvba.com.Server.Api.Tags;
+namespace rubberduckvba.Server.Api.Tags;
 
 public record struct LatestTagsViewModel
 {

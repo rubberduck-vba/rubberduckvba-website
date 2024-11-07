@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 
 public class PipelineResult<TResult> : IPipelineResult<TResult>
 {

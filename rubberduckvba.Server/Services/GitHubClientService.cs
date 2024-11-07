@@ -1,16 +1,17 @@
 ﻿using Microsoft.Extensions.Options;
 using Octokit;
 using Octokit.Internal;
-using rubberduckvba.com.Server.ContentSynchronization;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Schema;
-using rubberduckvba.com.Server.Data;
+using rubberduckvba.Server;
+using rubberduckvba.Server.ContentSynchronization;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
+using rubberduckvba.Server.Model;
 using System.Collections.Immutable;
 using System.Security.Claims;
 using System.Text;
 using System.Web;
 using System.Xml.Linq;
 
-namespace rubberduckvba.com.Server.Services;
+namespace rubberduckvba.Server.Services;
 
 public interface IGitHubClientService
 {
@@ -55,23 +56,23 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
         var releases = await client.Repository.Release.GetAll(config.OwnerOrg, config.Rubberduck, new ApiOptions { PageCount = 1, PageSize = 10 });
 
         return (from release in releases
-               let installer = release.Assets.SingleOrDefault(asset => asset.Name.EndsWith(".exe") && asset.Name.StartsWith("Rubberduck.Setup"))
-               select new TagGraph
-               {
-                   ReleaseId = release.Id,
-                   Name = release.TagName,
-                   DateCreated = release.CreatedAt.Date,
-                   IsPreRelease = release.Prerelease,
-                   InstallerDownloads = installer?.DownloadCount ?? 0,
-                   InstallerDownloadUrl = installer?.BrowserDownloadUrl ?? string.Empty,
-                   Assets = (from asset in release.Assets
-                            where asset.Name.EndsWith(".xml")
-                            select new TagAsset
-                            {
-                                Name = asset.Name,
-                                DownloadUrl = asset.BrowserDownloadUrl
-                            }).ToImmutableArray()
-               }).ToImmutableArray();
+                let installer = release.Assets.SingleOrDefault(asset => asset.Name.EndsWith(".exe") && asset.Name.StartsWith("Rubberduck.Setup"))
+                select new TagGraph
+                {
+                    ReleaseId = release.Id,
+                    Name = release.TagName,
+                    DateCreated = release.CreatedAt.Date,
+                    IsPreRelease = release.Prerelease,
+                    InstallerDownloads = installer?.DownloadCount ?? 0,
+                    InstallerDownloadUrl = installer?.BrowserDownloadUrl ?? string.Empty,
+                    Assets = (from asset in release.Assets
+                              where asset.Name.EndsWith(".xml")
+                              select new TagAsset
+                              {
+                                  Name = asset.Name,
+                                  DownloadUrl = asset.BrowserDownloadUrl
+                              }).ToImmutableArray()
+                }).ToImmutableArray();
     }
 
     public async Task<TagGraph> GetTagAsync(string token, string name)
@@ -164,7 +165,7 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
         var length = endIndex - startIndex + encodedTagClose.Length;
         var encodedDocument = encoded.Substring(startIndex, length);
         var decoded = HttpUtility.HtmlDecode(encodedDocument);
-        
+
         var document = XDocument.Parse(decoded);
         return document;
     }

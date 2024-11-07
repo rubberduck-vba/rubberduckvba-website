@@ -1,7 +1,8 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.Data;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
 public class AccumulateProcessedFeatureItemsBlock : ActionBlockBase<FeatureXmlDoc, SyncContext>
 {
@@ -14,15 +15,15 @@ public class AccumulateProcessedFeatureItemsBlock : ActionBlockBase<FeatureXmlDo
     {
         if (input != null)
         {
-            foreach (var featureItem in input.Examples.GroupBy(e => e.FeatureItemId))
-            {
-                var exampleNumber = 1;
-                foreach (var example in featureItem)
-                {
-                    example.SortOrder = exampleNumber;
-                    exampleNumber++;
-                }
-            }
+            //foreach (var featureItem in input.Examples.GroupBy(e => e))
+            //{
+            //    var exampleNumber = 1;
+            //    foreach (var example in featureItem)
+            //    {
+            //        example.SortOrder = exampleNumber;
+            //        exampleNumber++;
+            //    }
+            //}
 
             Context.StagingContext.ProcessedFeatureItems.Add(input);
         }

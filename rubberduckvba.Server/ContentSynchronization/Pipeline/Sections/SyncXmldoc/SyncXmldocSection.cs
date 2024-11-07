@@ -1,19 +1,25 @@
-﻿using System.Threading.Tasks.Dataflow;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
-using rubberduckvba.com.Server.Data;
-using rubberduckvba.com.Server.Services;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
+using rubberduckvba.Server.Data;
+using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Model.Entity;
+using rubberduckvba.Server.Services;
+using System.Threading.Tasks.Dataflow;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
 public class SyncXmldocSection : PipelineSection<SyncContext>
 {
-    public SyncXmldocSection(IPipeline<SyncContext, bool> parent, CancellationTokenSource tokenSource, ILogger logger, 
-        IRubberduckDbService content, 
-        IGitHubClientService github, 
-        IXmlDocMerge mergeService, 
-        IStagingServices staging, 
+    public SyncXmldocSection(IPipeline<SyncContext, bool> parent, CancellationTokenSource tokenSource, ILogger logger,
+        IRubberduckDbService content,
+        IRepository<InspectionEntity> inspections,
+        IRepository<QuickFixEntity> quickfixes,
+        IRepository<AnnotationEntity> annotations,
+        IGitHubClientService github,
+        IXmlDocMerge mergeService,
+        IStagingServices staging,
         IMarkdownFormattingService markdownService)
         : base(parent, tokenSource, logger)
     {
@@ -21,7 +27,7 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         BroadcastParameters = new BroadcastParametersBlock(this, tokenSource, logger);
         LoadInspectionDefaultConfig = new LoadInspectionDefaultConfigBlock(this, tokenSource, github, logger);
         LoadFeatures = new LoadFeaturesBlock(this, tokenSource, content, logger);
-        LoadDbFeatureItems = new LoadDbFeatureItemsBlock(this, tokenSource, logger, content);
+        LoadDbFeatureItems = new LoadDbFeatureItemsBlock(this, tokenSource, logger, inspections, quickfixes, annotations);
         AcquireDbMainTagGraph = new AcquireDbMainTagGraphBlock(this, tokenSource, content, logger);
         AcquireDbNextTagGraph = new AcquireDbNextTagGraphBlock(this, tokenSource, content, logger);
         AcquireDbTags = new AcquireDbTagsBlock(this, tokenSource, logger, content);
@@ -40,7 +46,9 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         ParseQuickFixInfo = new ParseQuickFixXElementInfoBlock(this, tokenSource, logger);
         ParseAnnotationInfo = new ParseAnnotationXElementInfoBlock(this, tokenSource, logger);
         FeatureItemBuffer = new FeatureItemBufferBlock(this, tokenSource, logger);
-        MergeItems = new MergeFeatureItemsBlock(mergeService, this, tokenSource, logger);
+        MergeInspections = new MergeInspectionsBlock(this, tokenSource, logger, mergeService);
+        MergeQuickFixes = new MergeQuickFixesBlock(this, tokenSource, logger, mergeService);
+        MergeAnnotations = new MergeAnnotationsBlock(this, tokenSource, logger, mergeService);
         AccumulateProcessedItems = new AccumulateProcessedFeatureItemsBlock(this, tokenSource, logger);
         SaveStaging = new BulkSaveStagingBlock(this, tokenSource, staging, logger);
     }
@@ -69,7 +77,9 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
     private ParseQuickFixXElementInfoBlock ParseQuickFixInfo { get; }
     private ParseAnnotationXElementInfoBlock ParseAnnotationInfo { get; }
     private FeatureItemBufferBlock FeatureItemBuffer { get; }
-    private MergeFeatureItemsBlock MergeItems { get; }
+    private MergeInspectionsBlock MergeInspections { get; }
+    private MergeQuickFixesBlock MergeQuickFixes { get; }
+    private MergeAnnotationsBlock MergeAnnotations { get; }
     private AccumulateProcessedFeatureItemsBlock AccumulateProcessedItems { get; }
     private BulkSaveStagingBlock SaveStaging { get; }
 
@@ -101,7 +111,9 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         [nameof(ParseQuickFixInfo)] = ParseQuickFixInfo.Block,
         [nameof(ParseAnnotationInfo)] = ParseAnnotationInfo.Block,
         [nameof(FeatureItemBuffer)] = FeatureItemBuffer.Block,
-        [nameof(MergeItems)] = MergeItems.Block,
+        [nameof(MergeInspections)] = MergeInspections.Block,
+        [nameof(MergeQuickFixes)] = MergeQuickFixes.Block,
+        [nameof(MergeAnnotations)] = MergeAnnotations.Block,
         [nameof(AccumulateProcessedItems)] = AccumulateProcessedItems.Block,
         [nameof(SaveStaging)] = SaveStaging.Block,
     };
@@ -133,7 +145,7 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         ParseAnnotationInfo.CreateBlock(GetAnnotationNodes);
         FeatureItemBuffer.CreateBlock(ParseInspectionInfo, ParseQuickFixInfo, ParseAnnotationInfo);
         AccumulateProcessedItems.CreateBlock(FeatureItemBuffer);
-        MergeItems.CreateBlock(() => Context.StagingContext.ProcessedFeatureItems, AccumulateProcessedItems.Block.Completion);
-        SaveStaging.CreateBlock(MergeItems);
+        MergeInspections.CreateBlock(() => Context.StagingContext.NewInspections, AccumulateProcessedItems.Block.Completion);
+        SaveStaging.CreateBlock(MergeInspections);
     }
 }

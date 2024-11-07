@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using System.Threading.Tasks.Dataflow;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 
 public abstract class PipelineBase<TContext, TResult> : IDisposable, IPipeline<TContext, TResult>
     where TContext : IPipelineContext

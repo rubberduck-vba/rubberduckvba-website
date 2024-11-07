@@ -1,4 +1,4 @@
-﻿namespace rubberduckvba.com.Server.Hangfire;
+﻿namespace rubberduckvba.Server.Hangfire;
 
 public static class HangfireConstants
 {

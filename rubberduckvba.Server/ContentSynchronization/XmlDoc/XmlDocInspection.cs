@@ -1,13 +1,12 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Schema;
-using rubberduckvba.com.Server.Data;
-using rubberduckvba.com.Server.Services;
+﻿using rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
+using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Services;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using System.Text.Json;
 using System.Xml.Linq;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
+namespace rubberduckvba.Server.ContentSynchronization.XmlDoc;
 
 public record class InspectionProperties
 {
@@ -33,31 +32,12 @@ public class XmlDocInspection
         _markdownService = markdownService;
     }
 
-    public string Properties { get; private set; }
-
-    public string SourceObject { get; }
-    public bool IsPreRelease { get; }
-
-    public bool IsHidden { get; }
-    public string TypeName { get; }
-    public string InspectionName { get; }
-    public string Summary { get; }
-    public string[] References { get; }
-    public string HostApp { get; }
-    public string Reasoning { get; }
-    public string Remarks { get; }
-    public string InspectionType { get; }
-    public string DefaultSeverity { get; }
-
-    public Example[] Examples { get; }
-
-    public async Task<FeatureXmlDoc> ParseAsync(int assetId, string tagName, int featureId, IEnumerable<FeatureXmlDoc> quickFixes, string name, XElement node, InspectionDefaultConfig? config, bool isPreRelease)
+    public async Task<Inspection> ParseAsync(int assetId, string tagName, int featureId, IEnumerable<QuickFix> quickFixes, string name, XElement node, InspectionDefaultConfig? config, bool isPreRelease)
     {
         var typeName = name.Substring(name.LastIndexOf(".", StringComparison.Ordinal) + 1);
         var inspectionName = typeName.Replace("Inspection", string.Empty).Trim();
 
-        var fixes = quickFixes.Select(e => (e.Name, e.Serialized));
-        var fixesByName = fixes.ToLookup(e => e.Name, e => JsonSerializer.Deserialize<XmlDocQuickFixInfo>(e.Serialized, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })?.Inspections);
+        var fixesByName = quickFixes.ToLookup(e => e.Name, e => e.Inspections);
         var filteredFixes = quickFixes.Where(fix => fixesByName[fix.Name].FirstOrDefault()?.Contains(inspectionName) ?? false).ToList();
 
         var sourceObject = name.Substring(2).Replace(".", "/").Replace("Rubberduck/CodeAnalysis/", "Rubberduck.CodeAnalysis/");
@@ -75,7 +55,7 @@ public class XmlDocInspection
         var defaultSeverity = config?.DefaultSeverity ?? _defaultSeverity;
         var inspectionType = config?.InspectionType ?? _defaultInspectionType;
 
-        if (Enum.TryParse<CodeInspectionType>(InspectionType, out var enumInspectionType))
+        if (Enum.TryParse<CodeInspectionType>(inspectionType, out var enumInspectionType))
         {
             inspectionType = InspectionTypes[enumInspectionType];
         }
@@ -83,24 +63,9 @@ public class XmlDocInspection
 
         var (summary, reasoning, remarks) = (await summaryTask, await reasoningTask, await remarksTask);
 
-        var properties = new InspectionProperties
-        {
-            Reasoning = reasoning,
-            Summary = summary,
-            Remarks = remarks,
-            HostApp = hostApp,
-            DefaultSeverity = defaultSeverity,
-            InspectionType = inspectionType,
-            QuickFixes = filteredFixes.Select(e => e.Name).ToArray(),
-            References = references,
-            Examples = examples
-        };
-
-        return new FeatureXmlDoc
+        return new Inspection
         {
             FeatureId = featureId,
-            FeatureName = "Inspections",
-            FeatureTitle = "Inspections",
 
             Id = default,
             DateTimeInserted = DateTime.UtcNow,
@@ -108,16 +73,20 @@ public class XmlDocInspection
             TagAssetId = assetId,
             SourceUrl = sourceObject,
 
-            Name = inspectionName,
-            Title = inspectionName,
-            Summary = summary,
-
             IsHidden = isHidden,
             IsNew = isPreRelease,
             IsDiscontinued = default,
 
-            Examples = examples,
-            Serialized = JsonSerializer.Serialize(properties)
+            Name = inspectionName,
+            Summary = summary,
+            Reasoning = reasoning,
+            Remarks = remarks,
+            HostApp = hostApp,
+            DefaultSeverity = defaultSeverity,
+            InspectionType = inspectionType,
+            QuickFixes = filteredFixes.Select(e => e.Name).ToArray(),
+            References = references,
+            Examples = examples
         };
     }
 
@@ -147,15 +116,14 @@ public class XmlDocInspection
         Performance,
     }
 
-    private IEnumerable<Example> ParseExamples(XElement node)
+    private IEnumerable<InspectionExample> ParseExamples(XElement node)
     {
         return node.Elements(XmlDocSchema.Inspection.Example.ElementName).AsParallel()
             .Select((e, i) =>
                 {
-                    var hasResult = e.Attributes().Any(a => string.Equals(a.Name.LocalName, XmlDocSchema.Inspection.Example.HasResultAttribute, StringComparison.InvariantCultureIgnoreCase) && bool.TryParse(a.Value, out var value) && value);
-                    var example = new Example
+                    var example = new InspectionExample
                     {
-                        Properties = $"{{\"HasResult\":\"{hasResult}\"}}",
+                        HasResult = e.Attributes().Any(a => string.Equals(a.Name.LocalName, XmlDocSchema.Inspection.Example.HasResultAttribute, StringComparison.InvariantCultureIgnoreCase) && bool.TryParse(a.Value, out var value) && value),
                         SortOrder = i,
                         Modules = e.Elements(XmlDocSchema.Inspection.Example.Module.ElementName)
                         .Select(async m =>

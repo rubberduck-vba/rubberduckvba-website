@@ -2,7 +2,7 @@
 using MarkdownSharp;
 using RubberduckServices;
 
-namespace rubberduckvba.com.Server.Services;
+namespace rubberduckvba.Server.Services;
 
 public interface IMarkdownFormattingService
 {

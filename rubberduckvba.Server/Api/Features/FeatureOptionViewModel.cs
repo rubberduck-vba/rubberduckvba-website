@@ -1,4 +1,4 @@
-﻿namespace rubberduckvba.com.Server.Api.Features;
+﻿namespace rubberduckvba.Server.Api.Features;
 
 public class FeatureOptionViewModel
 {

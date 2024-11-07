@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using rubberduckvba.com.Server.Services;
+using rubberduckvba.Server.Services;
 
-namespace rubberduckvba.com.Server.Api.Tags;
+namespace rubberduckvba.Server.Api.Tags;
 
 
 [ApiController]

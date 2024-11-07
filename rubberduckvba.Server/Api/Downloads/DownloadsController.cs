@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using rubberduckvba.com.Server.Services;
+using rubberduckvba.Server.Services;
 using System.Collections.Immutable;
 
-namespace rubberduckvba.com.Server.Api.Downloads;
+namespace rubberduckvba.Server.Api.Downloads;
 
 
 [ApiController]

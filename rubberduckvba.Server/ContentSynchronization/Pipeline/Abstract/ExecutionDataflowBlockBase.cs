@@ -1,7 +1,8 @@
-﻿using System.Diagnostics;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using System.Diagnostics;
 using System.Threading.Tasks.Dataflow;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 
 public abstract class ExecutionDataflowBlockBase<TBlock, TInput, TContext> : DataflowBlockBase<TBlock, TContext>, IDisposable
     where TBlock : class, IDataflowBlock, ITargetBlock<TInput>
@@ -123,7 +124,7 @@ public abstract class ExecutionDataflowBlockBase<TBlock, TInput, TContext> : Dat
         if (sources != null && sources.Length > 0)
         {
             var propagate = sources.Count() == 1;
-            
+
             foreach (var source in sources)
             {
                 var propagateSourceCompletion = propagate

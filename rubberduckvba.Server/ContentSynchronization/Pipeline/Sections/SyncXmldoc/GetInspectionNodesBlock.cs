@@ -1,8 +1,9 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.Model;
 using System.Xml.Linq;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
 public class GetInspectionNodesBlock : GetXElementInfoBlock
 {
@@ -19,10 +20,10 @@ public class GetInspectionNodesBlock : GetXElementInfoBlock
         }
 
         var result = (from node in input.document.Descendants("member").AsParallel()
-                     let fullName = GetNameOrDefault(node, "Inspection")
-                     where !string.IsNullOrWhiteSpace(fullName)
-                     let typeName = fullName.Substring(fullName.LastIndexOf(".", StringComparison.Ordinal) + 1)
-                     select (input.asset, new XElementInfo(typeName, node)))
+                      let fullName = GetNameOrDefault(node, "Inspection")
+                      where !string.IsNullOrWhiteSpace(fullName)
+                      let typeName = fullName.Substring(fullName.LastIndexOf(".", StringComparison.Ordinal) + 1)
+                      select (input.asset, new XElementInfo(typeName, node)))
                     .ToList();
 
         Logger.LogInformation(Context.Parameters, $"{Name} | Extracted {result.Count} inspection nodes from tag asset {input.asset.Name}");

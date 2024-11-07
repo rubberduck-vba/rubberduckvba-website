@@ -1,7 +1,6 @@
-﻿using rubberduckvba.com.Server.Data;
-using System.Text.Json;
+﻿using rubberduckvba.Server.Model;
 
-namespace rubberduckvba.com.Server.Api.Features;
+namespace rubberduckvba.Server.Api.Features;
 
 public class FeatureViewModel
 {
@@ -26,8 +25,7 @@ public class FeatureViewModel
             FeatureTitle = graph.ParentTitle;
 
             Features = graph.Features.Select(e => new FeatureViewModel(e)).ToArray();
-            Items = graph.Items.Select(e => e with { FeatureId = graph.ParentId!.Value, FeatureName = graph.ParentName, FeatureTitle = graph.ParentTitle }).ToArray();
-            Inspections = graph.Items.Select(e => JsonSerializer.Deserialize<XmlDocInspectionInfo>(e.Serialized)!).ToArray();
+            Inspections = graph.Inspections.ToArray();
         }
     }
 
@@ -48,8 +46,7 @@ public class FeatureViewModel
     public bool HasImage { get; init; }
 
     public FeatureViewModel[] Features { get; init; } = [];
-    public FeatureXmlDoc[] Items { get; init; } = [];
-    public XmlDocInspectionInfo[] Inspections { get; init; } = [];
+    public Inspection[] Inspections { get; init; } = []; // InspectionViewModel[]
 }
 
 public class FeatureXmlDocViewModel

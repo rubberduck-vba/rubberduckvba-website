@@ -1,8 +1,8 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+﻿using rubberduckvba.Server.ContentSynchronization;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 
-namespace rubberduckvba.com.Server.Services;
+namespace rubberduckvba.Server.Services;
 
 public class XmldocContentOrchestrator(ISynchronizationPipelineFactory<SyncContext> factory) : IContentOrchestrator<XmldocSyncRequestParameters>
 {

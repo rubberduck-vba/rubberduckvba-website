@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
-using rubberduckvba.com.Server.Data;
-using rubberduckvba.com.Server.Services;
+using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Services;
 using System.ComponentModel;
 using System.Reflection;
-using System.Text.Json;
 
-namespace rubberduckvba.com.Server.Api.Features;
+namespace rubberduckvba.Server.Api.Features;
 
 public record class MarkdownFormattingRequestViewModel
 {
@@ -81,42 +79,9 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
                 ShortDescription = md.FormatMarkdownDocument(subFeature.ShortDescription).ConfigureAwait(false).GetAwaiter().GetResult()
             }).ToArray(),
 
-            Inspections = feature.Items.Select(item =>
-            {
-                var info = JsonSerializer.Deserialize<InspectionProperties>(item.Serialized)!;
-                return new XmlDocInspectionInfo
-                {
-                    Id = item.Id,
-                    DateTimeInserted = item.DateTimeInserted,
-                    DateTimeUpdated = item.DateTimeUpdated,
-                    IsDiscontinued = item.IsDiscontinued,
-                    IsHidden = item.IsHidden,
-                    IsNew = item.IsNew,
-                    Name = item.Name,
-                    Title = item.Title,
-                    SourceUrl = item.SourceUrl,
-
-                    FeatureId = feature.Id,
-                    FeatureName = feature.Name,
-                    FeatureTitle = feature.Title,
-
-                    Summary = info.Summary,
-                    Reasoning = info.Reasoning,
-                    Remarks = info.Remarks,
-                    HostApp = info.HostApp,
-                    References = info.References,
-                    InspectionType = info.InspectionType,
-                    DefaultSeverity = info.DefaultSeverity,
-                    QuickFixes = info.QuickFixes,
-                    Serialized = item.Serialized,
-                    Examples = info.Examples.Select(e => e with
-                    {
-                        Modules = e.Modules.Select(module => module with { ModuleTypeName = _moduleTypeNames[module.ModuleType.ToString()] }).ToList()
-                    }).ToList() ?? []
-                };
-            }).ToArray(),
-
-            //Items = feature.Items
+            Inspections = feature.Inspections,
+            QuickFixes = feature.QuickFixes,
+            Annotations = feature.Annotations,
         });
 
         //cache.Write(HttpContext.Request.Path, model);

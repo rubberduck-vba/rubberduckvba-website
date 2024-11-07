@@ -1,7 +1,8 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.Data;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
 public class AccumulateFeatureItemsBlock : ActionBlockBase<FeatureXmlDoc, SyncContext>
 {

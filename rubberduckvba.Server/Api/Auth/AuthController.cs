@@ -6,7 +6,7 @@ using Octokit.Internal;
 using System.Security.Claims;
 using System.Text;
 
-namespace rubberduckvba.com.Server.Api.Auth;
+namespace rubberduckvba.Server.Api.Auth;
 
 public record class UserViewModel
 {

@@ -1,4 +1,4 @@
-﻿namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Schema;
+﻿namespace rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
 
 public static class XmlDocSchema
 {

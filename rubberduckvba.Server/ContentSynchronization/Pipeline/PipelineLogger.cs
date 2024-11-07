@@ -1,3 +1,3 @@
-﻿namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline;
+﻿namespace rubberduckvba.Server.ContentSynchronization.Pipeline;
 
 public class PipelineLogger { }

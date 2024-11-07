@@ -1,90 +1,90 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
+﻿using rubberduckvba.Server.Model;
 using System.Diagnostics.CodeAnalysis;
 
-namespace rubberduckvba.com.Server.Data;
+namespace rubberduckvba.Server.Data;
 
-public record class Tag
-{
-    public int Id { get; init; }
-    public DateTime DateTimeInserted { get; init; }
-    public DateTime? DateTimeUpdated { get; init; }
-    public long ReleaseId { get; init; }
-    public string Name { get; init; } = default!;
-    public DateTime DateCreated { get; init; }
-    public string InstallerDownloadUrl { get; init; } = default!;
-    public int InstallerDownloads { get; init; }
-    public bool IsPreRelease { get; init; }
-}
+//public record class Tag
+//{
+//    public int Id { get; init; }
+//    public DateTime DateTimeInserted { get; init; }
+//    public DateTime? DateTimeUpdated { get; init; }
+//    public long ReleaseId { get; init; }
+//    public string Name { get; init; } = default!;
+//    public DateTime DateCreated { get; init; }
+//    public string InstallerDownloadUrl { get; init; } = default!;
+//    public int InstallerDownloads { get; init; }
+//    public bool IsPreRelease { get; init; }
+//}
 
-public record class TagAsset
-{
-    public int Id { get; init; }
-    public DateTime DateTimeInserted { get; init; }
-    public DateTime? DateTimeUpdated { get; init; }
-    public int TagId { get; init; }
-    public string Name { get; init; } = default!;
-    public string DownloadUrl { get; init; } = default!;
-}
+//public record class TagAsset
+//{
+//    public int Id { get; init; }
+//    public DateTime DateTimeInserted { get; init; }
+//    public DateTime? DateTimeUpdated { get; init; }
+//    public int TagId { get; init; }
+//    public string Name { get; init; } = default!;
+//    public string DownloadUrl { get; init; } = default!;
+//}
 
 
-public record class TagGraph : Tag
-{
-    public IEnumerable<TagAsset> Assets { get; init; } = [];
-}
+//public record class TagGraph : Tag
+//{
+//    public IEnumerable<TagAsset> Assets { get; init; } = [];
+//}
 
-public record class Feature
-{
-    public int Id { get; init; }
-    public int? ParentId { get; init; }
-    public DateTime DateTimeInserted { get; init; }
-    public DateTime? DateTimeUpdated { get; init; }
-    public int RepositoryId { get; init; }
-    public string Name { get; init; } = default!;
-    public string Title { get; init; } = default!;
-    public string ShortDescription { get; init; } = default!;
-    public string Description { get; init; } = default!;
-    public bool IsHidden { get; init; }
-    public bool IsNew { get; init; }
-    public bool HasImage { get; init; }
-}
+//public record class Feature
+//{
+//    public int Id { get; init; }
+//    public int? ParentId { get; init; }
+//    public DateTime DateTimeInserted { get; init; }
+//    public DateTime? DateTimeUpdated { get; init; }
+//    public int RepositoryId { get; init; }
+//    public string Name { get; init; } = default!;
+//    public string Title { get; init; } = default!;
+//    public string ShortDescription { get; init; } = default!;
+//    public string Description { get; init; } = default!;
+//    public bool IsHidden { get; init; }
+//    public bool IsNew { get; init; }
+//    public bool HasImage { get; init; }
+//}
 
-public record class FeatureGraph : Feature
-{
-    public static FeatureGraph FromFeature(Feature feature) => new()
-    {
-        Id = feature.Id,
-        DateTimeInserted = feature.DateTimeInserted,
-        DateTimeUpdated = feature.DateTimeUpdated,
-        RepositoryId = feature.RepositoryId,
-        ParentId = feature.ParentId,
-        Name = feature.Name,
-        Title = feature.Title,
-        ShortDescription = feature.ShortDescription,
-        Description = feature.Description,
-        IsHidden = feature.IsHidden,
-        IsNew = feature.IsNew,
-    };
+//public record class FeatureGraph : Feature
+//{
+//    public static FeatureGraph FromFeature(Feature feature) => new()
+//    {
+//        Id = feature.Id,
+//        DateTimeInserted = feature.DateTimeInserted,
+//        DateTimeUpdated = feature.DateTimeUpdated,
+//        RepositoryId = feature.RepositoryId,
+//        ParentId = feature.ParentId,
+//        Name = feature.Name,
+//        Title = feature.Title,
+//        ShortDescription = feature.ShortDescription,
+//        Description = feature.Description,
+//        IsHidden = feature.IsHidden,
+//        IsNew = feature.IsNew,
+//    };
 
-    public string ParentName { get; init; } = default!;
-    public string ParentTitle { get; init; } = default!;
+//    public string ParentName { get; init; } = default!;
+//    public string ParentTitle { get; init; } = default!;
 
-    public IEnumerable<Feature> Features { get; init; } = [];
-    public IEnumerable<FeatureXmlDoc> Items { get; init; } = [];
+//    public IEnumerable<Feature> Features { get; init; } = [];
+//    public IEnumerable<FeatureXmlDoc> Items { get; init; } = [];
 
-    public IEnumerable<XmlDocInspectionInfo> Inspections { get; init; } = [];
-}
+//    public IEnumerable<XmlDocInspectionInfo> Inspections { get; init; } = [];
+//}
 
 public record class FeatureXmlDoc<TInfo> : FeatureXmlDoc
 {
     public TInfo? Info { get; init; } = default!;
 }
 
-public record class FeatureXmlDoc 
+public record class FeatureXmlDoc
 {
     public int Id { get; init; }
     public DateTime DateTimeInserted { get; init; }
     public DateTime? DateTimeUpdated { get; init; }
-    
+
     public int FeatureId { get; init; }
     public string FeatureName { get; init; }
     public string FeatureTitle { get; init; }
@@ -101,7 +101,7 @@ public record class FeatureXmlDoc
     public int TagId { get; init; }
 
     public string SourceUrl { get; init; } = default!;
-    
+
     public string Serialized { get; init; } = default!;
     public string TagName { get; init; } = default!;
 
@@ -112,17 +112,17 @@ public class XmlDocBranchIntersectComparer : EqualityComparer<FeatureXmlDoc>
 {
     public override bool Equals(FeatureXmlDoc? x, FeatureXmlDoc? y)
     {
-        if (x is null && y is null) 
+        if (x is null && y is null)
         {
             return true;
         }
 
-        if (x is null || y is null) 
+        if (x is null || y is null)
         {
             return false;
         }
 
-        if (ReferenceEquals(x, y)) 
+        if (ReferenceEquals(x, y))
         {
             return true;
         }
@@ -185,7 +185,7 @@ public record class SynchronizationRequest
     public string JobId { get; init; } = default!;
     public DateTime UtcDateTimeStarted { get; init; } = default!;
     public DateTime? UtcDateTimeEnded { get; init; } = default!;
-    public SyncStatus Status {  get; init; } = default!;
+    public SyncStatus Status { get; init; } = default!;
     public string Message { get; init; } = default!;
 }
 

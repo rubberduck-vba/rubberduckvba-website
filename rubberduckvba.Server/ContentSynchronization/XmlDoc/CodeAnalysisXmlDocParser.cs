@@ -1,12 +1,11 @@
-﻿using System.Xml.Linq;
+﻿using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
+using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Services;
 using System.Collections.Concurrent;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Schema;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
-using rubberduckvba.com.Server.Data;
-using rubberduckvba.com.Server.Services;
-using RubberduckServices;
+using System.Xml.Linq;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
+namespace rubberduckvba.Server.ContentSynchronization.XmlDoc;
 
 public interface ICodeAnalysisXmlDocParserFactory
 {
@@ -49,20 +48,20 @@ public class CodeAnalysisXmlDocParser : XmlDocParserBase, ICodeAnalysisXmlDocPar
         _inspectionDefaults = inspectionDefaults.ToDictionary(e => e.InspectionName, e => e);
     }
 
-    protected override async Task<IEnumerable<FeatureXmlDoc>> ParseAsync(int assetId, string tagName, XDocument document, bool isPreRelease)
-    {
-        var quickfixesFeatureId = await _content.GetFeatureId(RepositoryId.Rubberduck, "QuickFixes")
-            ?? throw new InvalidOperationException("Could not retrieve a FeatureId for the 'QuickFixes' feature.");
-        var quickFixes = ReadQuickFixes(assetId, tagName, quickfixesFeatureId, document, !isPreRelease);
+    //protected override async Task<IEnumerable<FeatureXmlDoc>> ParseAsync(int assetId, string tagName, XDocument document, bool isPreRelease)
+    //{
+    //    var quickfixesFeatureId = await _content.GetFeatureId(RepositoryId.Rubberduck, "QuickFixes")
+    //        ?? throw new InvalidOperationException("Could not retrieve a FeatureId for the 'QuickFixes' feature.");
+    //    var quickFixes = ReadQuickFixes(assetId, tagName, quickfixesFeatureId, document, !isPreRelease);
 
-        var inspectionsFeatureId = await _content.GetFeatureId(RepositoryId.Rubberduck, "Inspections")
-            ?? throw new InvalidOperationException("Could not retrieve a FeatureId for the 'Inspections' feature.");
-        var inspections = ReadInspections(assetId, tagName, inspectionsFeatureId, document, !isPreRelease, quickFixes);
+    //    var inspectionsFeatureId = await _content.GetFeatureId(RepositoryId.Rubberduck, "Inspections")
+    //        ?? throw new InvalidOperationException("Could not retrieve a FeatureId for the 'Inspections' feature.");
+    //    var inspections = ReadInspections(assetId, tagName, inspectionsFeatureId, document, !isPreRelease, quickFixes);
 
-        return inspections.Concat(quickFixes);
-    }
+    //    return inspections.Concat(quickFixes);
+    //}
 
-    private IEnumerable<FeatureXmlDoc> ReadInspections(int assetId, string tagName, int featureId, XDocument doc, bool hasReleased, IEnumerable<FeatureXmlDoc> quickFixes)
+    private IEnumerable<Inspection> ReadInspections(int assetId, string tagName, int featureId, XDocument doc, bool hasReleased, IEnumerable<QuickFix> quickFixes)
     {
         var nodes = from node in doc.Descendants("member").AsParallel()
                     let name = GetFullTypeNameOrDefault(node, "Inspection")
@@ -71,7 +70,7 @@ public class CodeAnalysisXmlDocParser : XmlDocParserBase, ICodeAnalysisXmlDocPar
                     let config = _inspectionDefaults.ContainsKey(inspectionName) ? _inspectionDefaults[inspectionName] : default
                     select (name, node, config);
 
-        var results = new ConcurrentBag<Task<FeatureXmlDoc>>();
+        var results = new ConcurrentBag<Task<Inspection>>();
         Parallel.ForEach(nodes, info =>
         {
             var xmldoc = new XmlDocInspection(_markdownService);
@@ -81,18 +80,18 @@ public class CodeAnalysisXmlDocParser : XmlDocParserBase, ICodeAnalysisXmlDocPar
         return results.Select(t => t.GetAwaiter().GetResult());
     }
 
-    private IEnumerable<FeatureXmlDoc> ReadQuickFixes(int assetId, string tagName, int featureId, XDocument doc, bool hasReleased)
+    private IEnumerable<QuickFix> ReadQuickFixes(int assetId, string tagName, int featureId, XDocument doc, bool hasReleased)
     {
         var nodes = from node in doc.Descendants("member").AsParallel()
                     let name = GetFullTypeNameOrDefault(node, "QuickFix")
                     where !string.IsNullOrEmpty(name) && node.Descendants(XmlDocSchema.QuickFix.CanFix.ElementName).Any() // this excludes any quickfixes added to main (master) prior to v2.5.0 
                     select (name, node);
 
-        var results = new ConcurrentBag<FeatureXmlDoc>();
+        var results = new ConcurrentBag<QuickFix>();
         Parallel.ForEach(nodes, info =>
         {
-            var xmldoc = new XmlDocQuickFix(info.name, info.node, !hasReleased);
-            results.Add(xmldoc.Parse(assetId, featureId));
+            var xmldoc = new XmlDocQuickFix();
+            results.Add(xmldoc.Parse(info.name, assetId, featureId, info.node, !hasReleased));
         });
 
         return results;

@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using rubberduckvba.com.Server.ContentSynchronization;
-using rubberduckvba.com.Server.Hangfire;
+using rubberduckvba.Server;
+using rubberduckvba.Server.ContentSynchronization;
+using rubberduckvba.Server.Hangfire;
+using rubberduckvba.Server.Services;
 
-namespace rubberduckvba.com.Server.Api.Admin;
+namespace rubberduckvba.Server.Api.Admin;
 
 
 [Authorize("github")]
@@ -20,7 +22,7 @@ public class AdminController(ConfigurationOptions options, IBackgroundJobClient 
     [HttpPost("admin/update/xmldoc")]
     public async ValueTask<IActionResult> UpdateXmldocContent()
     {
-        var parameters = new XmldocSyncRequestParameters { RepositoryId = Services.RepositoryId.Rubberduck, RequestId = Guid.NewGuid() };
+        var parameters = new XmldocSyncRequestParameters { RepositoryId = RepositoryId.Rubberduck, RequestId = Guid.NewGuid() };
         var jobId = backgroundJob.Enqueue(HangfireConstants.ManualQueueName, () => QueuedUpdateOrchestrator.UpdateXmldocContent(parameters, null!));
         logger.LogInformation("JobId {jobId} was enqueued (queue: {queueName}) for xmldoc sync request {requestId}", jobId, HangfireConstants.ManualQueueName, parameters.RequestId);
 
@@ -35,7 +37,7 @@ public class AdminController(ConfigurationOptions options, IBackgroundJobClient 
     [HttpPost("admin/update/tags")]
     public async ValueTask<IActionResult> UpdateTagMetadata()
     {
-        var parameters = new TagSyncRequestParameters { RepositoryId = Services.RepositoryId.Rubberduck, RequestId = Guid.NewGuid() };
+        var parameters = new TagSyncRequestParameters { RepositoryId = RepositoryId.Rubberduck, RequestId = Guid.NewGuid() };
         var jobId = backgroundJob.Enqueue(HangfireConstants.ManualQueueName, () => QueuedUpdateOrchestrator.UpdateInstallerDownloadStats(parameters, null!));
         logger.LogInformation("JobId {jobId} was enqueued (queue: {queueName}) for tag sync request {requestId}", jobId, HangfireConstants.ManualQueueName, parameters.RequestId);
 

@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
-namespace rubberduckvba.com.Server.Services;
+namespace rubberduckvba.Server.Services;
 
 public interface IContentCacheService : IDisposable
 {

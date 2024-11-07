@@ -3,7 +3,7 @@ using NLog.Targets;
 using System.Text;
 using System.Text.Json;
 
-namespace rubberduckvba.com.Server.Services;
+namespace rubberduckvba.Server.Services;
 
 public interface ICacheService
 {

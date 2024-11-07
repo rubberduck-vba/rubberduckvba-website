@@ -1,7 +1,7 @@
 ﻿using Hangfire.Annotations;
 using Hangfire.Dashboard;
 
-namespace rubberduckvba.com.Server.Hangfire;
+namespace rubberduckvba.Server.Hangfire;
 
 public class DockerDashboardFilter : IDashboardAuthorizationFilter
 {

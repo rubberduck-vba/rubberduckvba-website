@@ -8,18 +8,18 @@ using NLog.Config;
 using NLog.Extensions.Logging;
 using NLog.Targets;
 using RubberduckServices;
-using rubberduckvba.com.Server.Api.Admin;
-using rubberduckvba.com.Server.ContentSynchronization;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
-using rubberduckvba.com.Server.Hangfire;
-using rubberduckvba.com.Server.Services;
+using rubberduckvba.Server.Api.Admin;
+using rubberduckvba.Server.ContentSynchronization;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
+using rubberduckvba.Server.Hangfire;
+using rubberduckvba.Server.Services;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace rubberduckvba.com.Server;
+namespace rubberduckvba.Server;
 
 public class HangfireAuthenticationFilter : IDashboardAuthorizationFilter
 {
@@ -149,7 +149,7 @@ public class Program
         services.AddSingleton<ISyntaxHighlighterService, SyntaxHighlighterService>();
 
         services.AddSingleton<IRubberduckDbService, RubberduckDbService>();
-        services.AddSingleton<ISynchronizationService, SynchronizationDbService>();
+        //services.AddSingleton<ISynchronizationService, SynchronizationDbService>();
         services.AddSingleton<IGitHubClientService, GitHubClientService>();
         services.AddSingleton<IContentOrchestrator<TagSyncRequestParameters>, InstallerDownloadStatsOrchestrator>();
         services.AddSingleton<IContentOrchestrator<XmldocSyncRequestParameters>, XmldocContentOrchestrator>();
