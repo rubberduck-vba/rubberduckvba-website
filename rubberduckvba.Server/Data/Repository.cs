@@ -52,7 +52,7 @@ public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity :
     protected abstract string InsertSql { get; }
     protected abstract string UpdateSql { get; }
 
-    protected virtual string? ParentFKColumnName => "ParentFKColumnName";
+    protected virtual string? ParentFKColumnName => null;
 
     public virtual int GetId(string name) => Get(db => db.QuerySingle<int>($"SELECT [Id] FROM [dbo].[{TableName}] WHERE [Name]=@name", new { name }));
     public virtual TEntity GetById(int id) => Get(db => db.QuerySingle<TEntity>(SelectSql + " WHERE [Id]=@id", new { id }));

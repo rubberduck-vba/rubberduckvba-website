@@ -44,7 +44,7 @@ public class SyncTagsSection : PipelineSection<SyncContext>
     private BulkSaveStagingBlock SaveTags { get; }
 
     public ITargetBlock<SyncRequestParameters> InputBlock => ReceiveRequest.Block;
-    public Task OutputTask => AccumulateProcessedTags.Block.Completion;
+    public Task OutputTask => SaveTags.Block.Completion;
 
     protected override IReadOnlyDictionary<string, IDataflowBlock> Blocks => new Dictionary<string, IDataflowBlock>
     {

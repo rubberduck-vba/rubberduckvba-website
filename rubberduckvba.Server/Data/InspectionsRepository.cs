@@ -3,7 +3,7 @@ using rubberduckvba.Server.Model.Entity;
 
 namespace rubberduckvba.Server.Data;
 
-public class InspectionsRepository : Repository<InspectionEntity>
+public class InspectionsRepository : Repository<InspectionEntity>, IRepository<InspectionEntity>
 {
     public InspectionsRepository(IOptions<ConnectionSettings> settings)
         : base(settings) { }

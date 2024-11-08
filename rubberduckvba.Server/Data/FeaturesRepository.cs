@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
-using rubberduckvba.Server;
 using rubberduckvba.Server.Model.Entity;
 
 namespace rubberduckvba.Server.Data;
 
-public abstract class FeaturesRepository : Repository<FeatureEntity>
+public class FeaturesRepository : Repository<FeatureEntity>, IRepository<FeatureEntity>
 {
     public FeaturesRepository(IOptions<ConnectionSettings> settings)
         : base(settings) { }

@@ -17,14 +17,19 @@ public interface IGitHubClientService
 {
     Task<ClaimsPrincipal?> ValidateTokenAsync(string token);
     Task<IEnumerable<TagGraph>> GetAllTagsAsync();
-    Task<TagGraph> GetTagAsync(string token, string name);
+    Task<TagGraph> GetTagAsync(string? token, string name);
     Task<IEnumerable<InspectionDefaultConfig>> GetCodeAnalysisDefaultsConfigAsync();
 }
 
 public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger<ServiceLogger> logger) : IGitHubClientService
 {
-    public async Task<ClaimsPrincipal?> ValidateTokenAsync(string token)
+    public async Task<ClaimsPrincipal?> ValidateTokenAsync(string? token)
     {
+        if (token is null)
+        {
+            return null;
+        }
+
         var config = configuration.Value;
         var credentials = new Credentials(token);
         var client = new GitHubClient(new ProductHeaderValue(config.UserAgent), new InMemoryCredentialStore(credentials));
@@ -75,10 +80,10 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
                 }).ToImmutableArray();
     }
 
-    public async Task<TagGraph> GetTagAsync(string token, string name)
+    public async Task<TagGraph> GetTagAsync(string? token, string name)
     {
         var config = configuration.Value;
-        var credentials = new Credentials(config.OrgToken);
+        var credentials = new Credentials(token ?? config.OrgToken);
         var client = new GitHubClient(new ProductHeaderValue(config.UserAgent), new InMemoryCredentialStore(credentials));
 
         var release = await client.Repository.Release.Get(config.OwnerOrg, config.Rubberduck, name);

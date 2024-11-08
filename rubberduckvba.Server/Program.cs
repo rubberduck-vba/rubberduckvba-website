@@ -14,8 +14,11 @@ using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
+using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Hangfire;
+using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
+using rubberduckvba.Server.Services.rubberduckdb;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -32,16 +35,13 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Configuration.AddJsonFile("appsettings.json");
-        builder.Configuration.AddEnvironmentVariables("ConnectionStrings");
-        builder.Configuration.AddEnvironmentVariables("GitHub");
-        builder.Configuration.AddEnvironmentVariables("Api");
-
         builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
 
         builder.Services.Configure<ConnectionSettings>(options => builder.Configuration.GetSection("ConnectionStrings").Bind(options));
         builder.Services.Configure<GitHubSettings>(options => builder.Configuration.GetSection("GitHub").Bind(options));
         builder.Services.Configure<ApiSettings>(options => builder.Configuration.GetSection("Api").Bind(options));
         builder.Services.Configure<HangfireSettings>(options => builder.Configuration.GetSection("Hangfire").Bind(options));
+
 
         builder.Services.AddAuthentication(options =>
         {
@@ -149,6 +149,15 @@ public class Program
         services.AddSingleton<ISyntaxHighlighterService, SyntaxHighlighterService>();
 
         services.AddSingleton<IRubberduckDbService, RubberduckDbService>();
+        services.AddSingleton<TagServices>();
+        services.AddSingleton<FeatureServices>();
+        services.AddSingleton<IRepository<TagEntity>, TagsRepository>();
+        services.AddSingleton<IRepository<TagAssetEntity>, TagAssetsRepository>();
+        services.AddSingleton<IRepository<FeatureEntity>, FeaturesRepository>();
+        services.AddSingleton<IRepository<InspectionEntity>, InspectionsRepository>();
+        services.AddSingleton<IRepository<QuickFixEntity>, QuickFixRepository>();
+        services.AddSingleton<IRepository<AnnotationEntity>, AnnotationsRepository>();
+
         //services.AddSingleton<ISynchronizationService, SynchronizationDbService>();
         services.AddSingleton<IGitHubClientService, GitHubClientService>();
         services.AddSingleton<IContentOrchestrator<TagSyncRequestParameters>, InstallerDownloadStatsOrchestrator>();

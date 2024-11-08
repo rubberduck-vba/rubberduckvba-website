@@ -3,7 +3,7 @@ using rubberduckvba.Server.Model.Entity;
 
 namespace rubberduckvba.Server.Data;
 
-public class QuickFixRepository : Repository<QuickFixEntity>
+public class QuickFixRepository : Repository<QuickFixEntity>, IRepository<QuickFixEntity>
 {
     public QuickFixRepository(IOptions<ConnectionSettings> settings)
         : base(settings) { }

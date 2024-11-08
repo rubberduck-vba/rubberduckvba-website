@@ -10,7 +10,6 @@ using rubberduckvba.Server.Services;
 namespace rubberduckvba.Server.Api.Admin;
 
 
-[Authorize("github")]
 [ApiController]
 public class AdminController(ConfigurationOptions options, IBackgroundJobClient backgroundJob, ILogger<AdminController> logger) : ControllerBase
 {
@@ -53,6 +52,7 @@ public class AdminController(ConfigurationOptions options, IBackgroundJobClient 
 
 public record class ConfigurationOptions(
     IOptions<ConnectionSettings> ConnectionOptions,
+    IOptions<GitHubSettings> GitHubOptions,
     IOptions<HangfireSettings> HangfireOptions)
 {
 

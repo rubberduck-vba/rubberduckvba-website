@@ -45,7 +45,6 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         ParseInspectionInfo = new ParseInspectionXElementInfoBlock(this, tokenSource, logger, markdownService);
         ParseQuickFixInfo = new ParseQuickFixXElementInfoBlock(this, tokenSource, logger);
         ParseAnnotationInfo = new ParseAnnotationXElementInfoBlock(this, tokenSource, logger);
-        FeatureItemBuffer = new FeatureItemBufferBlock(this, tokenSource, logger);
         MergeInspections = new MergeInspectionsBlock(this, tokenSource, logger, mergeService);
         MergeQuickFixes = new MergeQuickFixesBlock(this, tokenSource, logger, mergeService);
         MergeAnnotations = new MergeAnnotationsBlock(this, tokenSource, logger, mergeService);
@@ -76,7 +75,6 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
     private ParseInspectionXElementInfoBlock ParseInspectionInfo { get; }
     private ParseQuickFixXElementInfoBlock ParseQuickFixInfo { get; }
     private ParseAnnotationXElementInfoBlock ParseAnnotationInfo { get; }
-    private FeatureItemBufferBlock FeatureItemBuffer { get; }
     private MergeInspectionsBlock MergeInspections { get; }
     private MergeQuickFixesBlock MergeQuickFixes { get; }
     private MergeAnnotationsBlock MergeAnnotations { get; }
@@ -110,7 +108,6 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         [nameof(ParseInspectionInfo)] = ParseInspectionInfo.Block,
         [nameof(ParseQuickFixInfo)] = ParseQuickFixInfo.Block,
         [nameof(ParseAnnotationInfo)] = ParseAnnotationInfo.Block,
-        [nameof(FeatureItemBuffer)] = FeatureItemBuffer.Block,
         [nameof(MergeInspections)] = MergeInspections.Block,
         [nameof(MergeQuickFixes)] = MergeQuickFixes.Block,
         [nameof(MergeAnnotations)] = MergeAnnotations.Block,
@@ -146,6 +143,7 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         FeatureItemBuffer.CreateBlock(ParseInspectionInfo, ParseQuickFixInfo, ParseAnnotationInfo);
         AccumulateProcessedItems.CreateBlock(FeatureItemBuffer);
         MergeInspections.CreateBlock(() => Context.StagingContext.NewInspections, AccumulateProcessedItems.Block.Completion);
+        MergeQuickFixes.CreateBlock(() => Context.StagingContext.NewQuickFixes)
         SaveStaging.CreateBlock(MergeInspections);
     }
 }

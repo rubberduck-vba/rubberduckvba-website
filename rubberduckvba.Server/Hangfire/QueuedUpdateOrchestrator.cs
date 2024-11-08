@@ -9,8 +9,12 @@ using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
+using rubberduckvba.Server.Data;
+using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
+using rubberduckvba.Server.Services.rubberduckdb;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace rubberduckvba.Server.Hangfire;
 
@@ -29,7 +33,7 @@ public static class QueuedUpdateOrchestrator
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
-            //.AddUserSecrets(Assembly.GetExecutingAssembly())
+            .AddUserSecrets(Assembly.GetExecutingAssembly())
             .Build();
 
 
@@ -97,6 +101,15 @@ public static class QueuedUpdateOrchestrator
         services.AddSingleton<ISyntaxHighlighterService, SyntaxHighlighterService>();
 
         services.AddSingleton<IRubberduckDbService, RubberduckDbService>();
+        services.AddSingleton<TagServices>();
+        services.AddSingleton<FeatureServices>();
+        services.AddSingleton<IRepository<TagEntity>, TagsRepository>();
+        services.AddSingleton<IRepository<TagAssetEntity>, TagAssetsRepository>();
+        services.AddSingleton<IRepository<FeatureEntity>, FeaturesRepository>();
+        services.AddSingleton<IRepository<InspectionEntity>, InspectionsRepository>();
+        services.AddSingleton<IRepository<QuickFixEntity>, QuickFixRepository>();
+        services.AddSingleton<IRepository<AnnotationEntity>, AnnotationsRepository>();
+
         services.AddSingleton<IGitHubClientService, GitHubClientService>();
         services.AddSingleton<ISynchronizationPipelineFactory<SyncContext>, SynchronizationPipelineFactory>();
         services.AddSingleton<IXmlDocMerge, XmlDocMerge>();

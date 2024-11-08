@@ -3,7 +3,7 @@ using rubberduckvba.Server.Model.Entity;
 
 namespace rubberduckvba.Server.Data;
 
-public class AnnotationsRepository : Repository<AnnotationEntity>
+public class AnnotationsRepository : Repository<AnnotationEntity>, IRepository<AnnotationEntity>
 {
     public AnnotationsRepository(IOptions<ConnectionSettings> settings)
         : base(settings) { }

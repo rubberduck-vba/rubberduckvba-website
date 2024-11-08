@@ -4,6 +4,10 @@ namespace rubberduckvba.Server.Model;
 
 public record class Tag
 {
+    public Tag()
+    {
+    }
+
     public Tag(TagEntity entity)
     {
         Id = entity.Id;
@@ -43,7 +47,7 @@ public record class Tag
 
 public record class TagGraph : Tag
 {
-    public TagGraph() : this(null!) { }
+    public TagGraph() : base() { }
     public TagGraph(TagEntity tag, IEnumerable<TagAssetEntity> assets)
         : base(tag)
     {
