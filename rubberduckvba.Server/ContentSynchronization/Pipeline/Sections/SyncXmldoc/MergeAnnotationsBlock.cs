@@ -2,7 +2,6 @@
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
 using rubberduckvba.Server.Model;
-using System.Collections.Immutable;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
@@ -34,10 +33,9 @@ public class MergeAnnotationsBlock : TransformBlockBase<IEnumerable<Annotation>,
             var merged = _service.Merge(dbItems, main, next);
             Logger.LogDebug(Context.Parameters, $"Merged x{merged.Count()}");
 
-            Context.StagingContext.UpdatedAnnotations = merged.Where(e => e.Id != default && e.DateTimeUpdated.HasValue).ToImmutableArray();
-            Context.StagingContext.NewAnnotations = merged.Where(e => e.Id == default).ToImmutableArray();
+            Context.StagingContext.Annotations = new(merged);
 
-            Logger.LogDebug(Context.Parameters, $"Updated: {Context.StagingContext.UpdatedAnnotations.Count()} | New: {Context.StagingContext.NewAnnotations.Count()}");
+            Logger.LogDebug(Context.Parameters, $"Updated: {Context.StagingContext.Annotations.Count()} | New: {Context.StagingContext.Annotations.Count()}");
             return merged;
         }
         finally

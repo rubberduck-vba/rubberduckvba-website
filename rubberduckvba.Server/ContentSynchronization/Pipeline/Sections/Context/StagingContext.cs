@@ -14,7 +14,7 @@ public class StagingContext
 
     public ConcurrentBag<TagGraph> Tags { get; } = [];
 
-    public IEnumerable<Inspection> Inspections { get; set; } = [];
-    public IEnumerable<QuickFix> QuickFixes { get; set; } = [];
-    public IEnumerable<Annotation> Annotations { get; set; } = [];
+    public ConcurrentBag<Inspection> Inspections { get; set; } = [];
+    public ConcurrentBag<QuickFix> QuickFixes { get; set; } = [];
+    public ConcurrentBag<Annotation> Annotations { get; set; } = [];
 }

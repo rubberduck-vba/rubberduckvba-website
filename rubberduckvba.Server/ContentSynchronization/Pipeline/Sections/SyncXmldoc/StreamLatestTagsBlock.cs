@@ -4,9 +4,9 @@ using rubberduckvba.Server.Model;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
-public class BroadcastLatestTagsBlock : TransformManyBlockBase<Tuple<SyncContext, SyncContext, SyncContext>, TagGraph, SyncContext>
+public class StreamLatestTagsBlock : TransformManyBlockBase<Tuple<SyncContext, SyncContext, SyncContext>, TagGraph, SyncContext>
 {
-    public BroadcastLatestTagsBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
+    public StreamLatestTagsBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
         : base(parent, tokenSource, logger)
     {
     }

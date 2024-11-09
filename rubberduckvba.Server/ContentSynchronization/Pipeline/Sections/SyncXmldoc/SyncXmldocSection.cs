@@ -1,12 +1,14 @@
 ﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
 using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Model;
 using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
 using System.Threading.Tasks.Dataflow;
+using System.Xml.Linq;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
@@ -20,7 +22,9 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         IGitHubClientService github,
         IXmlDocMerge mergeService,
         IStagingServices staging,
-        IMarkdownFormattingService markdownService)
+        XmlDocAnnotationParser xmlAnnotationParser,
+        XmlDocQuickFixParser xmlQuickFixParser,
+        XmlDocInspectionParser xmlInspectionParser)
         : base(parent, tokenSource, logger)
     {
         ReceiveRequest = new ReceiveRequestBlock(this, tokenSource, logger);
@@ -34,21 +38,24 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         JoinDbTags = new DataflowJoinBlock<TagGraph, TagGraph, IEnumerable<Tag>>(this, tokenSource, logger, nameof(JoinDbTags));
         LoadDbTags = new LoadDbTagsBlock(this, tokenSource, logger);
         JoinAsyncSources = new DataflowJoinBlock<SyncContext, SyncContext, SyncContext>(this, tokenSource, logger, nameof(JoinAsyncSources));
-        BroadcastTags = new BroadcastLatestTagsBlock(this, tokenSource, logger);
-        BroadcastAssets = new BroadcastTagAssetsBlock(this, tokenSource, logger);
-        StreamXmlAssets = new StreamXmlAssetsBlock(this, tokenSource, logger);
-        DownloadXmlAsset = new DownloadXmlAssetBlock(this, tokenSource, logger);
+        StreamLatestTags = new StreamLatestTagsBlock(this, tokenSource, logger);
+        StreamTagAssets = new StreamTagAssetsBlock(this, tokenSource, logger);
+        BufferXmlAsset = new XmlTagAssetBufferBlock(this, tokenSource, logger);
+        DownloadXmlAsset = new DownloadXmlTagAssetBlock(this, tokenSource, logger);
         BroadcastXDocument = new BroadcastXDocumentBlock(this, tokenSource, logger);
-        GetInspectionNodes = new GetInspectionNodesBlock(this, tokenSource, logger);
-        GetQuickFixNodes = new GetQuickFixNodesBlock(this, tokenSource, logger);
-        GetAnnotationNodes = new GetAnnotationNodesBlock(this, tokenSource, logger);
-        ParseInspectionInfo = new ParseInspectionXElementInfoBlock(this, tokenSource, logger, markdownService);
-        ParseQuickFixInfo = new ParseQuickFixXElementInfoBlock(this, tokenSource, logger);
-        ParseAnnotationInfo = new ParseAnnotationXElementInfoBlock(this, tokenSource, logger);
+        JoinQuickFixes = new DataflowJoinBlock<(TagAsset, XDocument), IEnumerable<QuickFix>>(this, tokenSource, logger, nameof(JoinQuickFixes));
+        StreamInspectionNodes = new StreamInspectionNodesBlock(this, tokenSource, logger);
+        StreamQuickFixNodes = new StreamQuickFixNodesBlock(this, tokenSource, logger);
+        StreamAnnotationNodes = new StreamAnnotationNodesBlock(this, tokenSource, logger);
+        ParseXmlDocInspections = new ParseInspectionXElementInfoBlock(this, tokenSource, logger, xmlInspectionParser);
+        ParseXmlDocQuickFixes = new ParseQuickFixXElementInfoBlock(this, tokenSource, logger, xmlQuickFixParser);
+        ParseXmlDocAnnotations = new ParseAnnotationXElementInfoBlock(this, tokenSource, logger, xmlAnnotationParser);
         MergeInspections = new MergeInspectionsBlock(this, tokenSource, logger, mergeService);
         MergeQuickFixes = new MergeQuickFixesBlock(this, tokenSource, logger, mergeService);
         MergeAnnotations = new MergeAnnotationsBlock(this, tokenSource, logger, mergeService);
-        AccumulateProcessedItems = new AccumulateProcessedFeatureItemsBlock(this, tokenSource, logger);
+        AccumulateProcessedInspections = new AccumulateProcessedInspectionsBlock(this, tokenSource, logger);
+        AccumulateProcessedQuickFixes = new AccumulateProcessedQuickFixesBlock(this, tokenSource, logger);
+        AccumulateProcessedAnnotations = new AccumulateProcessedAnnotationsBlock(this, tokenSource, logger);
         SaveStaging = new BulkSaveStagingBlock(this, tokenSource, staging, logger);
     }
 
@@ -64,21 +71,29 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
     private DataflowJoinBlock<TagGraph, TagGraph, IEnumerable<Tag>> JoinDbTags { get; }
     private LoadDbTagsBlock LoadDbTags { get; }
     private DataflowJoinBlock<SyncContext, SyncContext, SyncContext> JoinAsyncSources { get; }
-    private BroadcastLatestTagsBlock BroadcastTags { get; }
-    private BroadcastTagAssetsBlock BroadcastAssets { get; }
-    private StreamXmlAssetsBlock StreamXmlAssets { get; }
-    private DownloadXmlAssetBlock DownloadXmlAsset { get; }
+    private StreamLatestTagsBlock StreamLatestTags { get; }
+    private StreamTagAssetsBlock StreamTagAssets { get; }
+    private XmlTagAssetBufferBlock BufferXmlAsset { get; }
+    private DownloadXmlTagAssetBlock DownloadXmlAsset { get; }
     private BroadcastXDocumentBlock BroadcastXDocument { get; }
-    private GetInspectionNodesBlock GetInspectionNodes { get; }
-    private GetQuickFixNodesBlock GetQuickFixNodes { get; }
-    private GetAnnotationNodesBlock GetAnnotationNodes { get; }
-    private ParseInspectionXElementInfoBlock ParseInspectionInfo { get; }
-    private ParseQuickFixXElementInfoBlock ParseQuickFixInfo { get; }
-    private ParseAnnotationXElementInfoBlock ParseAnnotationInfo { get; }
-    private MergeInspectionsBlock MergeInspections { get; }
+
+    private StreamQuickFixNodesBlock StreamQuickFixNodes { get; }
+    private ParseQuickFixXElementInfoBlock ParseXmlDocQuickFixes { get; }
     private MergeQuickFixesBlock MergeQuickFixes { get; }
+    private BroadcastQuickFixesBlock BroadcastQuickFixes { get; }
+    private AccumulateProcessedQuickFixesBlock AccumulateProcessedQuickFixes { get; }
+
+    private DataflowJoinBlock<(TagAsset, XDocument), IEnumerable<QuickFix>> JoinQuickFixes { get; }
+    private StreamInspectionNodesBlock StreamInspectionNodes { get; }
+    private ParseInspectionXElementInfoBlock ParseXmlDocInspections { get; }
+    private MergeInspectionsBlock MergeInspections { get; }
+    private AccumulateProcessedInspectionsBlock AccumulateProcessedInspections { get; }
+
+    private StreamAnnotationNodesBlock StreamAnnotationNodes { get; }
+    private ParseAnnotationXElementInfoBlock ParseXmlDocAnnotations { get; }
     private MergeAnnotationsBlock MergeAnnotations { get; }
-    private AccumulateProcessedFeatureItemsBlock AccumulateProcessedItems { get; }
+    private AccumulateProcessedAnnotationsBlock AccumulateProcessedAnnotations { get; }
+
     private BulkSaveStagingBlock SaveStaging { get; }
 
     public ITargetBlock<XmldocSyncRequestParameters> InputBlock => ReceiveRequest.Block;
@@ -97,21 +112,28 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         [nameof(JoinDbTags)] = JoinDbTags.Block,
         [nameof(LoadDbTags)] = LoadDbTags.Block,
         [nameof(JoinAsyncSources)] = JoinAsyncSources.Block,
-        [nameof(BroadcastTags)] = BroadcastTags.Block,
-        [nameof(BroadcastAssets)] = BroadcastAssets.Block,
-        [nameof(StreamXmlAssets)] = StreamXmlAssets.Block,
+        [nameof(StreamLatestTags)] = StreamLatestTags.Block,
+        [nameof(StreamTagAssets)] = StreamTagAssets.Block,
+        [nameof(BufferXmlAsset)] = BufferXmlAsset.Block,
         [nameof(DownloadXmlAsset)] = DownloadXmlAsset.Block,
         [nameof(BroadcastXDocument)] = BroadcastXDocument.Block,
-        [nameof(GetInspectionNodes)] = GetInspectionNodes.Block,
-        [nameof(GetQuickFixNodes)] = GetQuickFixNodes.Block,
-        [nameof(GetAnnotationNodes)] = GetAnnotationNodes.Block,
-        [nameof(ParseInspectionInfo)] = ParseInspectionInfo.Block,
-        [nameof(ParseQuickFixInfo)] = ParseQuickFixInfo.Block,
-        [nameof(ParseAnnotationInfo)] = ParseAnnotationInfo.Block,
-        [nameof(MergeInspections)] = MergeInspections.Block,
+        [nameof(JoinQuickFixes)] = JoinQuickFixes.Block,
+
+        [nameof(StreamQuickFixNodes)] = StreamQuickFixNodes.Block,
+        [nameof(ParseXmlDocQuickFixes)] = ParseXmlDocQuickFixes.Block,
         [nameof(MergeQuickFixes)] = MergeQuickFixes.Block,
+        [nameof(AccumulateProcessedQuickFixes)] = AccumulateProcessedQuickFixes.Block,
+
+        [nameof(StreamInspectionNodes)] = StreamInspectionNodes.Block,
+        [nameof(ParseXmlDocInspections)] = ParseXmlDocInspections.Block,
+        [nameof(MergeInspections)] = MergeInspections.Block,
+        [nameof(AccumulateProcessedInspections)] = AccumulateProcessedInspections.Block,
+
+        [nameof(StreamAnnotationNodes)] = StreamAnnotationNodes.Block,
+        [nameof(ParseXmlDocAnnotations)] = ParseXmlDocAnnotations.Block,
         [nameof(MergeAnnotations)] = MergeAnnotations.Block,
-        [nameof(AccumulateProcessedItems)] = AccumulateProcessedItems.Block,
+        [nameof(AccumulateProcessedAnnotations)] = AccumulateProcessedAnnotations.Block,
+
         [nameof(SaveStaging)] = SaveStaging.Block,
     };
     #endregion
@@ -129,21 +151,32 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         JoinDbTags.CreateBlock(AcquireDbMainTagGraph, AcquireDbNextTagGraph, AcquireDbTags);
         LoadDbTags.CreateBlock(JoinDbTags);
         JoinAsyncSources.CreateBlock(LoadDbTags, LoadInspectionDefaultConfig, LoadFeatures);
-        BroadcastTags.CreateBlock(JoinAsyncSources);
-        BroadcastAssets.CreateBlock(BroadcastTags);
-        StreamXmlAssets.CreateBlock(BroadcastAssets);
-        DownloadXmlAsset.CreateBlock(StreamXmlAssets);
+        StreamLatestTags.CreateBlock(JoinAsyncSources);
+        StreamTagAssets.CreateBlock(StreamLatestTags);
+        BufferXmlAsset.CreateBlock(StreamTagAssets);
+        DownloadXmlAsset.CreateBlock(BufferXmlAsset);
         BroadcastXDocument.CreateBlock(DownloadXmlAsset);
-        GetInspectionNodes.CreateBlock(BroadcastXDocument);
-        GetQuickFixNodes.CreateBlock(BroadcastXDocument);
-        GetAnnotationNodes.CreateBlock(BroadcastXDocument);
-        ParseInspectionInfo.CreateBlock(GetInspectionNodes);
-        ParseQuickFixInfo.CreateBlock(GetQuickFixNodes);
-        ParseAnnotationInfo.CreateBlock(GetAnnotationNodes);
-        FeatureItemBuffer.CreateBlock(ParseInspectionInfo, ParseQuickFixInfo, ParseAnnotationInfo);
-        AccumulateProcessedItems.CreateBlock(FeatureItemBuffer);
-        MergeInspections.CreateBlock(() => Context.StagingContext.NewInspections, AccumulateProcessedItems.Block.Completion);
-        MergeQuickFixes.CreateBlock(() => Context.StagingContext.NewQuickFixes)
-        SaveStaging.CreateBlock(MergeInspections);
+
+        StreamQuickFixNodes.CreateBlock(BroadcastXDocument);
+        ParseXmlDocQuickFixes.CreateBlock(StreamQuickFixNodes);
+        MergeQuickFixes.CreateBlock(() => Context.StagingContext.QuickFixes, AccumulateProcessedQuickFixes.Block.Completion);
+        BroadcastQuickFixes.CreateBlock(MergeQuickFixes);
+        AccumulateProcessedQuickFixes.CreateBlock(BroadcastQuickFixes);
+        JoinQuickFixes.CreateBlock(BroadcastXDocument, BroadcastQuickFixes);
+
+        StreamAnnotationNodes.CreateBlock(BroadcastXDocument);
+        ParseXmlDocAnnotations.CreateBlock(StreamAnnotationNodes);
+        MergeAnnotations.CreateBlock(() => Context.StagingContext.Annotations, AccumulateProcessedAnnotations.Block.Completion);
+        AccumulateProcessedAnnotations.CreateBlock(MergeAnnotations);
+
+        StreamInspectionNodes.CreateBlock(JoinQuickFixes);
+        ParseXmlDocInspections.CreateBlock(StreamInspectionNodes);
+        MergeInspections.CreateBlock(() => Context.StagingContext.Inspections, AccumulateProcessedInspections.Block.Completion);
+        AccumulateProcessedInspections.CreateBlock(MergeInspections);
+
+        SaveStaging.CreateBlock(() => Context.StagingContext,
+            AccumulateProcessedInspections.Block.Completion,
+            AccumulateProcessedQuickFixes.Block.Completion,
+            AccumulateProcessedAnnotations.Block.Completion);
     }
 }

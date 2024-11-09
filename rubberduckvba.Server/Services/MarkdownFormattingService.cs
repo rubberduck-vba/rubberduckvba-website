@@ -6,14 +6,14 @@ namespace rubberduckvba.Server.Services;
 
 public interface IMarkdownFormattingService
 {
-    Task<string> FormatMarkdownDocument(string content, bool withSyntaxHighlighting = false);
+    string FormatMarkdownDocument(string content, bool withSyntaxHighlighting = false);
 }
 
 public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMarkdownFormattingService
 {
     private static readonly Markdown _service = new();
 
-    public async Task<string> FormatMarkdownDocument(string content, bool withSyntaxHighlighting = false)
+    public string FormatMarkdownDocument(string content, bool withSyntaxHighlighting = false)
     {
         if (string.IsNullOrWhiteSpace(content))
         {
@@ -25,7 +25,10 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
 
         if (withSyntaxHighlighting)
         {
-            markdown = await PreProcessMarkdownString(markdown);
+            // HTML tags makes the markdown formatter silently fail,
+            // so we pull out any <code> blocks and format everything between them.
+
+            markdown = PreProcessMarkdownString(markdown);
 
             var lastSectionStart = markdown.LastIndexOf("</code>");
             if (lastSectionStart > 0)
@@ -60,11 +63,10 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
             html = _service.Transform(markdown);
         }
 
-        var result = await PostProcessHtml(html);
-        return await Task.FromResult(result);
+        return PostProcessHtml(html);
     }
 
-    private async Task<string> PreProcessMarkdownString(string content)
+    private string PreProcessMarkdownString(string content)
     {
         var document = new HtmlDocument();
         document.LoadHtml($"<div>{content}</div>");
@@ -72,7 +74,7 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
         var codeNodes = document.DocumentNode.Descendants("code").ToList();
         foreach (var node in codeNodes)
         {
-            var code = await service.FormatAsync(node.InnerText);
+            var code = service.Format(node.InnerText);
 
             //node.Name = "div";
             //node.EndNode.Name = "div";
@@ -100,7 +102,7 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
         return document.DocumentNode.InnerHtml;
     }
 
-    private async Task<string> PostProcessHtml(string html)
+    private string PostProcessHtml(string html)
     {
         var document = new HtmlDocument();
         document.LoadHtml($"<div>{html}</div>");
@@ -110,6 +112,6 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
             node.AddClass("document-img");
         }
 
-        return await Task.FromResult(document.DocumentNode.FirstChild.InnerHtml);
+        return document.DocumentNode.FirstChild.InnerHtml;
     }
 }

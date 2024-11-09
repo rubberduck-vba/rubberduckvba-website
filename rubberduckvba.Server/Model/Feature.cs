@@ -2,7 +2,21 @@
 
 namespace rubberduckvba.Server.Model;
 
-public record class Feature()
+public interface IFeature
+{
+    int Id { get; init; }
+    DateTime DateTimeInserted { get; init; }
+    DateTime? DateTimeUpdated { get; init; }
+    string Name { get; init; }
+
+    bool IsNew { get; init; }
+    bool IsHidden { get; init; }
+    bool IsDiscontinued { get; init; }
+
+    int GetContentHash();
+}
+
+public record class Feature() : IFeature
 {
     public Feature(FeatureEntity entity) : this()
     {
@@ -32,6 +46,7 @@ public record class Feature()
     public string Description { get; init; } = string.Empty;
     public bool IsHidden { get; init; }
     public bool IsNew { get; init; }
+    public bool IsDiscontinued { get; init; }
     public bool HasImage { get; init; }
 
     public FeatureEntity ToEntity() => new()
@@ -49,6 +64,8 @@ public record class Feature()
         RepositoryId = (int)Services.RepositoryId.Rubberduck,
         Title = Title,
     };
+
+    public int GetContentHash() => HashCode.Combine(Name, Title, ShortDescription, Description, HasImage, IsHidden, IsNew, IsDiscontinued);
 }
 
 public record class FeatureGraph : Feature

@@ -66,8 +66,8 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
 
         var model = new FeatureViewModel(feature with
         {
-            Description = await md.FormatMarkdownDocument(feature.Description, true),
-            ShortDescription = await md.FormatMarkdownDocument(feature.ShortDescription),
+            Description = md.FormatMarkdownDocument(feature.Description, true),
+            ShortDescription = md.FormatMarkdownDocument(feature.ShortDescription),
 
             ParentId = feature.Id,
             ParentName = feature.Name,
@@ -75,8 +75,8 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
 
             Features = feature.Features.Select(subFeature => subFeature with
             {
-                Description = md.FormatMarkdownDocument(subFeature.Description).ConfigureAwait(false).GetAwaiter().GetResult(),
-                ShortDescription = md.FormatMarkdownDocument(subFeature.ShortDescription).ConfigureAwait(false).GetAwaiter().GetResult()
+                Description = md.FormatMarkdownDocument(subFeature.Description),
+                ShortDescription = md.FormatMarkdownDocument(subFeature.ShortDescription)
             }).ToArray(),
 
             Inspections = feature.Inspections,
@@ -93,12 +93,12 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
     public async Task<ActionResult> Resolve([FromQuery] RepositoryId repository, [FromQuery] string name)
     {
         var graph = await db.ResolveFeature(repository, name);
-        var markdown = await md.FormatMarkdownDocument(graph.Description, withSyntaxHighlighting: true);
+        var markdown = md.FormatMarkdownDocument(graph.Description, withSyntaxHighlighting: true);
         return Ok(graph with { Description = markdown });
     }
 
     [HttpGet("features/create")]
-    //[Authorize("github")]
+    [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromQuery] RepositoryId repository = RepositoryId.Rubberduck, [FromQuery] int? parentId = default)
     {
         var features = await GetFeatureOptions(repository);
@@ -109,7 +109,7 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
     }
 
     [HttpPost("create")]
-    //[Authorize("github")]
+    [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromBody] FeatureEditViewModel model)
     {
         if (model.Id.HasValue || string.IsNullOrWhiteSpace(model.Name) || model.Name.Trim().Length < 3)
@@ -131,7 +131,7 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
     }
 
     [HttpPost("features/update")]
-    //[Authorize("github")]
+    [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Update([FromBody] FeatureEditViewModel model)
     {
         if (model.Id.GetValueOrDefault() == default)
@@ -152,8 +152,8 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
     }
 
     [HttpPost("features/markdown")]
-    public async Task<ActionResult> FormatMarkdown([FromBody] MarkdownFormattingRequestViewModel model)
+    public IActionResult FormatMarkdown([FromBody] MarkdownFormattingRequestViewModel model)
     {
-        return Ok(await md.FormatMarkdownDocument(model.MarkdownContent, model.WithVbeCodeBlocks));
+        return Ok(md.FormatMarkdownDocument(model.MarkdownContent, model.WithVbeCodeBlocks));
     }
 }

@@ -2,7 +2,6 @@
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
 using rubberduckvba.Server.Model;
-using System.Collections.Immutable;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
@@ -34,10 +33,9 @@ public class MergeQuickFixesBlock : TransformBlockBase<IEnumerable<QuickFix>, IE
             var merged = _service.Merge(dbItems, main, next);
             Logger.LogDebug(Context.Parameters, $"Merged x{merged.Count()}");
 
-            Context.StagingContext.UpdatedQuickFixes = merged.Where(e => e.Id != default && e.DateTimeUpdated.HasValue).ToImmutableArray();
-            Context.StagingContext.NewQuickFixes = merged.Where(e => e.Id == default).ToImmutableArray();
+            Context.StagingContext.QuickFixes = new(merged);
 
-            Logger.LogDebug(Context.Parameters, $"Updated: {Context.StagingContext.UpdatedQuickFixes.Count()} | New: {Context.StagingContext.NewQuickFixes.Count()}");
+            Logger.LogDebug(Context.Parameters, $"Updated: {Context.StagingContext.QuickFixes.Count(e => e.Id != default)} | New: {Context.StagingContext.QuickFixes.Count(e => e.Id == default)}");
             return merged;
         }
         finally

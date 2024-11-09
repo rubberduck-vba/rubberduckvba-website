@@ -14,7 +14,7 @@ public class AccumulateProcessedTagsBlock : TransformBlockBase<TagGraph, SyncCon
 
     public override SyncContext Transform(TagGraph input)
     {
-        Context.StagingContext.ProcessedTags.Add(input);
+        Context.StagingContext.Tags.Add(input);
         return Context;
     }
 }

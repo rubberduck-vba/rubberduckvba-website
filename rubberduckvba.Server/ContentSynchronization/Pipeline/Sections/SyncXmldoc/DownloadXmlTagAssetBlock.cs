@@ -5,9 +5,9 @@ using System.Xml.Linq;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
-public class DownloadXmlAssetBlock : TransformBlockBase<TagAsset, (TagAsset, XDocument), SyncContext>
+public class DownloadXmlTagAssetBlock : TransformBlockBase<TagAsset, (TagAsset, XDocument), SyncContext>
 {
-    public DownloadXmlAssetBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
+    public DownloadXmlTagAssetBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
         : base(parent, tokenSource, logger)
     {
     }

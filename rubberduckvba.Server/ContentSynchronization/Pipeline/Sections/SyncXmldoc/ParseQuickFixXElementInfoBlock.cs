@@ -7,9 +7,12 @@ namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmld
 
 public class ParseQuickFixXElementInfoBlock : TransformBlockBase<(TagAsset asset, XElementInfo info), QuickFix, SyncContext>
 {
-    public ParseQuickFixXElementInfoBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
+    private readonly XmlDocQuickFixParser _parser;
+
+    public ParseQuickFixXElementInfoBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger, XmlDocQuickFixParser parser)
         : base(parent, tokenSource, logger)
     {
+        _parser = parser;
     }
 
     public override QuickFix Transform((TagAsset asset, XElementInfo info) input)
@@ -22,9 +25,8 @@ public class ParseQuickFixXElementInfoBlock : TransformBlockBase<(TagAsset asset
         var feature = Context.Features["QuickFixes"];
         var isPreRelease = Context.RubberduckDbNext.Assets.Any(asset => asset.Id == input.asset.Id);
 
-        var parser = new XmlDocQuickFix();
-        var result = parser.Parse(input.info.Name, input.asset.Id, feature.Id, input.info.Element, isPreRelease) with { TagAssetId = input.asset.Id };
+        var result = _parser.Parse(input.info.Name, input.asset.Id, feature.Id, input.info.Element, isPreRelease) with { TagAssetId = input.asset.Id };
 
-        return result ?? throw new InvalidOperationException("Failed to parse xmldoc");
+        return result ?? throw new InvalidOperationException("Failed to parse quickfix xmldoc");
     }
 }

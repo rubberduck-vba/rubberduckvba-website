@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace rubberduckvba.Server.Model;
 
-public record class QuickFix()
+public record class QuickFix() : IFeature
 {
     public QuickFix(QuickFixEntity entity) : this()
     {
@@ -70,4 +70,20 @@ public record class QuickFix()
         JsonExamples = JsonSerializer.Serialize(Examples),
         Inspections = string.Join(',', Inspections),
     };
+
+    public int GetContentHash()
+    {
+        var hash = new HashCode();
+        hash.Add(Summary);
+        hash.Add(Remarks);
+        hash.Add(Name);
+        hash.Add(CanFixAll);
+        hash.Add(CanFixModule);
+        hash.Add(CanFixMultiple);
+        hash.Add(CanFixProcedure);
+        hash.Add(CanFixProject);
+        hash.Add(JsonSerializer.Serialize(Examples));
+        hash.Add(string.Join(',', Inspections));
+        return hash.ToHashCode();
+    }
 }

@@ -15,19 +15,26 @@ public record class InspectionExample : Example
     public ICollection<ExampleModule> Modules { get; init; } = [];
 }
 
-public record class QuickFixExample : Example
+public record class QuickFixExample : BeforeAndAfterExample
+{
+}
+
+public record class AnnotationExample : BeforeAndAfterExample
 {
     /// <summary>
-    /// The code modules before the quickfix is applied.
+    /// The example modules when the annotation has no before/after examples.
+    /// </summary>
+    public ICollection<ExampleModule> Modules { get; init; } = [];
+}
+
+public record class BeforeAndAfterExample : Example
+{
+    /// <summary>
+    /// The code modules before feature is used.
     /// </summary>
     public ICollection<ExampleModule> ModulesBefore { get; init; } = [];
     /// <summary>
-    /// The code modules after the quickfix is applied.
+    /// The code modules after the feature is used.
     /// </summary>
     public ICollection<ExampleModule> ModulesAfter { get; init; } = [];
-}
-
-public record class AnnotationExample : Example
-{
-    public ICollection<ExampleModule> Modules { get; init; } = [];
 }

@@ -1,11 +1,10 @@
 ﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
-using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Services;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
-public class BulkSaveStagingBlock : ActionBlockBase<IEnumerable<FeatureXmlDoc>, SyncContext>
+public class BulkSaveStagingBlock : ActionBlockBase<StagingContext, SyncContext>
 {
     private readonly IStagingServices _staging;
 
@@ -15,8 +14,8 @@ public class BulkSaveStagingBlock : ActionBlockBase<IEnumerable<FeatureXmlDoc>, 
         _staging = staging;
     }
 
-    protected override async Task ActionAsync(IEnumerable<FeatureXmlDoc> input)
+    protected override async Task ActionAsync(StagingContext input)
     {
-        await _staging.StageAsync(Context.StagingContext, Token);
+        await _staging.StageAsync(input, Token);
     }
 }

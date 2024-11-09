@@ -2,7 +2,6 @@
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
 using rubberduckvba.Server.Model;
-using System.Collections.Immutable;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
@@ -20,7 +19,6 @@ public class MergeInspectionsBlock : TransformBlockBase<IEnumerable<Inspection>,
     {
         try
         {
-
             var main = input
                 .Where(e => Context.RubberduckDbMain.Assets.Any(asset => asset.Id == e.TagAssetId))
                 .ToList();
@@ -34,10 +32,9 @@ public class MergeInspectionsBlock : TransformBlockBase<IEnumerable<Inspection>,
             var merged = _service.Merge(dbItems, main, next);
             Logger.LogDebug(Context.Parameters, $"Merged x{merged.Count()}");
 
-            Context.StagingContext.UpdatedInspections = merged.Where(e => e.Id != default && e.DateTimeUpdated.HasValue).ToImmutableArray();
-            Context.StagingContext.NewInspections = merged.Where(e => e.Id == default).ToImmutableArray();
+            Context.StagingContext.Inspections = new(merged);
 
-            Logger.LogDebug(Context.Parameters, $"Updated: {Context.StagingContext.UpdatedInspections.Count()} | New: {Context.StagingContext.NewInspections.Count()}");
+            Logger.LogDebug(Context.Parameters, $"Updated: {Context.StagingContext.Inspections.Count(e => e.Id != default)} | New: {Context.StagingContext.Inspections.Count(e => e.Id == default)}");
             return merged;
         }
         finally

@@ -4,8 +4,8 @@ using rubberduckvba.Server.Model;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
-public class StreamXmlAssetsBlock : BufferBlockBase<TagAsset, SyncContext>
+public class XmlTagAssetBufferBlock : BufferBlockBase<TagAsset, SyncContext>
 {
-    public StreamXmlAssetsBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
+    public XmlTagAssetBufferBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
         : base(parent, tokenSource, logger) { }
 }

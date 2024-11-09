@@ -5,24 +5,12 @@ using System.Xml.Linq;
 
 namespace rubberduckvba.Server.ContentSynchronization.XmlDoc;
 
-public class QuickFixProperties
-{
-    public string Summary { get; set; }
-    public string Remarks { get; set; }
-    public bool CanFixInProcedure { get; set; }
-    public bool CanFixInModule { get; set; }
-    public bool CanFixInProject { get; set; }
-    public string[] Inspections { get; set; }
-}
-
-public class XmlDocQuickFix : IEquatable<XmlDocQuickFix>
+public class XmlDocQuickFixParser
 {
     public QuickFix Parse(string name, int assetId, int featureId, XElement node, bool isPreRelease)
     {
-        var sourceObject = name;
+        var sourceObject = name[2..].Replace('.', '/').Replace("Rubberduck/CodeAnalysis/", "Rubberduck.CodeAnalysis/");
         var typeName = name/*.Substring(name.LastIndexOf(".", StringComparison.Ordinal) + 1)/*.Replace("QuickFix", string.Empty)*/;
-
-        sourceObject = node.Attribute("name")?.Value.Substring(2) ?? string.Empty;
 
         var summary = node.Element(XmlDocSchema.QuickFix.Summary.ElementName)?.Value.Trim().Replace("  ", " ") ?? string.Empty;
         var remarks = node.Element(XmlDocSchema.QuickFix.Remarks.ElementName)?.Value.Trim().Replace("  ", " ") ?? string.Empty;
@@ -31,6 +19,8 @@ public class XmlDocQuickFix : IEquatable<XmlDocQuickFix>
         var canFixInProcedure = Convert.ToBoolean(canFixNode?.Attribute(XmlDocSchema.QuickFix.CanFix.ProcedureAttribute)?.Value ?? true.ToString());
         var canFixInModule = Convert.ToBoolean(canFixNode?.Attribute(XmlDocSchema.QuickFix.CanFix.ModuleAttribute)?.Value ?? true.ToString());
         var canFixInProject = Convert.ToBoolean(canFixNode?.Attribute(XmlDocSchema.QuickFix.CanFix.ProjectAttribute)?.Value ?? true.ToString());
+        var canFixMultiple = Convert.ToBoolean(canFixNode?.Attribute(XmlDocSchema.QuickFix.CanFix.MultipleAttribute)?.Value ?? true.ToString());
+        var canFixAll = Convert.ToBoolean(canFixNode?.Attribute(XmlDocSchema.QuickFix.CanFix.AllAttribute)?.Value ?? true.ToString());
 
         var nodes = node.Element(XmlDocSchema.QuickFix.Inspections.ElementName)?
                         .Elements(XmlDocSchema.QuickFix.Inspections.Inspection.ElementName);
@@ -47,48 +37,39 @@ public class XmlDocQuickFix : IEquatable<XmlDocQuickFix>
         return new QuickFix
         {
             FeatureId = featureId,
-
-            Name = name,
-            IsHidden = false,
-            IsNew = isPreRelease,
-
-            Summary = summary.Trim().Replace("  ", " "),
             TagAssetId = assetId,
             SourceUrl = sourceObject,
-            Examples = ParseExamples(node).ToArray(),
+
+            Name = name,
+            Summary = summary.Trim().Replace("  ", " "),
+            Remarks = remarks,
+
+            IsHidden = false,
+            IsNew = isPreRelease, // if initially true, will be set to false if same quickfix exists in regular release branch (main)
+            IsDiscontinued = default, // initially false, will be set to true if same quickfix does not exist in pre-release branch (next)
+
+            CanFixAll = canFixAll,
+            CanFixMultiple = canFixMultiple,
+            CanFixProcedure = canFixInProcedure,
+            CanFixModule = canFixInModule,
+            CanFixProject = canFixInProject,
+
+            Examples = [.. ParseExamples(node)],
+            Inspections = inspections
         };
     }
 
-    public string SourceObject { get; init; }
-    public string TypeName { get; init; }
 
-    public string QuickFixName { get; init; }
-
-    public string Summary { get; init; }
-    public string Remarks { get; init; }
-    public bool IsPreRelease { get; init; }
-
-    public bool CanFixInProcedure { get; init; }
-    public bool CanFixInModule { get; init; }
-    public bool CanFixInProject { get; init; }
-
-    public BeforeAndAfterCodeExample[] Examples { get; init; } = [];
-
-    public bool Equals(XmlDocQuickFix? other) => other?.QuickFixName == QuickFixName;
-
-    public override bool Equals(object? obj) => Equals(obj as XmlDocQuickFix);
-    public override int GetHashCode() => QuickFixName.GetHashCode();
-
-    private static readonly IDictionary<string, ExampleModuleType> ModuleTypes =
+    private static readonly Dictionary<string, ExampleModuleType> ModuleTypes =
         typeof(ExampleModuleType)
             .GetMembers()
             .Select(m => (m.Name, Description: m.GetCustomAttributes().OfType<System.ComponentModel.DescriptionAttribute>().SingleOrDefault()?.Description ?? string.Empty))
             .Where(m => m.Description != null)
             .ToDictionary(m => m.Description, m => (ExampleModuleType)Enum.Parse(typeof(ExampleModuleType), m.Name, true));
 
-    private IEnumerable<QuickFixExample> ParseExamples(XElement node)
+    private static List<QuickFixExample> ParseExamples(XElement node)
     {
-        var results = new List<QuickFixExample>();
+        var examples = new List<QuickFixExample>();
         foreach (var exampleNode in node.Elements(XmlDocSchema.QuickFix.Example.ElementName))
         {
             var before = exampleNode.Element(XmlDocSchema.QuickFix.Example.Before.ElementName)?
@@ -125,13 +106,13 @@ public class XmlDocQuickFix : IEquatable<XmlDocQuickFix>
 
             if (before != null && after != null)
             {
-                results.Add(new QuickFixExample { ModulesBefore = before.ToList(), ModulesAfter = after.ToList() });
+                examples.Add(new QuickFixExample { ModulesBefore = before.ToList(), ModulesAfter = after.ToList() });
             }
             else
             {
                 // TODO log a warning, something.
             }
         }
-        return results;
+        return examples;
     }
 }

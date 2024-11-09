@@ -7,9 +7,12 @@ namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmld
 
 public class ParseAnnotationXElementInfoBlock : TransformBlockBase<(TagAsset asset, XElementInfo info), Annotation, SyncContext>
 {
-    public ParseAnnotationXElementInfoBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
+    private readonly XmlDocAnnotationParser _parser;
+
+    public ParseAnnotationXElementInfoBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger, XmlDocAnnotationParser parser)
         : base(parent, tokenSource, logger)
     {
+        _parser = parser;
     }
 
     public override Annotation Transform((TagAsset asset, XElementInfo info) input)
@@ -17,8 +20,7 @@ public class ParseAnnotationXElementInfoBlock : TransformBlockBase<(TagAsset ass
         var feature = Context.Features["Annotations"];
         var isPreRelease = Context.RubberduckDbNext.Assets.Any(asset => asset.Id == input.asset.Id);
 
-        var parser = new XmlDocAnnotation(input.info.Name, input.info.Element, isPreRelease);
-        var result = parser.Parse(input.asset.Id, feature.Id);
+        var result = _parser.Parse(input.asset.Id, feature.Id, input.info.Name, input.info.Element, isPreRelease);
 
         return result ?? throw new InvalidOperationException("Failed to parse annotation xmldoc");
     }

@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace rubberduckvba.Server.Model;
 
-public record class Inspection()
+public record class Inspection() : IFeature
 {
     public Inspection(InspectionEntity entity) : this()
     {

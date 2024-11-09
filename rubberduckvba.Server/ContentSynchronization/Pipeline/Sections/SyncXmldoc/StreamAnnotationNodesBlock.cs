@@ -5,9 +5,9 @@ using System.Xml.Linq;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
-public class GetAnnotationNodesBlock : GetXElementInfoBlock
+public class StreamAnnotationNodesBlock : GetXElementInfoBlock
 {
-    public GetAnnotationNodesBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
+    public StreamAnnotationNodesBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
         : base(parent, tokenSource, logger)
     {
     }

@@ -11,24 +11,41 @@ public interface IStagingServices
     Task StageAsync(StagingContext staging, CancellationToken token);
 }
 
-public class StagingServices(IRubberduckDbService service, TagServices tagService, FeatureServices featureServices) : IStagingServices
+public class StagingServices(TagServices tagService, FeatureServices featureServices) : IStagingServices
 {
     public async Task StageAsync(StagingContext context, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var updatedTags = context.ProcessedTags.Where(e => e.Id != default);
+        var updatedTags = context.Tags.Where(e => e.Id != default);
         tagService.Update(updatedTags);
 
         token.ThrowIfCancellationRequested();
-        var newTags = context.ProcessedTags.Where(e => e.Id == default);
+        var newTags = context.Tags.Where(e => e.Id == default);
         tagService.Create(newTags);
 
-        //token.ThrowIfCancellationRequested();
-        //featureServices.Update(context.UpdatedFeatureItems);
-        //await service.UpdateAsync(context.UpdatedFeatureItems);
+        token.ThrowIfCancellationRequested();
+        var updatedInspections = context.Inspections.Where(e => e.Id != default);
+        featureServices.Update(updatedInspections);
 
-        //token.ThrowIfCancellationRequested();
-        //await service.CreateAsync(context.NewFeatureItems);
+        token.ThrowIfCancellationRequested();
+        var newInspections = context.Inspections.Where(e => e.Id == default);
+        featureServices.Insert(newInspections);
+
+        token.ThrowIfCancellationRequested();
+        var updatedQuickFixes = context.QuickFixes.Where(e => e.Id != default);
+        featureServices.Update(updatedQuickFixes);
+
+        token.ThrowIfCancellationRequested();
+        var newQuickFixes = context.QuickFixes.Where(e => e.Id == default);
+        featureServices.Insert(newQuickFixes);
+
+        token.ThrowIfCancellationRequested();
+        var updatedAnnotations = context.Annotations.Where(e => e.Id != default);
+        featureServices.Update(updatedAnnotations);
+
+        token.ThrowIfCancellationRequested();
+        var newAnnotations = context.Annotations.Where(e => e.Id == default);
+        featureServices.Insert(newAnnotations);
     }
 }
 

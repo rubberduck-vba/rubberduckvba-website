@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace rubberduckvba.Server.Model;
 
-public record class Annotation()
+public record class Annotation() : IFeature
 {
     public Annotation(AnnotationEntity entity) : this()
     {
@@ -28,6 +28,8 @@ public record class Annotation()
     public bool IsDiscontinued { get; init; }
     public bool IsHidden { get; init; }
     public string Name { get; init; } = string.Empty;
+    public string Summary { get; init; } = string.Empty;
+    public string Remarks { get; init; } = string.Empty;
     public AnnotationParameter[] Parameters { get; init; } = [];
     public AnnotationExample[] Examples { get; init; } = [];
 
@@ -40,7 +42,20 @@ public record class Annotation()
         TagAssetId = TagAssetId,
         SourceUrl = SourceUrl,
         Name = Name,
+        Summary = Summary,
+        Remarks = Remarks,
         JsonParameters = JsonSerializer.Serialize(Parameters),
         JsonExamples = JsonSerializer.Serialize(Examples),
     };
+
+    public int GetContentHash()
+    {
+        var hash = new HashCode();
+        hash.Add(Name);
+        hash.Add(Summary);
+        hash.Add(Remarks);
+        hash.Add(JsonSerializer.Serialize(Parameters));
+        hash.Add(JsonSerializer.Serialize(Examples));
+        return hash.ToHashCode();
+    }
 }

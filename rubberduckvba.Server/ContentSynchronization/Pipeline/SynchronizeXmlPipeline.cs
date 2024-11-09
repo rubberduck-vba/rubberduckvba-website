@@ -1,6 +1,7 @@
 ﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
 using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Model.Entity;
@@ -18,9 +19,13 @@ public class SynchronizeXmlPipeline : PipelineBase<SyncContext, bool>, ISynchron
     private readonly IRepository<InspectionEntity> _inspections;
     private readonly IRepository<QuickFixEntity> _quickfixes;
     private readonly IRepository<AnnotationEntity> _annotations;
+    private readonly XmlDocAnnotationParser _annotationParser;
+    private readonly XmlDocQuickFixParser _quickFixParser;
+    private readonly XmlDocInspectionParser _inspectionParser;
 
     public SynchronizeXmlPipeline(IRequestParameters parameters, ILogger logger, IRubberduckDbService content, IGitHubClientService github, IXmlDocMerge merge, IStagingServices staging, IMarkdownFormattingService markdown, CancellationTokenSource tokenSource,
-        IRepository<InspectionEntity> inspections, IRepository<QuickFixEntity> quickfixes, IRepository<AnnotationEntity> annotations)
+        IRepository<InspectionEntity> inspections, IRepository<QuickFixEntity> quickfixes, IRepository<AnnotationEntity> annotations,
+        XmlDocAnnotationParser xmlAnnotationParser, XmlDocQuickFixParser xmlQuickFixParser, XmlDocInspectionParser xmlInspectionParser)
         : base(new SyncContext(parameters), tokenSource, logger)
     {
         _content = content;
@@ -31,6 +36,10 @@ public class SynchronizeXmlPipeline : PipelineBase<SyncContext, bool>, ISynchron
         _inspections = inspections;
         _quickfixes = quickfixes;
         _annotations = annotations;
+
+        _annotationParser = xmlAnnotationParser;
+        _quickFixParser = xmlQuickFixParser;
+        _inspectionParser = xmlInspectionParser;
     }
 
     public async Task<IPipelineResult<bool>> ExecuteAsync(SyncRequestParameters parameters, CancellationTokenSource tokenSource)
@@ -42,7 +51,7 @@ public class SynchronizeXmlPipeline : PipelineBase<SyncContext, bool>, ISynchron
         }
 
         // 01. Create the pipeline sections
-        var synchronizeFeatureItems = new SyncXmldocSection(this, tokenSource, Logger, _content, _inspections, _quickfixes, _annotations, _github, _merge, _staging, _markdown);
+        var synchronizeFeatureItems = new SyncXmldocSection(this, tokenSource, Logger, _content, _inspections, _quickfixes, _annotations, _github, _merge, _staging, _annotationParser, _quickFixParser, _inspectionParser);
 
         // 02. Wire up the pipeline
         AddSections(parameters, synchronizeFeatureItems);

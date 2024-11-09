@@ -5,9 +5,9 @@ using System.Xml.Linq;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
-public class GetInspectionNodesBlock : GetXElementInfoBlock
+public class StreamQuickFixNodesBlock : GetXElementInfoBlock
 {
-    public GetInspectionNodesBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
+    public StreamQuickFixNodesBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger)
         : base(parent, tokenSource, logger)
     {
     }
@@ -20,13 +20,13 @@ public class GetInspectionNodesBlock : GetXElementInfoBlock
         }
 
         var result = (from node in input.document.Descendants("member").AsParallel()
-                      let fullName = GetNameOrDefault(node, "Inspection")
+                      let fullName = GetNameOrDefault(node, "QuickFix")
                       where !string.IsNullOrWhiteSpace(fullName)
                       let typeName = fullName.Substring(fullName.LastIndexOf(".", StringComparison.Ordinal) + 1)
                       select (input.asset, new XElementInfo(typeName, node)))
                     .ToList();
 
-        Logger.LogInformation(Context.Parameters, $"{Name} | Extracted {result.Count} inspection nodes from tag asset {input.asset.Name}");
+        Logger.LogInformation(Context.Parameters, $"{Name} | Extracted {result.Count} quickfix nodes from tag asset {input.asset.Name}");
         return result;
     }
 }

@@ -108,9 +108,9 @@ public record class FeatureXmlDoc
     public IEnumerable<Example> Examples { get; init; } = [];
 }
 
-public class XmlDocBranchIntersectComparer : EqualityComparer<FeatureXmlDoc>
+public class XmlDocBranchIntersectComparer<T> : EqualityComparer<T> where T : IFeature
 {
-    public override bool Equals(FeatureXmlDoc? x, FeatureXmlDoc? y)
+    public override bool Equals(T? x, T? y)
     {
         if (x is null && y is null)
         {
@@ -130,7 +130,7 @@ public class XmlDocBranchIntersectComparer : EqualityComparer<FeatureXmlDoc>
         return x.Name == y.Name;
     }
 
-    public override int GetHashCode([DisallowNull] FeatureXmlDoc obj)
+    public override int GetHashCode([DisallowNull] T obj)
     {
         return HashCode.Combine(obj.Name);
     }
