@@ -29,6 +29,7 @@ public class SyncContext : IPipelineContext
     public StagingContext StagingContext => ContextNotInitializedException.ThrowIfNull(_staging);
 
 
+    private Dictionary<int, TagGraph> _latestTagsByAssetId = [];
     private TagGraph? _main;
     public TagGraph RubberduckDbMain
         => ContextNotInitializedException.ThrowIfNull(_main);
@@ -38,6 +39,10 @@ public class SyncContext : IPipelineContext
         InvalidContextParameterException.ThrowIfNull(nameof(main), main);
         ContextAlreadyInitializedException.ThrowIfNotNull(_main);
         _main ??= main;
+        foreach (var asset in _main.Assets)
+        {
+            _latestTagsByAssetId[asset.Id] = _main;
+        }
     }
 
     private TagGraph? _next;
@@ -49,6 +54,17 @@ public class SyncContext : IPipelineContext
         InvalidContextParameterException.ThrowIfNull(nameof(next), next);
         ContextAlreadyInitializedException.ThrowIfNotNull(_next);
         _next ??= next;
+        foreach (var asset in _next.Assets)
+        {
+            _latestTagsByAssetId[asset.Id] = _next;
+        }
+    }
+
+
+    public bool TryGetTagByAssetId(int assetId, out TagGraph tag)
+    {
+        var tags = ContextNotInitializedException.ThrowIfNull(_latestTagsByAssetId);
+        return tags.TryGetValue(assetId, out tag!);
     }
 
     private ImmutableDictionary<int, Tag>? _tagsById;
@@ -65,6 +81,7 @@ public class SyncContext : IPipelineContext
         _tagsById = tags.ToImmutableDictionary(tag => tag.Id);
     }
 
+
     private ImmutableDictionary<string, InspectionDefaultConfig>? _inspectionConfig;
     public ImmutableDictionary<string, InspectionDefaultConfig> InspectionDefaultConfig
         => ContextNotInitializedException.ThrowIfNull(_inspectionConfig);
@@ -80,7 +97,7 @@ public class SyncContext : IPipelineContext
         => ContextNotInitializedException.ThrowIfNull(_inspections);
 
     private ImmutableHashSet<QuickFix>? _quickfixes;
-    public ImmutableHashSet<QuickFix> Quickfixes
+    public ImmutableHashSet<QuickFix> QuickFixes
         => ContextNotInitializedException.ThrowIfNull(_quickfixes);
 
     private ImmutableHashSet<Annotation>? _annotations;

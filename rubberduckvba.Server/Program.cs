@@ -165,6 +165,9 @@ public class Program
         services.AddSingleton<ISynchronizationPipelineFactory<SyncContext>, SynchronizationPipelineFactory>();
         services.AddSingleton<IXmlDocMerge, XmlDocMerge>();
         services.AddSingleton<IStagingServices, StagingServices>();
+        services.AddSingleton<XmlDocAnnotationParser>();
+        services.AddSingleton<XmlDocQuickFixParser>();
+        services.AddSingleton<XmlDocInspectionParser>();
 
         services.AddSingleton<IDistributedCache, MemoryDistributedCache>();
         services.AddSingleton<ICacheService, CacheService>();
@@ -185,7 +188,7 @@ public class Program
             var config = new LoggingConfiguration();
 
             (NLog.LogLevel MinLevel, string, Target Target)[] targets = [
-                (NLog.LogLevel.Trace, "*", new DebuggerTarget("DebuggerLog")),
+                (NLog.LogLevel.Trace, "rubberduckvba.*", new DebuggerTarget("DebuggerLog")),
                 (NLog.LogLevel.Info, "rubberduckvba.*", new FileTarget("FileLog")
                 {
                     FileName = "logs/rubberduckvba.Server.log",

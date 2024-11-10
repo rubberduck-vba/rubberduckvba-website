@@ -19,23 +19,23 @@ public class MergeAnnotationsBlock : TransformBlockBase<IEnumerable<Annotation>,
     {
         try
         {
-
-            var main = input
-                .Where(e => Context.RubberduckDbMain.Assets.Any(asset => asset.Id == e.TagAssetId))
+            var main = Context.StagingContext.Annotations
+                .Where(annotation => Context.RubberduckDbMain.Assets.Any(asset => asset.Id == annotation.TagAssetId))
                 .ToList();
 
-            var next = input
-                .Where(e => Context.RubberduckDbNext.Assets.Any(asset => asset.Id == e.TagAssetId))
+            var next = Context.StagingContext.Annotations
+                .Where(annotation => Context.RubberduckDbNext.Assets.Any(asset => asset.Id == annotation.TagAssetId))
                 .ToList();
 
             Logger.LogDebug(Context.Parameters, $"Merging annotations. Main x{main.Count} | Next x{next.Count}");
             var dbItems = Context.Annotations.ToDictionary(e => e.Name);
+
             var merged = _service.Merge(dbItems, main, next);
             Logger.LogDebug(Context.Parameters, $"Merged x{merged.Count()}");
 
             Context.StagingContext.Annotations = new(merged);
 
-            Logger.LogDebug(Context.Parameters, $"Updated: {Context.StagingContext.Annotations.Count()} | New: {Context.StagingContext.Annotations.Count()}");
+            Logger.LogDebug(Context.Parameters, $"Updated: {Context.StagingContext.Annotations.Count(e => e.Id != default)} | New: {Context.StagingContext.Annotations.Count(e => e.Id == default)}");
             return merged;
         }
         finally

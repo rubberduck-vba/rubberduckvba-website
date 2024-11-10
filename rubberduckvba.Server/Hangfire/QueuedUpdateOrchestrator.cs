@@ -114,6 +114,10 @@ public static class QueuedUpdateOrchestrator
         services.AddSingleton<ISynchronizationPipelineFactory<SyncContext>, SynchronizationPipelineFactory>();
         services.AddSingleton<IXmlDocMerge, XmlDocMerge>();
         services.AddSingleton<IStagingServices, StagingServices>();
+
+        services.AddSingleton<XmlDocAnnotationParser>();
+        services.AddSingleton<XmlDocQuickFixParser>();
+        services.AddSingleton<XmlDocInspectionParser>();
     }
 
     private static async Task Run<TParameters>(IServiceCollection services, PerformContext context, TParameters parameters)

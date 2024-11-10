@@ -16,9 +16,11 @@ SELECT
     [DateTimeInserted],
     [DateTimeUpdated],
     [RepositoryId],
+    [ParentId],
     [Name],
     [Title],
     [ShortDescription],
+    [Description],
     [IsNew],
     [HasImage]
 FROM [dbo].[Features]";

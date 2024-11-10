@@ -44,7 +44,7 @@ INSERT INTO [dbo].[QuickFixes] (
     [CanFixProject],
     [CanFixAll],
     [Inspections],
-    [JsonExamples]
+    [JsonExamples])
 VALUES (
     GETDATE(),
     @featureId,

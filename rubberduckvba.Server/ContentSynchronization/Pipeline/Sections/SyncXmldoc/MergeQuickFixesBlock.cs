@@ -19,17 +19,16 @@ public class MergeQuickFixesBlock : TransformBlockBase<IEnumerable<QuickFix>, IE
     {
         try
         {
-
-            var main = input
-                .Where(e => Context.RubberduckDbMain.Assets.Any(asset => asset.Id == e.TagAssetId))
+            var main = Context.StagingContext.QuickFixes
+                .Where(quickfix => Context.RubberduckDbMain.Assets.Any(asset => asset.Id == quickfix.TagAssetId))
                 .ToList();
 
-            var next = input
+            var next = Context.StagingContext.QuickFixes
                 .Where(e => Context.RubberduckDbNext.Assets.Any(asset => asset.Id == e.TagAssetId))
                 .ToList();
 
             Logger.LogDebug(Context.Parameters, $"Merging quickfixes. Main x{main.Count} | Next x{next.Count}");
-            var dbItems = Context.Quickfixes.ToDictionary(e => e.Name);
+            var dbItems = Context.QuickFixes.ToDictionary(e => e.Name);
             var merged = _service.Merge(dbItems, main, next);
             Logger.LogDebug(Context.Parameters, $"Merged x{merged.Count()}");
 

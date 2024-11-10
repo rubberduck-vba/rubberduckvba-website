@@ -154,7 +154,13 @@ public class RubberduckDbService : IRubberduckDbService
 
     public async Task<FeatureGraph> ResolveFeature(RepositoryId repositoryId, string name)
     {
-        return _featureServices.Get(name);
+        var features = _featureServices.Get(topLevelOnly: false).ToList();
+        var feature = features.Single(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
+        var children = features.Where(e => e.ParentId == feature.Id);
+        return new FeatureGraph(feature.ToEntity())
+        {
+            Features = children.ToArray()
+        };
         //        const string featureSql = @"
         //WITH feature AS (
         //    SELECT [Id] 

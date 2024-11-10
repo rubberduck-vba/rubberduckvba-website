@@ -5,7 +5,7 @@ using rubberduckvba.Server.Model;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
-public class ParseInspectionXElementInfoBlock : TransformBlockBase<(TagAsset asset, XElementInfo info), Inspection, SyncContext>
+public class ParseInspectionXElementInfoBlock : TransformBlockBase<(TagAsset asset, XElementInfo info, IEnumerable<QuickFix> quickfixes), Inspection, SyncContext>
 {
     private readonly XmlDocInspectionParser _parser;
 
@@ -16,7 +16,7 @@ public class ParseInspectionXElementInfoBlock : TransformBlockBase<(TagAsset ass
         _parser = parser;
     }
 
-    public override async Task<Inspection> TransformAsync((TagAsset asset, XElementInfo info) input)
+    public override async Task<Inspection> TransformAsync((TagAsset asset, XElementInfo info, IEnumerable<QuickFix> quickfixes) input)
     {
         if (input.asset is null)
         {
@@ -24,13 +24,12 @@ public class ParseInspectionXElementInfoBlock : TransformBlockBase<(TagAsset ass
         }
 
         var feature = Context.Features["Inspections"];
-        var quickfixes = Context.Features["QuickFixes"].QuickFixes; // NOTE: this makes parsing quickfixes a requirement for inspections
 
         var config = Context.InspectionDefaultConfig.TryGetValue(input.info.Name, out var value) ? value : null;
         var isPreRelease = Context.RubberduckDbNext.Assets.Any(asset => asset.Id == input.asset.Id);
         var name = input.info.Element.Attribute("name")!.Value;
 
-        var result = await _parser.ParseAsync(input.asset.Id, feature.Id, quickfixes, name, input.info.Element, config, isPreRelease);
+        var result = await _parser.ParseAsync(input.asset.Id, feature.Id, input.quickfixes, name, input.info.Element, config, isPreRelease);
 
         return result with { TagAssetId = input.asset.Id };
     }

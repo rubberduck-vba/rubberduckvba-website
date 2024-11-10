@@ -27,6 +27,7 @@ public abstract class PipelineSection<TContext> : PipelineBase<TContext, bool>
     private readonly List<Task> _tracedCompletionTasks = [];
     public void TraceBlockCompletion(IDataflowBlock block, string name)
     {
+        Logger.LogTrace(Context.Parameters, $"{GetType().Name} | ☑️ Tracing block completion for {name}.");
         _tracedCompletionTasks.Add(block.Completion.ContinueWith(t =>
         {
             string status;
@@ -42,20 +43,24 @@ public abstract class PipelineSection<TContext> : PipelineBase<TContext, bool>
                     status = "task ran to completion.";
                     break;
                 default:
-                    status = $"task is in unexpected state {t.Status}.";
+                    status = $"task is in unexpected state '{t.Status}'.";
                     break;
             }
             Logger.LogTrace(Context.Parameters, $"{GetType().Name} | ✅ Dataflow block completion task completed | {name} ({block.GetType().Name}) | {status}");
-        }).ContinueWith(t =>
-        {
-            var details = Blocks.Select(
-                block => $"{(
-                      block.Value.Completion.IsCompletedSuccessfully ? "✔️"
-                    : block.Value.Completion.IsFaulted ? "✖️"
-                    : block.Value.Completion.IsCanceled ? "⛔"
-                    : "🕑")} {block.Key} : {block.Value.Completion.Status}");
-            Logger.LogTrace(Context.Parameters, "Pipeline block completion status details" + Environment.NewLine + string.Join(Environment.NewLine, details));
+            LogBlockCompletionDetails();
         }));
+    }
+
+    public void LogBlockCompletionDetails()
+    {
+        var details = Blocks.Select(
+            block => $"{(
+                  block.Value.Completion.IsCompletedSuccessfully ? "✔️"
+                : block.Value.Completion.IsFaulted ? "✖️"
+                : block.Value.Completion.IsCanceled ? "⛔"
+                : "🕑")} {block.Key} : {block.Value.Completion.Status}");
+
+        Logger.LogTrace(Context.Parameters, "Pipeline block completion status details" + Environment.NewLine + string.Join(Environment.NewLine, details));
     }
 
     public void FaultPipelineBlock(IDataflowBlock block, Exception exception)

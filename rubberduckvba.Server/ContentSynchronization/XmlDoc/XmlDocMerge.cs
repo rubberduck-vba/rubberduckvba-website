@@ -45,8 +45,8 @@ public class XmlDocMerge(ILogger<XmlDocMerge> logger) : IXmlDocMerge
 
     public IEnumerable<Inspection> Merge(IDictionary<string, Inspection> dbItems, IEnumerable<Inspection> main, IEnumerable<Inspection> next)
     {
-        var mainBranch = main.ToHashSet();
-        var nextBranch = (next.Any() ? next : main).ToHashSet();
+        var mainBranch = (main.Any() ? main : dbItems.Values).ToHashSet();
+        var nextBranch = (next.Any() ? next : mainBranch).ToHashSet();
 
         var merged = new HashSet<Inspection>();
         var timestamp = TimeProvider.System.GetUtcNow().DateTime;
@@ -77,14 +77,16 @@ public class XmlDocMerge(ILogger<XmlDocMerge> logger) : IXmlDocMerge
             }
         );
 
+        merged.UnionWith(updatedItems);
+        merged.UnionWith(insertItems);
         return merged;
     }
 
 
     public IEnumerable<QuickFix> Merge(IDictionary<string, QuickFix> dbItems, IEnumerable<QuickFix> main, IEnumerable<QuickFix> next)
     {
-        var mainBranch = main.ToHashSet();
-        var nextBranch = (next.Any() ? next : main).ToHashSet();
+        var mainBranch = (main.Any() ? main : dbItems.Values).ToHashSet();
+        var nextBranch = (next.Any() ? next : mainBranch).ToHashSet();
 
         var merged = new HashSet<QuickFix>();
         var timestamp = TimeProvider.System.GetUtcNow().DateTime;
@@ -115,13 +117,15 @@ public class XmlDocMerge(ILogger<XmlDocMerge> logger) : IXmlDocMerge
             }
         );
 
+        merged.UnionWith(updatedItems);
+        merged.UnionWith(insertItems);
         return merged;
     }
 
     public IEnumerable<Annotation> Merge(IDictionary<string, Annotation> dbItems, IEnumerable<Annotation> main, IEnumerable<Annotation> next)
     {
-        var mainBranch = main.ToHashSet();
-        var nextBranch = (next.Any() ? next : main).ToHashSet();
+        var mainBranch = (main.Any() ? main : dbItems.Values).ToHashSet();
+        var nextBranch = (next.Any() ? next : mainBranch).ToHashSet();
 
         var merged = new HashSet<Annotation>();
         var timestamp = TimeProvider.System.GetUtcNow().DateTime;
@@ -152,6 +156,8 @@ public class XmlDocMerge(ILogger<XmlDocMerge> logger) : IXmlDocMerge
             }
         );
 
+        merged.UnionWith(updatedItems);
+        merged.UnionWith(insertItems);
         return merged;
     }
 }

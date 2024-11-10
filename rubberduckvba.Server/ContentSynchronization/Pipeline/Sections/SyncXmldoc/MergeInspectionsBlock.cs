@@ -19,12 +19,12 @@ public class MergeInspectionsBlock : TransformBlockBase<IEnumerable<Inspection>,
     {
         try
         {
-            var main = input
-                .Where(e => Context.RubberduckDbMain.Assets.Any(asset => asset.Id == e.TagAssetId))
+            var main = Context.StagingContext.Inspections
+                .Where(inspection => Context.RubberduckDbMain.Assets.Any(asset => asset.Id == inspection.TagAssetId))
                 .ToList();
 
-            var next = input
-                .Where(e => Context.RubberduckDbNext.Assets.Any(asset => asset.Id == e.TagAssetId))
+            var next = Context.StagingContext.Inspections
+                .Where(inspection => Context.RubberduckDbNext.Assets.Any(asset => asset.Id == inspection.TagAssetId))
                 .ToList();
 
             Logger.LogDebug(Context.Parameters, $"Merging inspections. Main x{main.Count} | Next x{next.Count}");

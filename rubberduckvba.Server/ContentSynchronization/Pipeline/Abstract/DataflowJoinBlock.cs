@@ -43,6 +43,7 @@ public class DataflowJoinBlock<T1, T2> : DataflowBlockBase<JoinBlock<T1, T2>, Sy
         Block = new JoinBlock<T1, T2>(options);
         LinkSources(source1, source2);
 
+        Parent.TraceBlockCompletion(Block, Name);
         return Block;
     }
 
@@ -51,12 +52,11 @@ public class DataflowJoinBlock<T1, T2> : DataflowBlockBase<JoinBlock<T1, T2>, Sy
     {
         Block = new JoinBlock<T1, T2>(options);
 
-        var sourceBlock1 = source1.TryGetBlock() as ISourceBlock<T1>;
-        var sourceBlock2 = source2.TryGetBlock() as ISourceBlock<T2>;
-        if (sourceBlock1 != null && sourceBlock2 != null)
-        {
-            LinkSources(sourceBlock1, sourceBlock2);
-        }
+        var sourceBlock1 = source1.TryGetBlock() as ISourceBlock<T1> ?? throw new ArgumentNullException(nameof(source1));
+        var sourceBlock2 = source2.TryGetBlock() as ISourceBlock<T2> ?? throw new ArgumentNullException(nameof(source2));
+
+        LinkSources(sourceBlock1, sourceBlock2);
+        Parent.TraceBlockCompletion(Block, Name);
 
         return Block;
     }
@@ -121,6 +121,7 @@ public class DataflowJoinBlock<T1, T2, T3> : DataflowBlockBase<JoinBlock<T1, T2,
         Block = new JoinBlock<T1, T2, T3>(options);
         LinkSources(source1, source2, source3);
 
+        Parent.TraceBlockCompletion(Block, Name);
         return Block;
     }
 
@@ -129,13 +130,12 @@ public class DataflowJoinBlock<T1, T2, T3> : DataflowBlockBase<JoinBlock<T1, T2,
     {
         Block = new JoinBlock<T1, T2, T3>(options);
 
-        var sourceBlock1 = source1.TryGetBlock() as ISourceBlock<T1>;
-        var sourceBlock2 = source2.TryGetBlock() as ISourceBlock<T2>;
-        var sourceBlock3 = source3.TryGetBlock() as ISourceBlock<T3>;
-        if (sourceBlock1 != null && sourceBlock2 != null && sourceBlock3 != null)
-        {
-            LinkSources(sourceBlock1, sourceBlock2, sourceBlock3);
-        }
+        var sourceBlock1 = source1.TryGetBlock() as ISourceBlock<T1> ?? throw new ArgumentNullException(nameof(source1));
+        var sourceBlock2 = source2.TryGetBlock() as ISourceBlock<T2> ?? throw new ArgumentNullException(nameof(source2));
+        var sourceBlock3 = source3.TryGetBlock() as ISourceBlock<T3> ?? throw new ArgumentNullException(nameof(source3));
+
+        LinkSources(sourceBlock1, sourceBlock2, sourceBlock3);
+        Parent.TraceBlockCompletion(Block, Name);
 
         return Block;
     }

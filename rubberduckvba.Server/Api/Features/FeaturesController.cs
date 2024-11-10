@@ -66,8 +66,8 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
 
         var model = new FeatureViewModel(feature with
         {
-            Description = md.FormatMarkdownDocument(feature.Description, true),
-            ShortDescription = md.FormatMarkdownDocument(feature.ShortDescription),
+            Description = feature.Description,
+            ShortDescription = feature.ShortDescription,
 
             ParentId = feature.Id,
             ParentName = feature.Name,
@@ -75,8 +75,8 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
 
             Features = feature.Features.Select(subFeature => subFeature with
             {
-                Description = md.FormatMarkdownDocument(subFeature.Description),
-                ShortDescription = md.FormatMarkdownDocument(subFeature.ShortDescription)
+                Description = subFeature.Description,
+                ShortDescription = subFeature.ShortDescription
             }).ToArray(),
 
             Inspections = feature.Inspections,
