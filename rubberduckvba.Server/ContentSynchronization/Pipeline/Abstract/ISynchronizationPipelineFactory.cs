@@ -1,4 +1,4 @@
-﻿namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+﻿namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 
 public interface ISynchronizationPipelineFactory<TContext>
     where TContext : class

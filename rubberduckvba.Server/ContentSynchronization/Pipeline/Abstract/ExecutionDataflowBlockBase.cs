@@ -1,7 +1,8 @@
-﻿using System.Diagnostics;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using System.Diagnostics;
 using System.Threading.Tasks.Dataflow;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 
 public abstract class ExecutionDataflowBlockBase<TBlock, TInput, TContext> : DataflowBlockBase<TBlock, TContext>, IDisposable
     where TBlock : class, IDataflowBlock, ITargetBlock<TInput>
@@ -123,7 +124,7 @@ public abstract class ExecutionDataflowBlockBase<TBlock, TInput, TContext> : Dat
         if (sources != null && sources.Length > 0)
         {
             var propagate = sources.Count() == 1;
-            
+
             foreach (var source in sources)
             {
                 var propagateSourceCompletion = propagate
@@ -164,9 +165,9 @@ public abstract class ExecutionDataflowBlockBase<TBlock, TInput, TContext> : Dat
                     }
                     else if (srcBlock != null)
                     {
-                        // could be e.g. ActionBlock<TInput>, which can't directly source another block.
-                        completionTasks.Add(srcBlock.Completion);
-                        Logger.LogDebug(Context.Parameters, $"{Name} | ⚠️ Source block ({srcBlock.GetType().Name}) is not ISourceBlock<{typeof(TInput).Name}>. If this is accidental, pipeline may not complete.");
+                        //completionTasks.Add(srcBlock.Completion);
+                        Logger.LogWarning(Context.Parameters, $"{Name} | ⚠️ Source block ({srcBlock.GetType().Name}) is not ISourceBlock<{typeof(TInput).Name}>. Pipeline may not complete.");
+                        throw new InvalidOperationException($"Source block ({srcBlock.GetType().Name}) is not ISourceBlock<{typeof(TInput).Name}>");
                     }
                     else
                     {
@@ -193,6 +194,7 @@ public abstract class ExecutionDataflowBlockBase<TBlock, TInput, TContext> : Dat
                 sw.Stop();
                 Block.Complete();
                 Logger.LogInformation(Context.Parameters, $"{Name} | ☑️ Block completed | ⏱️ {sw.Elapsed}");
+                Parent.LogBlockCompletionDetails();
             }));
         }
     }
@@ -202,6 +204,7 @@ public abstract class ExecutionDataflowBlockBase<TBlock, TInput, TContext> : Dat
         if (waitForTasks?.Any() ?? false)
         {
             Logger.LogTrace(Context.Parameters, $"{Name} | 🕑 Awaiting the completion of {waitForTasks.Length} source block task{(waitForTasks.Length > 1 ? "s" : string.Empty)}");
+
             _whenAllTasks.Add(Task.WhenAll(waitForTasks).ContinueWith(t =>
             {
                 try
@@ -215,18 +218,14 @@ public abstract class ExecutionDataflowBlockBase<TBlock, TInput, TContext> : Dat
                     }
 
                     Logger.LogTrace(Context.Parameters, $"{Name} | 🚀 Block accepted input ({typeof(TInput).Name})");
+                    Block.Complete();
                 }
                 catch (Exception exception)
                 {
                     Logger.LogException(Context.Parameters, exception);
                     throw;
                 }
-                finally
-                {
-                    Block.Complete();
-                    Logger.LogTrace(Context.Parameters, $"{Name} | ☑️ Block completed");
-                }
-            }, Token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current));
+            }, Token, TaskContinuationOptions.NotOnCanceled, TaskScheduler.Current));
         }
     }
 

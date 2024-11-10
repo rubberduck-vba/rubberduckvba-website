@@ -1,8 +1,8 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+﻿using rubberduckvba.Server.ContentSynchronization;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 
-namespace rubberduckvba.com.Server.Services;
+namespace rubberduckvba.Server.Services;
 
 public class InstallerDownloadStatsOrchestrator(ISynchronizationPipelineFactory<SyncContext> factory) : IContentOrchestrator<TagSyncRequestParameters>
 {
@@ -13,14 +13,14 @@ public class InstallerDownloadStatsOrchestrator(ISynchronizationPipelineFactory<
         {
             await pipeline.ExecuteAsync(request, tokenSource);
         }
-        catch (TaskCanceledException)
+        catch (TaskCanceledException e)
         {
             var exceptions = pipeline.Exceptions.ToList();
             if (exceptions.Count > 0)
             {
                 if (exceptions.Count == 1)
                 {
-                    throw exceptions[0];
+                    throw new OperationCanceledException(e.Message, exceptions[0]);
                 }
                 else
                 {

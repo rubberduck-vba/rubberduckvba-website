@@ -1,11 +1,14 @@
-﻿using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.Model;
+using System.Xml.Linq;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
 
 public interface IXmlDocParser
 {
     string AssetName { get; }
-    Task<IEnumerable<FeatureXmlDoc>> ParseAsync(TagGraph tag);
+    IEnumerable<Inspection> ParseInspections(XDocument document);
+    IEnumerable<QuickFix> ParseQuickFixes(XDocument document);
+    IEnumerable<Annotation> ParseAnnotations(XDocument document);
 }
 
 /// <summary>

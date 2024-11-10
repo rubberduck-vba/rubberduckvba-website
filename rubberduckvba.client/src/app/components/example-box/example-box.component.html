@@ -1,9 +1,6 @@
 <div class="accordion" id="exampleBoxAccordion">
     <div class="card my-2">
         <div class="card-header bg-light-subtle my-0 py-0" id="exampleBoxHeading">
-            <div *ngIf="!inspectionExample" class="row my-0 py-0">
-                <h4><span class="spinner-border text-primary"></span> Loading...</h4>
-            </div>
             <div *ngIf="inspectionExample" class="btn btn-link text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="inspectionExample.isCollapsed = !inspectionExample.isCollapsed">
                 <div class="row my-0 py-0">
                     <div class="col-1">
@@ -35,14 +32,14 @@
                     <div *ngFor="let module of inspectionExample.modules" class="row mx-1">
                         <div class="col-12">
                             <div class="card mb-1 border-primary border-2">
-                                <div class="card-header btn-primary">
+                                <div class="card-header bg-primary-subtle">
                                     <!--TODO icon for module.moduleType-->
                                     <h6 class="align-text-bottom" title="{{module.moduleName}} ({{module.moduleTypeName}})">
                                         <span class="icon {{module.moduleTypeIconClass}}"></span>
                                         <span>{{module.moduleName}}</span>
                                     </h6>
                                 </div>
-                                <div class="card-body bg-primary-subtle">
+                                <div class="card-body ">
                                     <div class="code" [innerHtml]="module.htmlContent"></div>
                                 </div>
                             </div>

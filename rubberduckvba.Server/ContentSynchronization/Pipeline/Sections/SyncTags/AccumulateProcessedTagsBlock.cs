@@ -1,8 +1,9 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.Data;
-using rubberduckvba.com.Server.Services;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Services;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
 
 public class AccumulateProcessedTagsBlock : TransformBlockBase<TagGraph, SyncContext, SyncContext>
 {
@@ -13,7 +14,7 @@ public class AccumulateProcessedTagsBlock : TransformBlockBase<TagGraph, SyncCon
 
     public override SyncContext Transform(TagGraph input)
     {
-        Context.StagingContext.ProcessedTags.Add(input);
+        Context.StagingContext.Tags.Add(input);
         return Context;
     }
 }

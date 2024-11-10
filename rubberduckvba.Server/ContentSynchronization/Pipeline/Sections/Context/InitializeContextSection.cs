@@ -1,12 +1,12 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
 using System.Threading.Tasks.Dataflow;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 
 public class InitializeContextSection : PipelineSection<SyncContext>
 {
-    public InitializeContextSection(IPipeline<SyncContext, bool> parent, CancellationTokenSource tokenSource, ILogger<InitializeContextSection> logger) 
+    public InitializeContextSection(IPipeline<SyncContext, bool> parent, CancellationTokenSource tokenSource, ILogger<InitializeContextSection> logger)
         : base(parent, tokenSource, logger)
     {
         ReceiveRequest = new ReceiveRequestBlock(this, tokenSource, logger);

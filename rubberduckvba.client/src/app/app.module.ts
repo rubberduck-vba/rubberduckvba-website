@@ -21,6 +21,7 @@ import { FeatureItemExampleComponent } from './components/quickfix-example.modal
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
+import { LoadingContentComponent } from './components/loading-content/loading-content.component';
 //import { httpInterceptorProviders } from './services/HttpRequestInterceptor';
 
 
@@ -38,6 +39,7 @@ import { RouterModule } from '@angular/router';
     FeatureItemBoxComponent,
     ExampleBoxComponent,
     FeatureItemExampleComponent,
+    LoadingContentComponent
   ],
   bootstrap: [AppComponent],
   imports: [

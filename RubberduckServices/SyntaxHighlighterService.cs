@@ -18,7 +18,7 @@ public interface ISyntaxHighlighterService
     /// </summary>
     /// <param name="code">A fragment of VBA code that can be parsed by Rubberduck.</param>
     /// <returns>The provided code, syntax-formatted.</returns>
-    Task<string> FormatAsync(string code);
+    string Format(string code);
 }
 
 public class SyntaxHighlighterService : ISyntaxHighlighterService
@@ -52,7 +52,7 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
         _attributeValueClass = cssAttributeValues;
     }
 
-    public async Task<string> FormatAsync(string code)
+    public string Format(string code)
     {
         var indenter = new SimpleIndenter();
 
@@ -96,10 +96,10 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
         var lines = builder.ToString().Split("\n").ToArray();
         var indent = lines.LastOrDefault()?.TakeWhile(char.IsWhiteSpace)?.Count() ?? 0;
         var formattedLines = from line in lines
-                             let trimmed = line.Substring(indent)
+                             let trimmed = line[indent..]
                              select FormatIndents(trimmed);
 
-        return await Task.FromResult(string.Join("<br/>", formattedLines));
+        return string.Join("<br/>", formattedLines);
     }
 
     private void FormatTokens(StringBuilder builder, ITokenStream tokens, IntervalListener[] listeners)
@@ -119,13 +119,13 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
                 builder.Append($"<span class=\"{listener.Class}\">{tokens.GetText(listener.Interval)}</span>");
                 i = listener.Interval.b;
             }
-            else if (listener is NewLineListener)
-            {
-                if (token.Type == VBAParser.NEWLINE)
-                {
-                    builder.Append(Environment.NewLine);
-                }
-            }
+            //else if (listener is NewLineListener)
+            //{
+            //    if (token.Type == VBAParser.NEWLINE)
+            //    {
+            //        builder.Append(Environment.NewLine);
+            //    }
+            //}
             else
             {
                 if (TokenKinds.StringLiterals.Contains(token.Type))
@@ -148,7 +148,7 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
         }
     }
 
-    private static ITokenStream Tokenize(string code)
+    private static CommonTokenStream Tokenize(string code)
     {
         AntlrInputStream input;
         using (var reader = new StringReader(code))
@@ -165,7 +165,7 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
         var indent = line.TakeWhile(char.IsWhiteSpace).Count();
         if (indent > 0)
         {
-            formatted = line.Substring(0, indent).Replace(" ", "&nbsp;") + line.Substring(indent);
+            formatted = string.Concat(line[..indent].Replace(" ", "&nbsp;"), line.AsSpan(indent));
         }
         return formatted;
     }

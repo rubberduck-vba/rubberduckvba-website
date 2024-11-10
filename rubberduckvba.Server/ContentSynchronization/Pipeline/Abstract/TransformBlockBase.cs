@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using System.Threading.Tasks.Dataflow;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 
 public abstract class TransformBlockBase<TInput, TOutput, TContext> : ExecutionDataflowBlockBase<TransformBlock<TInput, TOutput>, TInput, TContext>
     where TContext : IPipelineContext

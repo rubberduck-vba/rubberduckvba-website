@@ -1,6 +1,6 @@
-﻿using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.Model;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
+namespace rubberduckvba.Server.ContentSynchronization.XmlDoc;
 
 public class BeforeAndAfterCodeExample
 {
@@ -13,10 +13,11 @@ public class BeforeAndAfterCodeExample
     public IEnumerable<ExampleModule> ModulesBefore { get; }
     public IEnumerable<ExampleModule> ModulesAfter { get; }
 
-    public Example AsExample(string description = "", int sortOrder = 0) => new()
+    public Example AsExample(string description = "", int sortOrder = 0) => new QuickFixExample()
     {
-        Properties = description,
+        Description = description,
         SortOrder = sortOrder,
-        Modules = ModulesBefore.Concat(ModulesAfter).ToList()
+        ModulesBefore = ModulesBefore.ToList(),
+        ModulesAfter = ModulesAfter.ToList()
     };
 }

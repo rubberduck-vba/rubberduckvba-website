@@ -288,6 +288,8 @@ export interface PaginatedFeature {
 }
 
 export class FeatureViewModel {
+  parentId: number|null = null;
+
   description: string;
   features: FeatureViewModel[] = [];
 

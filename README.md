@@ -51,7 +51,7 @@ The task can be launched manually from the back-end API with an authenticated PO
 ## Update XmlDoc content
 Similarly, this job creates a TPL DataFlow pipeline that can be documented as follows:
 
-![diagram](https://github.com/user-attachments/assets/519e1d61-514f-4186-a694-4db69d7e8da9)
+![diagram](https://github.com/user-attachments/assets/dac3020c-9335-4573-b1ef-f4984cdf56b4)
 
 This pipeline hits GitHub to download the code inspections' default configuration from the **rubberduck-vba/Rubberduck** repository, fetches the current-latest tags from the database to compare against the current-latest tags from GitHub, then downloads the .xml assets and parses them into "feature items" and proceeds to merge the contents:
 - Items that exist in **next** but not **main** are considered/marked as NEW

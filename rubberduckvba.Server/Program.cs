@@ -8,21 +8,25 @@ using NLog.Config;
 using NLog.Extensions.Logging;
 using NLog.Targets;
 using RubberduckServices;
-using rubberduckvba.com.Server.Api.Admin;
-using rubberduckvba.com.Server.ContentSynchronization;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
-using rubberduckvba.com.Server.Hangfire;
-using rubberduckvba.com.Server.Services;
+using rubberduckvba.Server.Api.Admin;
+using rubberduckvba.Server.ContentSynchronization;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
+using rubberduckvba.Server.Data;
+using rubberduckvba.Server.Hangfire;
+using rubberduckvba.Server.Model.Entity;
+using rubberduckvba.Server.Services;
+using rubberduckvba.Server.Services.rubberduckdb;
+using System.Diagnostics;
 using System.Reflection;
 
-namespace rubberduckvba.com.Server;
+namespace rubberduckvba.Server;
 
 public class HangfireAuthenticationFilter : IDashboardAuthorizationFilter
 {
-    public bool Authorize([NotNull] DashboardContext context) => context.Request.RemoteIpAddress == "20.220.30.154";
+    public bool Authorize([NotNull] DashboardContext context) => Debugger.IsAttached || context.Request.RemoteIpAddress == "20.220.30.154";
 }
 
 public class Program
@@ -31,16 +35,13 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Configuration.AddJsonFile("appsettings.json");
-        builder.Configuration.AddEnvironmentVariables("ConnectionStrings");
-        builder.Configuration.AddEnvironmentVariables("GitHub");
-        builder.Configuration.AddEnvironmentVariables("Api");
-
         builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
 
         builder.Services.Configure<ConnectionSettings>(options => builder.Configuration.GetSection("ConnectionStrings").Bind(options));
         builder.Services.Configure<GitHubSettings>(options => builder.Configuration.GetSection("GitHub").Bind(options));
         builder.Services.Configure<ApiSettings>(options => builder.Configuration.GetSection("Api").Bind(options));
         builder.Services.Configure<HangfireSettings>(options => builder.Configuration.GetSection("Hangfire").Bind(options));
+
 
         builder.Services.AddAuthentication(options =>
         {
@@ -148,13 +149,25 @@ public class Program
         services.AddSingleton<ISyntaxHighlighterService, SyntaxHighlighterService>();
 
         services.AddSingleton<IRubberduckDbService, RubberduckDbService>();
-        services.AddSingleton<ISynchronizationService, SynchronizationDbService>();
+        services.AddSingleton<TagServices>();
+        services.AddSingleton<FeatureServices>();
+        services.AddSingleton<IRepository<TagEntity>, TagsRepository>();
+        services.AddSingleton<IRepository<TagAssetEntity>, TagAssetsRepository>();
+        services.AddSingleton<IRepository<FeatureEntity>, FeaturesRepository>();
+        services.AddSingleton<IRepository<InspectionEntity>, InspectionsRepository>();
+        services.AddSingleton<IRepository<QuickFixEntity>, QuickFixRepository>();
+        services.AddSingleton<IRepository<AnnotationEntity>, AnnotationsRepository>();
+
+        //services.AddSingleton<ISynchronizationService, SynchronizationDbService>();
         services.AddSingleton<IGitHubClientService, GitHubClientService>();
         services.AddSingleton<IContentOrchestrator<TagSyncRequestParameters>, InstallerDownloadStatsOrchestrator>();
         services.AddSingleton<IContentOrchestrator<XmldocSyncRequestParameters>, XmldocContentOrchestrator>();
         services.AddSingleton<ISynchronizationPipelineFactory<SyncContext>, SynchronizationPipelineFactory>();
         services.AddSingleton<IXmlDocMerge, XmlDocMerge>();
         services.AddSingleton<IStagingServices, StagingServices>();
+        services.AddSingleton<XmlDocAnnotationParser>();
+        services.AddSingleton<XmlDocQuickFixParser>();
+        services.AddSingleton<XmlDocInspectionParser>();
 
         services.AddSingleton<IDistributedCache, MemoryDistributedCache>();
         services.AddSingleton<ICacheService, CacheService>();
@@ -175,7 +188,7 @@ public class Program
             var config = new LoggingConfiguration();
 
             (NLog.LogLevel MinLevel, string, Target Target)[] targets = [
-                (NLog.LogLevel.Trace, "*", new DebuggerTarget("DebuggerLog")),
+                (NLog.LogLevel.Trace, "rubberduckvba.*", new DebuggerTarget("DebuggerLog")),
                 (NLog.LogLevel.Info, "rubberduckvba.*", new FileTarget("FileLog")
                 {
                     FileName = "logs/rubberduckvba.Server.log",

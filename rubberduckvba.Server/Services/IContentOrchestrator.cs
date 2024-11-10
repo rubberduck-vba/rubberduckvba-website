@@ -1,6 +1,6 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization;
+﻿using rubberduckvba.Server.ContentSynchronization;
 
-namespace rubberduckvba.com.Server.Services;
+namespace rubberduckvba.Server.Services;
 
 public interface IContentOrchestrator<TRequest> where TRequest : SyncRequestParameters
 {

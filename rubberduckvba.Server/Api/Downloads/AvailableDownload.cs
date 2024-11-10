@@ -1,6 +1,6 @@
-﻿using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.Model;
 
-namespace rubberduckvba.com.Server.Api.Downloads;
+namespace rubberduckvba.Server.Api.Downloads;
 
 public record class AvailableDownload
 {

@@ -1,11 +1,4 @@
-<section *ngIf="!features || features.length == 0" class="row text-center">
-    <div class="col-12">
-        <img class="ducky my-2 w-25" alt="Rubberduck logo" src="../../assets/vector-ducky-540.png" />
-    </div>
-    <div class="col-12">
-        <h3><span class="spinner-border text-primary"></span> loading...</h3>
-    </div>
-</section>
+<loading-content [show]="!features"></loading-content>
 <section *ngIf="features" class="row text-center my-3">
     <div>
         <h1>Features</h1>
@@ -14,12 +7,18 @@
     <div class="row">
         <div class="col-1"></div>
         <div class="col-10">
-            <p>Rubberduck takes inspiration from modern-day IDE features to <em>bring the VBE into this century</em> with game-changing tooling for all VBA programming skill levels. From helping Joe in Accounting with finding worksheets that have code behind them, to freelance veterans importing VBA code from source control repositories, or hobbyist programmers learning the ropes of OOP and unit testing in a language they're comfortable with - the VBE will never feel whole again without Rubberduck!</p>
+            <p>Rubberduck takes inspiration from modern-day IDE features to <em>bring the VBE into this century</em> with game-changing tooling for all skill levels.</p>
         </div>
     </div>
 
-    <div>
-        <img class="ducky my-2 w-25" alt="Rubberduck logo" src="../../assets/vector-ducky-540.png" />
+    <div class="row">
+        <div class="col-12">
+            <img class="ducky my-2 w-10" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+        </div>
+    </div>
+
+    <div class="row">
+        <h2>Your IDE is incomplete without...</h2>
     </div>
 
     <div *ngIf="features && features.length > 0">

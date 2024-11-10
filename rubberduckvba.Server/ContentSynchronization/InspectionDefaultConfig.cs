@@ -1,4 +1,4 @@
-﻿namespace rubberduckvba.com.Server.ContentSynchronization;
+﻿namespace rubberduckvba.Server.ContentSynchronization;
 
 /// <summary>
 /// Encapsulates the inspection type and default severity setting override for an inspection.

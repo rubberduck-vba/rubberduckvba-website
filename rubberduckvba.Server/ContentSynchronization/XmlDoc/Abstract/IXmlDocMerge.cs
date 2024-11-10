@@ -1,8 +1,10 @@
-﻿using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.Model;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
 
 public interface IXmlDocMerge
 {
-    IEnumerable<FeatureXmlDoc> Merge(IDictionary<string, FeatureXmlDoc> dbItems, IEnumerable<FeatureXmlDoc> main, IEnumerable<FeatureXmlDoc> next);
+    IEnumerable<Inspection> Merge(IDictionary<string, Inspection> dbItems, IEnumerable<Inspection> main, IEnumerable<Inspection> next);
+    IEnumerable<QuickFix> Merge(IDictionary<string, QuickFix> dbItems, IEnumerable<QuickFix> main, IEnumerable<QuickFix> next);
+    IEnumerable<Annotation> Merge(IDictionary<string, Annotation> dbItems, IEnumerable<Annotation> main, IEnumerable<Annotation> next);
 }

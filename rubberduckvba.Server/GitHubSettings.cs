@@ -1,6 +1,6 @@
 ﻿using Hangfire;
 
-namespace rubberduckvba.com.Server;
+namespace rubberduckvba.Server;
 
 public record class ApiSettings
 {

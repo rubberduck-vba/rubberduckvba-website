@@ -1,7 +1,6 @@
-﻿using rubberduckvba.com.Server.Data;
-using System.Text.Json;
+﻿using rubberduckvba.Server.Model;
 
-namespace rubberduckvba.com.Server.Api.Features;
+namespace rubberduckvba.Server.Api.Features;
 
 public class FeatureViewModel
 {
@@ -21,13 +20,8 @@ public class FeatureViewModel
 
         if (model is FeatureGraph graph)
         {
-            FeatureId = graph.ParentId;
-            FeatureName = graph.ParentName;
-            FeatureTitle = graph.ParentTitle;
-
-            Features = graph.Features.Select(e => new FeatureViewModel(e)).ToArray();
-            Items = graph.Items.Select(e => e with { FeatureId = graph.ParentId!.Value, FeatureName = graph.ParentName, FeatureTitle = graph.ParentTitle }).ToArray();
-            Inspections = graph.Items.Select(e => JsonSerializer.Deserialize<XmlDocInspectionInfo>(e.Serialized)!).ToArray();
+            Features = graph.Features.Select(e => new FeatureViewModel(e) { FeatureId = e.ParentId, FeatureName = graph.Name, FeatureTitle = graph.Title }).ToArray();
+            Inspections = graph.Inspections.ToArray();
         }
     }
 
@@ -36,8 +30,8 @@ public class FeatureViewModel
     public DateTime? DateUpdated { get; init; }
 
     public int? FeatureId { get; init; }
-    public string FeatureName { get; init; }
-    public string FeatureTitle { get; init; }
+    public string? FeatureName { get; init; }
+    public string? FeatureTitle { get; init; }
 
     public string Name { get; init; }
     public string Title { get; init; }
@@ -48,8 +42,7 @@ public class FeatureViewModel
     public bool HasImage { get; init; }
 
     public FeatureViewModel[] Features { get; init; } = [];
-    public FeatureXmlDoc[] Items { get; init; } = [];
-    public XmlDocInspectionInfo[] Inspections { get; init; } = [];
+    public Inspection[] Inspections { get; init; } = []; // InspectionViewModel[]
 }
 
 public class FeatureXmlDocViewModel

@@ -1,7 +1,7 @@
-﻿using rubberduckvba.com.Server.Data;
-using rubberduckvba.com.Server.Services;
+﻿using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Services;
 
-namespace rubberduckvba.com.Server.Api.Features;
+namespace rubberduckvba.Server.Api.Features;
 
 public class FeatureEditViewModel
 {
@@ -30,7 +30,7 @@ public class FeatureEditViewModel
         {
             Id = Id ?? default,
             ParentId = ParentId,
-            RepositoryId = (int)RepositoryId,
+            RepositoryId = RepositoryId,
             Name = Name,
             Title = Title,
             ShortDescription = ShortDescription,
@@ -44,8 +44,8 @@ public class FeatureEditViewModel
     {
         Id = model.Id;
         ParentId = model.ParentId;
-        RepositoryId = (RepositoryId)model.RepositoryId;
-        
+        RepositoryId = model.RepositoryId;
+
         Name = model.Name;
         Title = model.Title;
         ShortDescription = model.ShortDescription;

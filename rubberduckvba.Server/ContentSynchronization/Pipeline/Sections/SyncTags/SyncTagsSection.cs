@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks.Dataflow;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.Data;
-using rubberduckvba.com.Server.Services;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Services;
+using System.Threading.Tasks.Dataflow;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
 
 public class SyncTagsSection : PipelineSection<SyncContext>
 {
@@ -43,7 +44,7 @@ public class SyncTagsSection : PipelineSection<SyncContext>
     private BulkSaveStagingBlock SaveTags { get; }
 
     public ITargetBlock<SyncRequestParameters> InputBlock => ReceiveRequest.Block;
-    public Task OutputTask => AccumulateProcessedTags.Block.Completion;
+    public Task OutputTask => SaveTags.Block.Completion;
 
     protected override IReadOnlyDictionary<string, IDataflowBlock> Blocks => new Dictionary<string, IDataflowBlock>
     {

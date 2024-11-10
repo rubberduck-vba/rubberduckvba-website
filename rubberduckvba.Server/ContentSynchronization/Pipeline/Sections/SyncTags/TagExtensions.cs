@@ -1,6 +1,6 @@
-﻿using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.Model;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
 
 public static class TagExtensions
 {
@@ -9,9 +9,9 @@ public static class TagExtensions
         var sortedTags = tags.OrderByDescending(tag => tag.DateCreated)
             .GroupBy(tag => tag.IsPreRelease)
             .ToDictionary(grouping => grouping.Key, grouping => grouping.AsEnumerable());
- 
+
         return (
-            sortedTags[false].First(), 
+            sortedTags[false].First(),
             sortedTags[true].First(),
             sortedTags[false].Skip(1).Concat(sortedTags[true].Skip(1).ToArray())
         );

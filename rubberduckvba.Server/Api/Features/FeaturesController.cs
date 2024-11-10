@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
-using rubberduckvba.com.Server.Data;
-using rubberduckvba.com.Server.Services;
+using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Services;
+using rubberduckvba.Server.Services.rubberduckdb;
 using System.ComponentModel;
 using System.Reflection;
-using System.Text.Json;
 
-namespace rubberduckvba.com.Server.Api.Features;
+namespace rubberduckvba.Server.Api.Features;
 
 public record class MarkdownFormattingRequestViewModel
 {
@@ -18,7 +17,7 @@ public record class MarkdownFormattingRequestViewModel
 
 [ApiController]
 [AllowAnonymous]
-public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingService md, ICacheService cache) : ControllerBase
+public class FeaturesController(IRubberduckDbService db, FeatureServices features, IMarkdownFormattingService md, ICacheService cache) : ControllerBase
 {
     private static RepositoryOptionViewModel[] RepositoryOptions { get; } =
         Enum.GetValues<RepositoryId>().Select(e => new RepositoryOptionViewModel { Id = e, Name = e.ToString() }).ToArray();
@@ -48,6 +47,9 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
         return Ok(model);
     }
 
+    private static readonly IDictionary<string, string> _moduleTypeNames = typeof(ExampleModuleType).GetMembers().Where(e => e.GetCustomAttribute<DescriptionAttribute>() != null)
+        .ToDictionary(member => member.Name, member => member.GetCustomAttribute<DescriptionAttribute>()?.Description ?? member.Name);
+
     [HttpGet("features/{name}")]
     [AllowAnonymous]
     public async Task<ActionResult<FeatureViewModel>> Info([FromRoute] string name)
@@ -57,64 +59,13 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
         //    return cached;
         //}
 
-        var feature = await db.ResolveFeature(RepositoryId.Rubberduck, name);
+        var feature = features.Get(name);
         if (feature is null)
         {
             return NotFound();
         }
 
-        var moduleTypeNames = typeof(ExampleModuleType).GetMembers().Where(e => e.GetCustomAttribute<DescriptionAttribute>() != null).ToDictionary(member => member.Name, member => member.GetCustomAttribute<DescriptionAttribute>()?.Description ?? member.Name);
-
-        var model = new FeatureViewModel(feature with
-        {
-            Description = await md.FormatMarkdownDocument(feature.Description, true),
-            ShortDescription = feature.ShortDescription,
-
-            ParentId = feature.Id,
-            ParentName = feature.Name,
-            ParentTitle = feature.Title,
-
-            Features = feature.Features.Select(subFeature => subFeature with
-            {
-                Description = subFeature.Description,
-                ShortDescription = subFeature.ShortDescription
-            }).ToArray(),
-
-            Inspections = feature.Items.Select(item =>
-            {
-                var info = JsonSerializer.Deserialize<InspectionProperties>(item.Serialized)!;
-                return new XmlDocInspectionInfo
-                {
-                    Id = item.Id,
-                    DateTimeInserted = item.DateTimeInserted,
-                    DateTimeUpdated = item.DateTimeUpdated,
-                    IsDiscontinued = item.IsDiscontinued,
-                    IsHidden = item.IsHidden,
-                    IsNew = item.IsNew,
-                    Name = item.Name,
-                    Title = item.Title,
-                    SourceUrl = item.SourceUrl,
-
-                    FeatureId = feature.Id,
-                    FeatureName = feature.Name,
-                    FeatureTitle = feature.Title,
-
-                    Summary = info.Summary,
-                    Reasoning = info.Reasoning,
-                    Remarks = info.Remarks,
-                    HostApp = info.HostApp,
-                    References = info.References,
-                    InspectionType = info.InspectionType,
-                    DefaultSeverity = info.DefaultSeverity,
-                    QuickFixes = info.QuickFixes,
-                    Serialized = item.Serialized,
-                    Examples = info.Examples ?? []
-                };
-            }).ToArray(),
-
-            Items = feature.Items
-        });
-
+        var model = new FeatureViewModel(feature);
         //cache.Write(HttpContext.Request.Path, model);
         return Ok(model);
     }
@@ -124,12 +75,12 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
     public async Task<ActionResult> Resolve([FromQuery] RepositoryId repository, [FromQuery] string name)
     {
         var graph = await db.ResolveFeature(repository, name);
-        var markdown = await md.FormatMarkdownDocument(graph.Description, withSyntaxHighlighting: true);
+        var markdown = md.FormatMarkdownDocument(graph.Description, withSyntaxHighlighting: true);
         return Ok(graph with { Description = markdown });
     }
 
     [HttpGet("features/create")]
-    //[Authorize("github")]
+    [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromQuery] RepositoryId repository = RepositoryId.Rubberduck, [FromQuery] int? parentId = default)
     {
         var features = await GetFeatureOptions(repository);
@@ -140,7 +91,7 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
     }
 
     [HttpPost("create")]
-    //[Authorize("github")]
+    [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromBody] FeatureEditViewModel model)
     {
         if (model.Id.HasValue || string.IsNullOrWhiteSpace(model.Name) || model.Name.Trim().Length < 3)
@@ -162,7 +113,7 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
     }
 
     [HttpPost("features/update")]
-    //[Authorize("github")]
+    [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Update([FromBody] FeatureEditViewModel model)
     {
         if (model.Id.GetValueOrDefault() == default)
@@ -183,8 +134,8 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
     }
 
     [HttpPost("features/markdown")]
-    public async Task<ActionResult> FormatMarkdown([FromBody] MarkdownFormattingRequestViewModel model)
+    public IActionResult FormatMarkdown([FromBody] MarkdownFormattingRequestViewModel model)
     {
-        return Ok(await md.FormatMarkdownDocument(model.MarkdownContent, model.WithVbeCodeBlocks));
+        return Ok(md.FormatMarkdownDocument(model.MarkdownContent, model.WithVbeCodeBlocks));
     }
 }

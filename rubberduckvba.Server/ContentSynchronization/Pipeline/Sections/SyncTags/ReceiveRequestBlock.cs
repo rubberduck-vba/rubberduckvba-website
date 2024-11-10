@@ -1,6 +1,7 @@
-﻿using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
 
 public class ReceiveRequestBlock : TransformBlockBase<SyncRequestParameters, SyncRequestParameters, SyncContext>
 {

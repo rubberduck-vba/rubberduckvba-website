@@ -1,12 +1,13 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using System.Threading.Tasks.Dataflow;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 
 public abstract class TransformManyBlockBase<TInput, TOutput, TContext> : ExecutionDataflowBlockBase<TransformManyBlock<TInput, TOutput>, TInput, TContext>
     where TContext : IPipelineContext
 {
     protected TransformManyBlockBase(PipelineSection<TContext> parent, CancellationTokenSource tokenSource, ILogger logger)
-        : base(parent, tokenSource, logger) 
+        : base(parent, tokenSource, logger)
     {
     }
 

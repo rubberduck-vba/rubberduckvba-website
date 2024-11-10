@@ -1,7 +1,7 @@
-﻿using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.Model;
 using System.Collections.Concurrent;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.Pipeline;
+namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 
 public class StagingContext
 {
@@ -12,11 +12,9 @@ public class StagingContext
         Parameters = parameters;
     }
 
-    public ConcurrentBag<TagGraph> ProcessedTags { get; } = [];
-    public ICollection<TagGraph> NewTags { get; set; } = [];
-    public ICollection<Tag> UpdatedTags { get; set; } = [];
+    public ConcurrentBag<TagGraph> Tags { get; } = [];
 
-    public ConcurrentBag<FeatureXmlDoc> ProcessedFeatureItems { get; } = [];
-    public ICollection<FeatureXmlDoc> NewFeatureItems { get; set; } = [];
-    public ICollection<FeatureXmlDoc> UpdatedFeatureItems { get; set; } = [];
+    public ConcurrentBag<Inspection> Inspections { get; set; } = [];
+    public ConcurrentBag<QuickFix> QuickFixes { get; set; } = [];
+    public ConcurrentBag<Annotation> Annotations { get; set; } = [];
 }

@@ -4,15 +4,19 @@ using NLog.Config;
 using NLog.Extensions.Logging;
 using NLog.Targets;
 using RubberduckServices;
-using rubberduckvba.com.Server.ContentSynchronization;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline;
-using rubberduckvba.com.Server.ContentSynchronization.Pipeline.Abstract;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc;
-using rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
-using rubberduckvba.com.Server.Services;
+using rubberduckvba.Server.ContentSynchronization;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
+using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc;
+using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
+using rubberduckvba.Server.Data;
+using rubberduckvba.Server.Model.Entity;
+using rubberduckvba.Server.Services;
+using rubberduckvba.Server.Services.rubberduckdb;
 using System.Diagnostics;
+using System.Reflection;
 
-namespace rubberduckvba.com.Server.Hangfire;
+namespace rubberduckvba.Server.Hangfire;
 
 public static class QueuedUpdateOrchestrator
 {
@@ -29,7 +33,7 @@ public static class QueuedUpdateOrchestrator
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
-            //.AddUserSecrets(Assembly.GetExecutingAssembly())
+            .AddUserSecrets(Assembly.GetExecutingAssembly())
             .Build();
 
 
@@ -97,11 +101,23 @@ public static class QueuedUpdateOrchestrator
         services.AddSingleton<ISyntaxHighlighterService, SyntaxHighlighterService>();
 
         services.AddSingleton<IRubberduckDbService, RubberduckDbService>();
-        services.AddSingleton<ISynchronizationService, SynchronizationDbService>();
+        services.AddSingleton<TagServices>();
+        services.AddSingleton<FeatureServices>();
+        services.AddSingleton<IRepository<TagEntity>, TagsRepository>();
+        services.AddSingleton<IRepository<TagAssetEntity>, TagAssetsRepository>();
+        services.AddSingleton<IRepository<FeatureEntity>, FeaturesRepository>();
+        services.AddSingleton<IRepository<InspectionEntity>, InspectionsRepository>();
+        services.AddSingleton<IRepository<QuickFixEntity>, QuickFixRepository>();
+        services.AddSingleton<IRepository<AnnotationEntity>, AnnotationsRepository>();
+
         services.AddSingleton<IGitHubClientService, GitHubClientService>();
         services.AddSingleton<ISynchronizationPipelineFactory<SyncContext>, SynchronizationPipelineFactory>();
         services.AddSingleton<IXmlDocMerge, XmlDocMerge>();
         services.AddSingleton<IStagingServices, StagingServices>();
+
+        services.AddSingleton<XmlDocAnnotationParser>();
+        services.AddSingleton<XmlDocQuickFixParser>();
+        services.AddSingleton<XmlDocInspectionParser>();
     }
 
     private static async Task Run<TParameters>(IServiceCollection services, PerformContext context, TParameters parameters)

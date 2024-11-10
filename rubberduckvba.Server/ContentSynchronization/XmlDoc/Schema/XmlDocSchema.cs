@@ -1,4 +1,4 @@
-﻿namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Schema;
+﻿namespace rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
 
 public static class XmlDocSchema
 {
@@ -61,6 +61,7 @@ public static class XmlDocSchema
         public static class Summary
         {
             public static readonly string ElementName = "summary";
+            public static readonly string IsHiddenAttribute = "hidden";
         }
 
         public static class Remarks
@@ -74,6 +75,8 @@ public static class XmlDocSchema
             public static readonly string ProcedureAttribute = "procedure";
             public static readonly string ModuleAttribute = "module";
             public static readonly string ProjectAttribute = "project";
+            public static readonly string MultipleAttribute = "multiple";
+            public static readonly string AllAttribute = "all";
         }
 
         public static class Inspections
@@ -122,6 +125,7 @@ public static class XmlDocSchema
         public static class Summary
         {
             public static readonly string ElementName = "summary";
+            public static readonly string IsHiddenAttribute = "hidden";
         }
 
         public static class Remarks
@@ -134,6 +138,7 @@ public static class XmlDocSchema
             public static readonly string ElementName = "parameter";
             public static readonly string NameAttribute = "name";
             public static readonly string TypeAttribute = "type";
+            public static readonly string RequiredAttribute = "required";
         }
 
         public static class Example

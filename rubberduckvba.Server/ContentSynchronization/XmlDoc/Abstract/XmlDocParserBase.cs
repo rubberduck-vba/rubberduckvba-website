@@ -1,7 +1,7 @@
-﻿using System.Xml.Linq;
-using rubberduckvba.com.Server.Data;
+﻿using rubberduckvba.Server.Model;
+using System.Xml.Linq;
 
-namespace rubberduckvba.com.Server.ContentSynchronization.XmlDoc.Abstract;
+namespace rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
 
 public abstract class XmlDocParserBase : IXmlDocParser
 {
@@ -12,11 +12,11 @@ public abstract class XmlDocParserBase : IXmlDocParser
 
     public string AssetName { get; }
 
-    public async Task<IEnumerable<FeatureXmlDoc>> ParseAsync(TagGraph tag)
+    public async Task<XDocument> GetTagAssetXDocumentAsync(TagGraph tag)
     {
         if (tag is null)
         {
-            return Enumerable.Empty<FeatureXmlDoc>();
+            throw new ArgumentNullException(nameof(tag));
         }
 
         var asset = tag.Assets.SingleOrDefault(a => a.Name.Contains(AssetName))
@@ -27,34 +27,29 @@ public abstract class XmlDocParserBase : IXmlDocParser
             throw new UriFormatException($"Unexpected host in download URL '{uri}' from asset ID {asset.Id} (tag ID {tag.Id}, '{tag.Name}').");
         }
 
-        using (var client = new HttpClient())
-        using (var response = await client.GetAsync(uri))
-        {
-            if (response.IsSuccessStatusCode)
-            {
-                XDocument document;
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                {
-                    document = XDocument.Load(stream, LoadOptions.None);
-                }
-                var items = await ParseAsync(asset.Id, tag.Name, document, tag.IsPreRelease);
-                return items;
-            }
-        }
+        using var client = new HttpClient();
+        using var response = await client.GetAsync(uri);
 
-        return Enumerable.Empty<FeatureXmlDoc>();
+        response.EnsureSuccessStatusCode();
+        using var stream = await response.Content.ReadAsStreamAsync();
+
+        return XDocument.Load(stream, LoadOptions.None);
     }
 
-    protected abstract Task<IEnumerable<FeatureXmlDoc>> ParseAsync(int assetId, string tagName, XDocument document, bool isPreRelease);
-
-    protected static string GetFullTypeNameOrDefault(XElement memberNode, string suffix)
+    protected static string? GetFullTypeNameOrDefault(XElement memberNode, string suffix)
     {
         var name = memberNode.Attribute("name")?.Value;
-        if (name == null || !name.StartsWith("T:") || !name.EndsWith(suffix))
+        if (name is null || !name.StartsWith("T:") || !name.EndsWith(suffix))
         {
             return default;
         }
 
-        return name.Substring(2);
+        return name[2..];
     }
+
+    public virtual IEnumerable<Inspection> ParseInspections(XDocument document) => [];
+
+    public virtual IEnumerable<QuickFix> ParseQuickFixes(XDocument document) => [];
+
+    public virtual IEnumerable<Annotation> ParseAnnotations(XDocument document) => [];
 }

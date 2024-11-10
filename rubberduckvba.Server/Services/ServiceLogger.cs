@@ -1,3 +1,3 @@
-﻿namespace rubberduckvba.com.Server.Services;
+﻿namespace rubberduckvba.Server.Services;
 
 public class ServiceLogger { }

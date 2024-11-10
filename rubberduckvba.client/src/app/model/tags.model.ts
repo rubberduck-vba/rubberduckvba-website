@@ -9,8 +9,8 @@ export interface Tag {
   name: string;
   installerDownloadUrl: string;
   installerDownloads: number;
-  dateCreated: Date;
-  dateTimeUpdated: Date;
+  dateCreated: string;
+  dateTimeUpdated: string;
   isPreRelease: boolean;
 }
 

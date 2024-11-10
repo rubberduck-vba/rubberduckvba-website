@@ -7,7 +7,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Ink Free';
+  font-family: 'Ink Free', 'Acme';
   font-weight: bold;
 }
 
@@ -20,7 +20,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .modal-header {
-  font-family: 'Ink Free';
+  font-family: 'Ink Free', 'Acme';
   font-weight: bold;
 }
 
@@ -71,3 +71,4 @@ a {
   color: midnightblue;
   background-color: #1e90ff1b;
 }
+
