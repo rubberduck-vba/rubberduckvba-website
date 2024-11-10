@@ -9,6 +9,7 @@ public class FeaturesRepository : Repository<FeatureEntity>, IRepository<Feature
         : base(settings) { }
 
     protected override string TableName { get; } = "Features";
+    protected override string? ParentFKColumnName { get; } = "ParentId";
 
     protected override string SelectSql { get; } = @"
 SELECT 

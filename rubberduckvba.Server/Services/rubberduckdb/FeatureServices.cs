@@ -22,6 +22,7 @@ public class FeatureServices(
     {
         var id = featureRepository.GetId(name);
         var feature = featureRepository.GetById(id);
+        var children = featureRepository.GetAll(parentId: id).Select(e => new Feature(e));
 
         IEnumerable<Inspection> inspections = [];
         IEnumerable<QuickFix> quickfixes = [];
@@ -42,6 +43,7 @@ public class FeatureServices(
 
         return new FeatureGraph(feature)
         {
+            Features = children,
             Annotations = annotations,
             QuickFixes = quickfixes,
             Inspections = inspections,

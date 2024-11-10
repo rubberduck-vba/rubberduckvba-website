@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using rubberduckvba.Server.Model;
 using rubberduckvba.Server.Services;
+using rubberduckvba.Server.Services.rubberduckdb;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -16,7 +17,7 @@ public record class MarkdownFormattingRequestViewModel
 
 [ApiController]
 [AllowAnonymous]
-public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingService md, ICacheService cache) : ControllerBase
+public class FeaturesController(IRubberduckDbService db, FeatureServices features, IMarkdownFormattingService md, ICacheService cache) : ControllerBase
 {
     private static RepositoryOptionViewModel[] RepositoryOptions { get; } =
         Enum.GetValues<RepositoryId>().Select(e => new RepositoryOptionViewModel { Id = e, Name = e.ToString() }).ToArray();
@@ -58,32 +59,13 @@ public class FeaturesController(IRubberduckDbService db, IMarkdownFormattingServ
         //    return cached;
         //}
 
-        var feature = await db.ResolveFeature(RepositoryId.Rubberduck, name);
+        var feature = features.Get(name);
         if (feature is null)
         {
             return NotFound();
         }
 
-        var model = new FeatureViewModel(feature with
-        {
-            Description = feature.Description,
-            ShortDescription = feature.ShortDescription,
-
-            ParentId = feature.Id,
-            ParentName = feature.Name,
-            ParentTitle = feature.Title,
-
-            Features = feature.Features.Select(subFeature => subFeature with
-            {
-                Description = subFeature.Description,
-                ShortDescription = subFeature.ShortDescription
-            }).ToArray(),
-
-            Inspections = feature.Inspections,
-            QuickFixes = feature.QuickFixes,
-            Annotations = feature.Annotations,
-        });
-
+        var model = new FeatureViewModel(feature);
         //cache.Write(HttpContext.Request.Path, model);
         return Ok(model);
     }

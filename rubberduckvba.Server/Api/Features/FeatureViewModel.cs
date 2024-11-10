@@ -20,11 +20,7 @@ public class FeatureViewModel
 
         if (model is FeatureGraph graph)
         {
-            FeatureId = graph.ParentId;
-            FeatureName = graph.ParentName;
-            FeatureTitle = graph.ParentTitle;
-
-            Features = graph.Features.Select(e => new FeatureViewModel(e)).ToArray();
+            Features = graph.Features.Select(e => new FeatureViewModel(e) { FeatureId = e.ParentId, FeatureName = graph.Name, FeatureTitle = graph.Title }).ToArray();
             Inspections = graph.Inspections.ToArray();
         }
     }
@@ -34,8 +30,8 @@ public class FeatureViewModel
     public DateTime? DateUpdated { get; init; }
 
     public int? FeatureId { get; init; }
-    public string FeatureName { get; init; }
-    public string FeatureTitle { get; init; }
+    public string? FeatureName { get; init; }
+    public string? FeatureTitle { get; init; }
 
     public string Name { get; init; }
     public string Title { get; init; }
