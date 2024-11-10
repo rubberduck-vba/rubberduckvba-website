@@ -35,8 +35,8 @@ jobs:
     steps:
       - name: Deploy to IIS
         run: |
-            stop-webapppool rubberduckvba
-            stop-iissite -Name api -Confirm: $false
-            Copy-Item ${{env.DOTNET_ROOT}}\pub\* C:/inetpub/wwwroot -Recurse -Force 
+            stop-webapppool -name "rubberduckvba"
+            stop-iissite -name api -confirm: $false
+            copy-item C:/pub/* C:/inetpub/wwwroot -Recurse -Force 
             start-webapppool rubberduckvba
             start-iissite api
