@@ -50,7 +50,7 @@
                                     </div>
                                     <div class="col-10">
                                         <h5>
-                                            <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{inspectionInfo.InspectionType}}
+                                            <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{inspectionInfo.inspectionType}}
                                         </h5>
                                     </div>
                                     <div class="col-1">
@@ -60,44 +60,44 @@
                                     <div class="col-1">
                                     </div>
                                     <div class="col-10">
-                                        Default Severity: <strong>{{inspectionInfo.DefaultSeverity}}</strong>
+                                        Default Severity: <strong>{{inspectionInfo.defaultSeverity}}</strong>
                                         <p class="small text-black-50">{{severityTitle}}</p>
                                     </div>
                                     <div class="col-1">
                                     </div>
                                 </div>
-                                <div *ngIf="inspectionInfo.HostApp.length > 0" class="row">
+                                <div *ngIf="(inspectionInfo.hostApp?.length ?? 0) > 0" class="row">
                                     <div class="col-1"></div>
                                     <div class="col-11">
-                                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when hosted in <strong>{{inspectionInfo.HostApp}}</strong>.</p>
+                                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when hosted in <strong>{{inspectionInfo.hostApp}}</strong>.</p>
                                     </div>
                                 </div>
-                                <div *ngIf="inspectionInfo.References.length == 1" class="row">
+                                <div *ngIf="inspectionInfo.references.length == 1" class="row">
                                     <div class="col-1"></div>
                                     <div class="col-11">
-                                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when the <strong>{{inspectionInfo.References[0]}}</strong> library is referenced.</p>
+                                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when the <strong>{{inspectionInfo.references[0]}}</strong> library is referenced.</p>
                                     </div>
                                 </div>
-                                <div *ngIf="inspectionInfo.References.length > 1" class="row">
+                                <div *ngIf="inspectionInfo.references.length > 1" class="row">
                                     <div class="col-1"></div>
                                     <div class="col-11">
                                         <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when any of the following libraries is referenced:</p>
                                         <ul>
-                                            <li *ngFor="let library of this.inspectionInfo.References">{{library}}</li>
+                                            <li *ngFor="let library of this.inspectionInfo.references">{{library}}</li>
                                         </ul>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-1">
                                     </div>
-                                    <div *ngIf="inspectionInfo.QuickFixes.length > 0" class="col-10">
+                                    <div *ngIf="inspectionInfo.quickFixes.length > 0" class="col-10">
                                         <hr/>
                                         <h5>
                                             <fa-icon [icon]="'wand-magic-sparkles'"></fa-icon>&nbsp;QuickFixes
                                         </h5>
                                         <p class="small">This inspection offers the following fixes:</p>
                                         <ul class="list-unstyled ms-2">
-                                            <li *ngFor="let fix of this.inspectionInfo.QuickFixes" class="my-1">
+                                            <li *ngFor="let fix of this.inspectionInfo.quickFixes" class="my-1">
                                                 <a class="text-decoration-none" href="/features/quickfixes/{{fix}}">
                                                     <div class="card-highlight rounded-4 p-2">
                                                         <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.replace('QuickFix','')}}</h6>
@@ -116,22 +116,22 @@
                                     <div class="col-11">
                                         <div class="p-2">
                                             <h5>Reasoning</h5>
-                                            <p [innerHtml]="inspectionInfo.Reasoning"></p>
+                                            <p [innerHtml]="inspectionInfo.reasoning"></p>
                                         </div>
                                     </div>
                                     <div class="col-1"></div>
                                 </div>
                             </div>
                         </div>
-                        <div *ngIf="inspectionInfo.Remarks && inspectionInfo.Remarks.length > 0" class="row">
+                        <div *ngIf="inspectionInfo.remarks && inspectionInfo.remarks.length > 0" class="row">
                             <div class="alert alert-info bg-light-subtle mt-2 col-12">
                                 <h5>Remarks</h5>
-                                <p [innerHtml]="inspectionInfo.Remarks"></p>
+                                <p [innerHtml]="inspectionInfo.remarks"></p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div *ngIf="((inspectionInfo.Examples && inspectionInfo.Examples.length > 0) || (item.info.parameters && item.info.parameters.length > 0) || (inspectionInfo.QuickFixes.length > 0))"
+                <div *ngIf="((inspectionInfo.examples && inspectionInfo.examples.length > 0) || (annotationInfo?.parameters?.length ?? 0) > 0 || (inspectionInfo.quickFixes.length > 0))"
                      class="row my-3">
                     <div class="col-1"></div>
                     <div class="col-10 text-center">
@@ -150,8 +150,8 @@
                     <div class="row">
                         <div class="col-1"></div>
                         <div class="col-10">
-                            <div id="inspectionInfoBody" *ngIf="item.examples">
-                                <div *ngFor="let example of item.examples">
+                            <div id="inspectionInfoBody" *ngIf="isInspectionInfo">
+                                <div *ngFor="let example of inspectionInfo.examples">
                                     <example-box [inspectionExample]="example"></example-box>
                                 </div>
                             </div>
@@ -162,7 +162,7 @@
             </div>
             <div class="row">
                 <div class="small text-muted">
-                    <p><a href="{{item.getGitHubViewLink()}}">View</a> | <a href="{{item.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub</p>
+                    <!--p><a href="{{item.getGitHubViewLink()}}">View</a> | <a href="{{item.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub</p-->
                 </div>
             </div>
         </div>

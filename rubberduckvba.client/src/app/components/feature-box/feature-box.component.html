@@ -3,23 +3,23 @@
         <div class="card-body">
 
             <div class="row" *ngIf="!feature.hasImage">
-                <div *ngIf="feature.parentId || !hasOwnDetailsPage" class="col-1"></div>
-                <div [ngClass]="feature.parentId || !hasOwnDetailsPage ? 'col-10' : 'col-6'">
+                <div *ngIf="feature.featureId || !hasOwnDetailsPage" class="col-1"></div>
+                <div [ngClass]="feature.featureId || !hasOwnDetailsPage ? 'col-10' : 'col-6'">
                     <h4>{{feature.title}}</h4>
                     <p [innerHtml]="feature.shortDescription"></p>
                     <a *ngIf="hasOwnDetailsPage" role="button" class="btn btn-outline-dark btn-ducky rounded-pill mt-4" href="features/{{feature.name.toLowerCase()}}">
                         <span>Details ▸</span>
                     </a>
-                    <div *ngIf="feature.parentId || !hasOwnDetailsPage" class="col-1"></div>
+                    <div *ngIf="feature.featureId || !hasOwnDetailsPage" class="col-1"></div>
                 </div>
             </div>
 
             <div class="row" *ngIf="feature.hasImage">
-                <div [ngClass]="feature.parentId || !hasOwnDetailsPage ? 'col-6' : 'col-12'">
+                <div [ngClass]="feature.featureId || !hasOwnDetailsPage ? 'col-6' : 'col-12'">
                     <h4>{{feature.title}}</h4>
                     <p [innerHtml]="feature.shortDescription"></p>
                 </div>
-                <div [ngClass]="feature.parentId  || !hasOwnDetailsPage ? 'col-6' : 'col-12'">
+                <div [ngClass]="feature.featureId  || !hasOwnDetailsPage ? 'col-6' : 'col-12'">
                     <img alt="{{feature.title}}" src='../../../assets/{{feature.name.toLowerCase()}}.gif' class="img-fluid" />
                 </div>
                 <div class="text-center">

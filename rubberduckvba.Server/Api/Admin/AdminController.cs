@@ -55,5 +55,4 @@ public record class ConfigurationOptions(
     IOptions<GitHubSettings> GitHubOptions,
     IOptions<HangfireSettings> HangfireOptions)
 {
-
 }

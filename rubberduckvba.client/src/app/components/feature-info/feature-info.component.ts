@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { Feature, FeatureItem, FeatureItemViewModel, FeatureViewModel, InspectionInfoViewModel, QuickFixViewModel } from '../../model/feature.model';
+import { AnnotationsFeatureViewModel, FeatureViewModel, InspectionViewModel, InspectionsFeatureViewModel, QuickFixViewModel, QuickFixesFeatureViewModel, XmlDocItemViewModel, XmlDocOrFeatureViewModel, XmlDocViewModel } from '../../model/feature.model';
 import { BehaviorSubject } from 'rxjs';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -11,7 +11,7 @@ import { ApiClientService } from '../../services/api-client.service';
 })
 export class FeatureInfoComponent implements OnInit, OnChanges {
 
-  private readonly _info: BehaviorSubject<FeatureViewModel> = new BehaviorSubject<FeatureViewModel>(null!);
+  private readonly _info: BehaviorSubject<XmlDocOrFeatureViewModel> = new BehaviorSubject<XmlDocOrFeatureViewModel>(null!);
 
   public filterState = {
     filterText: '',
@@ -23,32 +23,40 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
   };
 
   @Input()
-  public set feature(value: FeatureViewModel | undefined) {
+  public set feature(value: XmlDocOrFeatureViewModel | undefined) {
     if (value != null) {
       this._info.next(value);
       this.filterByNameOrDescription(this.filterState.filterText)
     }
   }
 
-  private _filteredItems: FeatureItemViewModel[] = [];
-  public get filteredItems(): FeatureItemViewModel[] {
+  private _filteredItems: XmlDocItemViewModel[] = [];
+  public get filteredItems(): XmlDocItemViewModel[] {
     return this._filteredItems;
   }
 
-  public get feature(): FeatureViewModel | undefined {
+  public get feature(): XmlDocOrFeatureViewModel | undefined {
     return this._info.value;
   }
 
-  private readonly _quickfixes: BehaviorSubject<FeatureItem[]> = new BehaviorSubject<FeatureItem[]>(null!);
+  public get inspectionItems(): InspectionViewModel[] {
+    return (this.feature as InspectionsFeatureViewModel).inspections ?? [];
+  }
+
+  private readonly _quickfixes: BehaviorSubject<QuickFixViewModel[]> = new BehaviorSubject<QuickFixViewModel[]>(null!);
+
+  public get subfeatures(): FeatureViewModel[] {
+    return (this.feature as FeatureViewModel).features
+  }
 
   @Input()
-  public set quickFixes(value: FeatureItem[]) {
+  public set quickFixes(value: QuickFixViewModel[]) {
     if (value != null) {
       this._quickfixes.next(value);
     }
   }
 
-  public get quickFixes(): FeatureItem[] {
+  public get quickFixes(): QuickFixViewModel[] {
     return this._quickfixes.value;
   }
 
@@ -57,9 +65,9 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    this.api.getFeature('QuickFixes').subscribe(result => {
+    this.api.getFeature('quickfixes').subscribe(result => {
       if (result) {
-        this._quickfixes.next(result.items.slice());
+        this._quickfixes.next((result as QuickFixesFeatureViewModel).quickFixes.slice());
       }
     });
   }
@@ -74,7 +82,7 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
 
   private onSeverityFilter(): void {
     this._filteredItems = this._filteredItems.filter(item => {
-      const vm = <InspectionInfoViewModel>item.info;
+      const vm = <InspectionViewModel>item;
       if (vm.isHidden /* !this.filterState.showHiddenStuff? */) {
         return false;
       }
@@ -100,8 +108,14 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
 
   private filterByNameOrDescription(filter: string) {
     const contains = (value: string, filter: string): boolean => value ? value.toLowerCase().indexOf(filter.toLowerCase()) >= 0 : false;
-    this._filteredItems = this.feature
-      ? this.feature.items.filter(item => filter === ''
+
+    const features = (this.feature as InspectionsFeatureViewModel).inspections
+                  || (this.feature as QuickFixesFeatureViewModel).quickFixes
+                  || (this.feature as AnnotationsFeatureViewModel).annotations
+                  || (this.feature as FeatureViewModel).features;
+
+    this._filteredItems = features != undefined
+      ? features.filter(item => filter === ''
         || contains(item.name, filter)
         || contains(item.summary, filter)
         || contains(item.reasoning, filter)

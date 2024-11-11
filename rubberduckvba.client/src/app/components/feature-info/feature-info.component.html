@@ -10,22 +10,22 @@
     </div>
 </section>
 
-<section *ngIf="(feature?.features?.length ?? 0) > 0 || (feature?.items?.length ?? 0) > 0" class="row text-center mb-3">
+<section *ngIf="(subfeatures.length ?? 0) > 0 || (inspectionItems.length ?? 0) > 0" class="row text-center mb-3">
     <div class="col-12">
         <img class="ducky my-2 w-10" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
     </div>
 </section>
 <section class="row">
     <!-- subfeatures -->
-    <div *ngIf="feature != null && (feature.features?.length ?? 0) > 0" class="col-12">
-        <div *ngFor="let subFeature of feature?.features">
+    <div *ngIf="feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0" class="col-12">
+        <div *ngFor="let subFeature of subfeatures">
             <feature-box *ngIf="!feature.isHidden" [parentFeatureName]="feature.name" [feature]="subFeature" [quickFixes]="quickFixes" [hasOwnDetailsPage]="subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations'"></feature-box>
         </div>
     </div>
     <!-- xmldoc items -->
-    <div *ngIf="(feature?.items?.length ?? 0) > 0" class="col-12">
+    <div *ngIf="(inspectionItems.length ?? 0) > 0" class="col-12">
         <h3>Search &amp; Filter</h3>
-        <small class="small text-black-50">Showing {{filteredItems.length}} of {{feature!.items.length}} items</small>
+        <small class="small text-black-50">Showing {{filteredItems.length}} of {{inspectionItems.length}} items</small>
         <div class="row my-3">
             <div class="col-8">
                 <div *ngIf="feature?.name == 'Inspections'" class="text-start">

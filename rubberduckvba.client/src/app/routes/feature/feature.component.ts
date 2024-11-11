@@ -3,7 +3,7 @@ import { ApiClientService } from "../../services/api-client.service";
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { BehaviorSubject, switchMap } from 'rxjs';
-import { Feature, FeatureViewModel } from '../../model/feature.model';
+import { FeatureViewModel } from '../../model/feature.model';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -32,7 +32,7 @@ export class FeatureComponent implements OnInit {
         const name = params.get('name')!;
         return this.api.getFeature(name);
       })).subscribe(e => {
-        this.feature = new FeatureViewModel(e);
+        this.feature = e as FeatureViewModel;
       });
   }
 }

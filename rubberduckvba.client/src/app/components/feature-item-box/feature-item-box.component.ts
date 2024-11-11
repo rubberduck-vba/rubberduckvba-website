@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges, TemplateRef, ViewChild, inject } from '@angular/core';
-import { AnnotationFeatureItem, AnnotationInfo, FeatureItem, FeatureItemViewModel, InspectionInfo, QuickFixInfo, QuickFixViewModel } from '../../model/feature.model';
+import { AnnotationViewModel, InspectionViewModel, QuickFixViewModel, XmlDocItemViewModel } from '../../model/feature.model';
 import { BehaviorSubject } from 'rxjs';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -11,13 +11,13 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class FeatureItemBoxComponent implements OnInit, OnChanges {
 
-  private readonly _info: BehaviorSubject<FeatureItemViewModel> = new BehaviorSubject<FeatureItemViewModel>(null!);
-  private readonly _inspectionInfo: BehaviorSubject<InspectionInfo> = new BehaviorSubject<InspectionInfo>(null!);
-  private readonly _quickfixInfo: BehaviorSubject<QuickFixInfo> = new BehaviorSubject<QuickFixInfo>(null!);
-  private readonly _annotationInfo: BehaviorSubject<AnnotationInfo> = new BehaviorSubject<AnnotationInfo>(null!);
+  private readonly _info: BehaviorSubject<XmlDocItemViewModel> = new BehaviorSubject<XmlDocItemViewModel>(null!);
+  private readonly _inspectionInfo: BehaviorSubject<InspectionViewModel> = new BehaviorSubject<InspectionViewModel>(null!);
+  private readonly _quickfixInfo: BehaviorSubject<QuickFixViewModel> = new BehaviorSubject<QuickFixViewModel>(null!);
+  private readonly _annotationInfo: BehaviorSubject<AnnotationViewModel> = new BehaviorSubject<AnnotationViewModel>(null!);
 
-  private readonly _quickfixes: BehaviorSubject<FeatureItem[]> = new BehaviorSubject<FeatureItem[]>(null!);
-  private _quickfixMap: Map<string, FeatureItem> = null!;
+  private readonly _quickfixes: BehaviorSubject<QuickFixViewModel[]> = new BehaviorSubject<QuickFixViewModel[]>(null!);
+  private _quickfixMap: Map<string, QuickFixViewModel> = null!;
 
   constructor(private fa: FaIconLibrary) {
     fa.addIconPacks(fas);
@@ -42,23 +42,23 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
     }
   }
 
-  private getQuickFixItem(item: FeatureItem): FeatureItem {
+  private getQuickFixItem(item: QuickFixViewModel): QuickFixViewModel {
     item.title = item.name.replace('QuickFix', '');
     
     return item;
   }
 
-  public get quickFixes(): FeatureItem[] {
+  public get quickFixes(): QuickFixViewModel[] {
     return this._quickfixes.value;
   }
 
   @Input()
-  public set item(value: FeatureItemViewModel) {
+  public set item(value: XmlDocItemViewModel) {
     if (value != null) {
       this._info.next(value);
 
       if (value.featureName == 'Inspections') {
-        this._inspectionInfo.next(JSON.parse(value.serialized));
+        this._inspectionInfo.next(value as InspectionViewModel);
         this.isInspectionInfo = true;
         if (this.item.isNew) {
           console.log(this.item);
@@ -66,22 +66,22 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
       }
 
       if (value.featureName == 'QuickFixes') {
-        this._quickfixInfo.next(value.info as QuickFixInfo);
+        this._quickfixInfo.next(value as QuickFixViewModel);
         this.isQuickfixInfo = true;
       }
 
       if (value.featureName == 'Annotations') {
-        this._annotationInfo.next(value.info as AnnotationInfo);
+        this._annotationInfo.next(value as AnnotationViewModel);
         this.isAnnotationInfo = true;
       }
     }
   }
 
-  public get item(): FeatureItemViewModel {
+  public get item(): XmlDocItemViewModel {
     return this._info.value;
   }
 
-  public getQuickFix(name: string): FeatureItem {
+  public getQuickFix(name: string): QuickFixViewModel {
     if (this._quickfixMap) {
       return this._quickfixMap.get(name)!;
     }
@@ -89,7 +89,7 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
   }
 
   public showQuickFixModal(name: string): void {
-    this.quickFixVM = new QuickFixViewModel(this.getQuickFix(name)!);
+    this.quickFixVM = this.getQuickFix(name);
     this.modal.open(this.content)
   }
 
@@ -98,7 +98,7 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
   }
 
   isInspectionInfo: boolean = false;
-  public get inspectionInfo(): InspectionInfo | undefined {
+  public get inspectionInfo(): InspectionViewModel | undefined {
     if (!this.isInspectionInfo) {
       return undefined;
     }
@@ -106,7 +106,7 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
   }
 
   public get severityTitle(): string {
-    switch (this.inspectionInfo?.DefaultSeverity) {
+    switch (this.inspectionInfo?.defaultSeverity) {
       case 'DoNotShow':
         return 'Inspections at this severity level are disabled until/unless configured differently.';
       case 'Hint':
@@ -123,7 +123,7 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
   }
 
   isQuickfixInfo: boolean = false;
-  public get quickfixInfo(): QuickFixInfo | undefined {
+  public get quickfixInfo(): QuickFixViewModel | undefined {
     if (!this.isQuickfixInfo) {
       return undefined;
     }
@@ -131,7 +131,7 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
   }
 
   isAnnotationInfo: boolean = false;
-  public get annotationInfo(): AnnotationInfo | undefined {
+  public get annotationInfo(): AnnotationViewModel | undefined {
     if (!this.isAnnotationInfo) {
       return undefined;
     }

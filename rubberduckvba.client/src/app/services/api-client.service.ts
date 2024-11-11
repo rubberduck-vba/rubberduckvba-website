@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { LatestTags, Tag } from "../model/tags.model";
-import { Feature, FeatureSummary, PaginatedFeature } from "../model/feature.model";
+import { AnnotationsFeatureViewModel, FeatureViewModel, InspectionsFeatureViewModel, QuickFixViewModel, QuickFixesFeatureViewModel, SubFeatureViewModel } from "../model/feature.model";
 import { DownloadInfo } from "../model/downloads.model";
 import { DataService } from "./data.service";
 import { environment } from "../../environments/environment.prod";
@@ -21,31 +21,23 @@ export class ApiClientService {
     return this.data.getAsync<LatestTags>(`${environment.apiBaseUrl}tags/latest`);
   }
 
-  public getFeatureSummaries(): Observable<FeatureSummary[]> {
-    return this.data.getAsync<FeatureSummary[]>(`${environment.apiBaseUrl}features`);
+  public getFeatureSummaries(): Observable<FeatureViewModel[]> {
+    return this.data.getAsync<FeatureViewModel[]>(`${environment.apiBaseUrl}features`);
   }
 
-  public getFeature(name: string): Observable<Feature> {
-    return this.data.getAsync<any>(`${environment.apiBaseUrl}features/${name}`);
-  }
+  public getFeature(name: string): Observable<SubFeatureViewModel|InspectionsFeatureViewModel|QuickFixesFeatureViewModel|AnnotationsFeatureViewModel> {
+    const url = `${environment.apiBaseUrl}features/${name}`;
+    const featureName = name.toLowerCase();
 
-  public getMarkdown(value: string, syntaxHighlighting: boolean): Observable<MarkdownFormattingInfo> {
-    const payload = new MarkdownFormattingViewModel(value, syntaxHighlighting);
-    return this.data.postAsync(`${environment.apiBaseUrl}features/markdown`, payload);
-  }
-}
-
-export interface MarkdownFormattingInfo {
-  markdownContent: string;
-  withVbeCodeBlocks: boolean;
-}
-
-export class MarkdownFormattingViewModel implements MarkdownFormattingInfo {
-  public markdownContent: string = '';
-  public withVbeCodeBlocks: boolean = false;
-
-  constructor(content: string, syntax: boolean) {
-    this.markdownContent = content;
-    this.withVbeCodeBlocks = syntax;
+    switch (featureName) {
+      case "inspections":
+        return this.data.getAsync<InspectionsFeatureViewModel>(url);
+      case "quickfixes":
+        return this.data.getAsync<QuickFixesFeatureViewModel>(url);
+      case "annotations":
+        return this.data.getAsync<AnnotationsFeatureViewModel>(url);
+      default:
+        return this.data.getAsync<SubFeatureViewModel>(`${environment.apiBaseUrl}features/${name}`);
+    }
   }
 }

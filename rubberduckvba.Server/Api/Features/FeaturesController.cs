@@ -17,7 +17,7 @@ public record class MarkdownFormattingRequestViewModel
 
 [ApiController]
 [AllowAnonymous]
-public class FeaturesController(IRubberduckDbService db, FeatureServices features, IMarkdownFormattingService md, ICacheService cache) : ControllerBase
+public class FeaturesController(IRubberduckDbService db, FeatureServices features, FeatureViewModelFactory vmFactory, IMarkdownFormattingService md, ICacheService cache) : ControllerBase
 {
     private static RepositoryOptionViewModel[] RepositoryOptions { get; } =
         Enum.GetValues<RepositoryId>().Select(e => new RepositoryOptionViewModel { Id = e, Name = e.ToString() }).ToArray();
@@ -26,13 +26,19 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
         await db.GetTopLevelFeatures(repositoryId)
             .ContinueWith(t => t.Result.Select(e => new FeatureOptionViewModel { Id = e.Id, Name = e.Name, Title = e.Title }).ToArray());
 
+    private bool TryGetCachedContent(out string key, out object cached)
+    {
+        key = HttpContext.Request.Path;
+        return cache.TryGet(key, out cached);
+    }
+
     [HttpGet("features")]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<FeatureViewModel>>> Index()
+    public async Task<IActionResult> Index()
     {
-        //if (cache.TryGet<FeatureViewModel[]>(HttpContext.Request.Path, out var cached))
+        //if (TryGetCachedContent(out var key, out var cached))
         //{
-        //    return cached;
+        //    return Ok(cached);
         //}
 
         var features = await db.GetTopLevelFeatures(RepositoryId.Rubberduck);
@@ -41,8 +47,8 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
             return NoContent();
         }
 
-        var model = features.Select(feature => new FeatureViewModel(feature)).ToArray();
-        //cache.Write(HttpContext.Request.Path, model);
+        var model = vmFactory.Create(features);
+        //cache.Write(key, model);
 
         return Ok(model);
     }
@@ -52,12 +58,12 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
 
     [HttpGet("features/{name}")]
     [AllowAnonymous]
-    public async Task<ActionResult<FeatureViewModel>> Info([FromRoute] string name)
+    public IActionResult Info([FromRoute] string name)
     {
-        //if (cache.TryGet<FeatureViewModel>(HttpContext.Request.Path, out var cached))
-        //{
-        //    return cached;
-        //}
+        if (TryGetCachedContent(out var key, out var cached))
+        {
+            return Ok(cached);
+        }
 
         var feature = features.Get(name);
         if (feature is null)
@@ -65,8 +71,9 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
             return NotFound();
         }
 
-        var model = new FeatureViewModel(feature);
-        //cache.Write(HttpContext.Request.Path, model);
+        var model = vmFactory.Create(feature);
+        cache.Write(key, model);
+
         return Ok(model);
     }
 

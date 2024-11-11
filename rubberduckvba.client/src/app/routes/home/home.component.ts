@@ -4,7 +4,6 @@ import { Tag } from '../../model/tags.model';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { BehaviorSubject } from 'rxjs';
-import { Feature } from '../../model/feature.model';
 
 @Component({
   selector: 'app-home',

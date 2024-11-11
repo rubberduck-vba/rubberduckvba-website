@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges, TemplateRef, ViewChild, inject } from '@angular/core';
-import { Feature, FeatureItem, FeatureViewModel, QuickFixViewModel } from '../../model/feature.model';
+import { FeatureViewModel, QuickFixViewModel, SubFeatureViewModel } from '../../model/feature.model';
 import { BehaviorSubject } from 'rxjs';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -30,19 +30,23 @@ export class FeatureBoxComponent implements OnInit {
   }
 
   public get feature(): FeatureViewModel | undefined {
-    return this._info.value;
+    return this._info.value as FeatureViewModel;
   }
 
-  private readonly _quickfixes: BehaviorSubject<FeatureItem[]> = new BehaviorSubject<FeatureItem[]>(null!);
+  public get subFeature(): SubFeatureViewModel | undefined {
+    return this._info.value as SubFeatureViewModel;
+  }
+
+  private readonly _quickfixes: BehaviorSubject<QuickFixViewModel[]> = new BehaviorSubject<QuickFixViewModel[]>(null!);
 
   @Input()
-  public set quickFixes(value: FeatureItem[]) {
+  public set quickFixes(value: QuickFixViewModel[]) {
     if (value != null) {
       this._quickfixes.next(value);
     }
   }
 
-  public get quickFixes(): FeatureItem[] {
+  public get quickFixes(): QuickFixViewModel[] {
     return this._quickfixes.value;
   }
 

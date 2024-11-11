@@ -21,7 +21,6 @@ public class FeatureViewModel
         if (model is FeatureGraph graph)
         {
             Features = graph.Features.Select(e => new FeatureViewModel(e) { FeatureId = e.ParentId, FeatureName = graph.Name, FeatureTitle = graph.Title }).ToArray();
-            Inspections = graph.Inspections.ToArray();
         }
     }
 
@@ -42,10 +41,37 @@ public class FeatureViewModel
     public bool HasImage { get; init; }
 
     public FeatureViewModel[] Features { get; init; } = [];
-    public Inspection[] Inspections { get; init; } = []; // InspectionViewModel[]
 }
 
-public class FeatureXmlDocViewModel
+public class InspectionsFeatureViewModel : FeatureViewModel
 {
+    public InspectionsFeatureViewModel(FeatureGraph model)
+        : base(model)
+    {
+        Inspections = model.Inspections.ToArray();
+    }
 
+    public Inspection[] Inspections { get; init; } = [];
+}
+
+public class QuickFixesFeatureViewModel : FeatureViewModel
+{
+    public QuickFixesFeatureViewModel(FeatureGraph model)
+        : base(model)
+    {
+        QuickFixes = model.QuickFixes.ToArray();
+    }
+
+    public QuickFix[] QuickFixes { get; init; } = [];
+}
+
+public class AnnotationsFeatureViewModel : FeatureViewModel
+{
+    public AnnotationsFeatureViewModel(FeatureGraph model)
+        : base(model)
+    {
+        Annotations = model.Annotations.ToArray();
+    }
+
+    public Annotation[] Annotations { get; init; } = [];
 }
