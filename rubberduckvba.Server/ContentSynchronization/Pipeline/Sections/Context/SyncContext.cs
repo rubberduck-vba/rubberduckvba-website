@@ -1,5 +1,6 @@
 ﻿using rubberduckvba.Server.Model;
 using System.Collections.Immutable;
+using System.Xml.Linq;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 
@@ -104,6 +105,13 @@ public class SyncContext : IPipelineContext
     public ImmutableHashSet<Annotation> Annotations
         => ContextNotInitializedException.ThrowIfNull(_annotations);
 
+    private readonly List<(TagAsset, XDocument)> _documents = [];
+    public void LoadCodeAnalysisXDocument((TagAsset, XDocument) document)
+    {
+        _documents.Add(document);
+    }
+
+    public ImmutableHashSet<(TagAsset, XDocument)> XDocuments => _documents.ToImmutableHashSet();
 
     public void LoadInspections(IEnumerable<Inspection> inspections)
     {

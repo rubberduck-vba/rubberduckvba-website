@@ -1,7 +1,6 @@
 ﻿using rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
 using rubberduckvba.Server.Model;
 using rubberduckvba.Server.Services;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Xml.Linq;
@@ -21,7 +20,7 @@ public class XmlDocInspectionParser(IMarkdownFormattingService markdownService)
         var fixesByName = quickFixes.ToLookup(e => e.Name, e => e.Inspections);
         var filteredFixes = quickFixes.Where(fix => fixesByName[fix.Name].FirstOrDefault()?.Contains(inspectionName) ?? false).ToList();
 
-        var sourceObject = name[2..].Replace('.', '/').Replace("Rubberduck/CodeAnalysis/", "Rubberduck.CodeAnalysis/");
+        var sourceObject = node.Attribute("name").Value[2..].Replace('.', '/').Replace("Rubberduck/CodeAnalysis/", "Rubberduck.CodeAnalysis/");
         //var sourceEditUrl = $"https://github.com/rubberduck-vba/Rubberduck/edit/next/{sourceObject}.cs";
         //var sourceViewUrl = $"https://github.com/rubberduck-vba/Rubberduck/blob/{tagName}/{sourceObject}.cs";
 
@@ -74,13 +73,13 @@ public class XmlDocInspectionParser(IMarkdownFormattingService markdownService)
     private static readonly Dictionary<string, ExampleModuleType> ModuleTypes =
         Enum.GetValues<ExampleModuleType>()
             .Select(m => (Name: m.ToString(), Description: typeof(ExampleModuleType).GetMember(m.ToString()).Single()
-                .GetCustomAttributes().OfType<DescriptionAttribute>().SingleOrDefault()?.Description ?? string.Empty))
+                .GetCustomAttributes().OfType<DisplayAttribute>().SingleOrDefault()?.Name ?? string.Empty))
             .ToDictionary(m => m.Description, m => Enum.Parse<ExampleModuleType>(m.Name, ignoreCase: true));
 
     private static readonly Dictionary<CodeInspectionType, string> InspectionTypes =
         Enum.GetValues<CodeInspectionType>()
             .Select(m => (Name: m.ToString(), Description: typeof(CodeInspectionType).GetMember(m.ToString()).Single()
-                .GetCustomAttributes().OfType<DescriptionAttribute>().SingleOrDefault()?.Description ?? string.Empty))
+                .GetCustomAttributes().OfType<DisplayAttribute>().SingleOrDefault()?.Name ?? string.Empty))
             .ToDictionary(m => Enum.Parse<CodeInspectionType>(m.Name, ignoreCase: true), m => m.Description);
 
     private enum CodeInspectionType
@@ -89,8 +88,8 @@ public class XmlDocInspectionParser(IMarkdownFormattingService markdownService)
         RubberduckOpportunities,
         [Display(Name = "Language Opportunities")]
         LanguageOpportunities,
-        [Display(Name = "Maintainability/Readability Issues")]
-        MaintainabilityAndReadabilityIssues,
+        [Display(Name = "Naming and Convention Issues")]
+        NamingAndConventionsIssues,
         [Display(Name = "Code Quality Issues")]
         CodeQualityIssues,
         [Display(Name = "Performance Opportunities")]

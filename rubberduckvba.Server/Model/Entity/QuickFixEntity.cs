@@ -3,6 +3,7 @@
 public record class QuickFixEntity : Entity
 {
     public int FeatureId { get; init; }
+    public string FeatureName { get; init; } = string.Empty;
     public int TagAssetId { get; init; }
     public string SourceUrl { get; init; } = string.Empty;
     public bool IsNew { get; init; }

@@ -1,0 +1,152 @@
+<div class="row">
+    <h1>About</h1>
+    <div class="col-11">
+
+        <h2></h2>
+        <p>Rubberduck is first and foremost a <em>project</em> aiming to bring the VBIDE functionality into this century, <strong>free of charge</strong> for all its users.</p>
+        <p>The project started in late 2014 as a C# port of a test runner tool written in VBA; it didn’t take too long to realize we could easily take the code in the editor, tokenize it, process it, analyze it, and then provide a wide array of developer tools to enhance the VBIDE experience.</p>
+        <p>Rubberduck is about <em>learning</em>, and <em>paying forward</em>: the project co-founder wrote their very first lines of C# for Rubberduck, and several contributors later did the same. Core contributors are always happy to guide new ducklings toward their first pull request!</p>
+        <p>Rubberduck is also about <em>teaching</em>: inspections will not just tell you that <em>Option Explicit</em> is missing, it will also explain <em>why</em> you want <code>Option Explicit</code> enabled everywhere. Many inspection ideas stemmed from questions frequently asked on Stack Overflow, and again explain what’s going on and why that might be a problem. If you’re new to VBA, Rubberduck inspections can teach you things about how VBA works, that many veterans took years to learn about!</p>
+        <p>The project’s blog presents new releases and upcoming features, and frequently proposes intermediate/advanced VBA topics revolving around object-oriented programming and clean code. A dedicated <a href="https://github.com/rubberduck-vba/examples">repository</a> was created to host all VBA code examples from blog articles.</p>
+
+        <div class="col-12 text-center">
+            <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+        </div>
+        <hr />
+
+        <h2>EULA</h2>
+        <p>
+            There is no <em>end user license agreement</em> (EULA) so to speak: everything is already covered by the GPLv3 license, and there is nothing in it that is relevant for the end user to "agree" to, except perhaps this excerpt from section 15:
+        </p>
+        <blockquote class="col-10 mx-5 px-3 py-1 border-start">
+            <p>
+                THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND,
+                EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+                THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.
+            </p>
+        </blockquote>
+        <p>
+            Basically: we did our best and it works for us, but we cannot promise it won't break anything on your computer so you use it at your own risk - standard stuff.
+        </p>
+        <p>
+            The installer makes you agree to terms and conditions designed to fill up a typical amount of space, but anyone taking the time to actually read it is in for a ride. Nobody ever reads these anyway... right?
+        </p>
+        <blockquote class="col-10 mx-5 px-3 py-1 border-start">
+            <p>
+                You may reverse engineer, decompile, disassemble or otherwise attempt to discover the source code, underlying ideas, underlying user interface techniques or algorithms of the Application
+                by any means whatsoever, directly or indirectly, or disclose any of the foregoing to other parties. It'd be kinda pointless to do so though,
+                because the source code is publicy available under GPLv3 at https://github.com/rubberduck-vba/Rubberduck. Go nuts.
+                <br />
+            </p>
+        </blockquote>
+
+        <h2>Privacy Policy</h2>
+        <p>Even though Rubberduck does not collect any data from its users, attention is given to avoid including any identifiable information in any data it produces, for example in log files.</p>
+        <p>
+            Any data produced by the software belongs to its user. This ought to remain true whether or not Rubberduck ends up with any telemetry features, which it currently does not.
+        </p>
+        <p>
+            Personal information provided on 3rd-party platforms such as GitHub or Ko-fi, is subject to the respective privacy policies of these platforms.
+            Personal information including full name, email, phone number, shipping address, is highly privileged and only ever disclosed to a single Rubberduck project administrator on a need-to-know basis;
+            such information is only collected to be shared with the parties that need it for their purpose, e.g. Canada Post/USPS/Purolator.
+        </p>
+
+        <div class="col-12 text-center">
+            <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+        </div>
+        <hr />
+
+        <h2>Attributions</h2>
+
+        <p>Rubberduck was made possible with the combined knowledge of many people, and depends on several libraries and projects.</p>
+
+        <div class="row">
+            <ul class="list-unstyled col-6">
+                <li>
+                    <div class="card">
+                        <div class="card-body">
+                            <fa-icon [icon]="'heart-pulse'"></fa-icon>&nbsp;<a class="text-decoration-none" href="https://github.com/rubberduck-vba/Rubberduck/graphs/contributors/"><strong>Rubberduck project contributors</strong></a>
+                            <p class="small text-black-50">70+ contributors and counting!</p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="card">
+                        <div class="card-body">
+                            <fa-icon [icon]="'heart'"></fa-icon>&nbsp;<a class="text-decoration-none" href="http://p.yusukekamiyamane.com/">Fugue icons by Yusuke Kamiyamane</a>
+                            <p class="small text-black-50">Beautiful 16x16 PNG icons in a massive collection.</p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="card">
+                        <div class="card-body">
+                            <fa-icon [icon]="'heart'"></fa-icon>&nbsp;<a class="text-decoration-none" href="https://github.com/icsharpcode/SharpDevelop/">Sharp Develop icons</a>
+                            <p class="small text-black-50">All IDE-specific icons come from (or derived from icons taken from) the SharpDevelop open-source initiative.</p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="card">
+                        <div class="card-body">
+                            <fa-icon [icon]="'heart'"></fa-icon>&nbsp;<a class="text-decoration-none" href="http://www.antlr.org/">ANTLR</a>
+                            <p class="small text-black-50">A powerful parser generator.</p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="card">
+                        <div class="card-body">
+                            <fa-icon [icon]="'heart'"></fa-icon>&nbsp;<a class="text-decoration-none" href="https://github.com/moq/moq/">Moq</a>
+                            <p class="small text-black-50">The mocking library Rubberduck uses for its own tests, is also behind the Rubberduck Mocks API.</p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <ul class="list-unstyled col-6">
+                <li>
+                    <div class="card">
+                        <div class="card-body">
+                            <fa-icon [icon]="'heart'"></fa-icon>&nbsp;<a class="text-decoration-none" href="http://easyhook.github.io/">EasyHook</a>
+                            <p class="small text-black-50">Used by the unit testing Fakes API to hook into the VBA runtime to intercept certain function calls.</p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="card">
+                        <div class="card-body">
+                            <fa-icon [icon]="'heart'"></fa-icon>&nbsp;<a class="text-decoration-none" href="http://avalonedit.net/">AvalonEdit</a>
+                            <p class="small text-black-50">Used for syntax-highlighted code in refactoring previews, for example.</p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="card">
+                        <div class="card-body">
+                            <fa-icon [icon]="'heart'"></fa-icon>&nbsp;<a class="text-decoration-none" href="http://www.codeproject.com/Articles/35159/WPF-Localization-Using-RESX-Files/">WPF Localization for RESX</a>
+                            <p class="small text-black-50">A piece of code specifically sublicensed for use in Rubberduck and its GPL license.</p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="card">
+                        <div class="card-body">
+                            <fa-icon [icon]="'heart'"></fa-icon>&nbsp;<a class="text-decoration-none" href="https://web.archive.org/web/20180806191001fw_/http://www.oaltd.co.uk/Indenter/Default.htm/">Smart Indenter</a>
+                            <p class="small text-black-50">The original Smart Indenter VBIDE add-in VB6 source code that served as a reference.</p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <h2>Trademarks</h2>
+
+        <p>Microsoft, Windows, Microsoft/Office 365, Excel, Access, Word, PowerPoint, Visual Basic for Applications, Visual Studio, Most Valuable Professional (MVP) Award logo, as well as other Microsoft products, services, and registered trademarks, are the property of Microsoft Corporation. Microsoft is a registered trademark of Microsoft Corporation in the United States and/or other countries.</p>
+        <p>The WordPress 'W logo with circle' is a trademark of the WordPress Foundation.</p>
+        <p>All other trademarks are the property of their respective owner.</p>
+
+        <div class="col-12 text-center">
+            <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+        </div>
+
+    </div>

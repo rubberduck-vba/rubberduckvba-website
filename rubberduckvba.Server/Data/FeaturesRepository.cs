@@ -13,18 +13,21 @@ public class FeaturesRepository : Repository<FeatureEntity>, IRepository<Feature
 
     protected override string SelectSql { get; } = @"
 SELECT 
-    [Id],
-    [DateTimeInserted],
-    [DateTimeUpdated],
-    [RepositoryId],
-    [ParentId],
-    [Name],
-    [Title],
-    [ShortDescription],
-    [Description],
-    [IsNew],
-    [HasImage]
-FROM [dbo].[Features]";
+    a.[Id],
+    a.[DateTimeInserted],
+    a.[DateTimeUpdated],
+    a.[RepositoryId],
+    a.[ParentId] AS [FeatureId],
+    f.[Name] AS [FeatureName],
+    a.[Name],
+    a.[Title],
+    a.[ShortDescription],
+    a.[Description],
+    a.[IsNew],
+    a.[HasImage],
+    a.[Links]
+FROM [dbo].[Features] a
+LEFT JOIN [dbo].[Features] f ON a.[ParentId]=f.[Id]";
 
     protected override string InsertSql { get; } = @"
 INSERT INTO [dbo].[Features] (

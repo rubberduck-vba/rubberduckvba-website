@@ -69,8 +69,10 @@ public class TagServices(IRepository<TagEntity> tagsRepository, IRepository<TagA
 
     public void Create(IEnumerable<TagGraph> tags)
     {
-        var tagsByName = tags.ToDictionary(tag => tag.Name);
         var tagEntities = tagsRepository.Insert(tags.Select(tag => tag.ToEntity()));
+        var tagsByName = tagEntities.ToDictionary(
+            tag => tag.Name,
+            tag => new TagGraph(tag, tags.Single(t => t.Name == tag.Name).Assets.Select(a => a.ToEntity())));
 
         var assets = new List<TagAssetEntity>();
         foreach (var tagEntity in tagEntities)

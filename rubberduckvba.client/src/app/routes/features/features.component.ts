@@ -3,7 +3,7 @@ import { ApiClientService } from "../../services/api-client.service";
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { BehaviorSubject } from 'rxjs';
-import { Feature, FeatureItem, FeatureViewModel, QuickFixViewModel } from '../../model/feature.model';
+import { FeatureViewModel, QuickFixViewModel } from '../../model/feature.model';
 
 @Component({
   selector: 'app-features',
@@ -19,8 +19,8 @@ export class FeaturesComponent implements OnInit, OnChanges {
     return this._features.getValue();
   }
 
-  private readonly _quickFixes: BehaviorSubject<FeatureItem[]> = new BehaviorSubject<FeatureItem[]>(null!);
-  public get quickFixes(): FeatureItem[] {
+  private readonly _quickFixes: BehaviorSubject<QuickFixViewModel[]> = new BehaviorSubject<QuickFixViewModel[]>(null!);
+  public get quickFixes(): QuickFixViewModel[] {
     return this._quickFixes.value;
   }
 
@@ -35,7 +35,7 @@ export class FeaturesComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.api.getFeatureSummaries().subscribe(result => {
       if (result) {
-        this._features.next(result.map(feature => new FeatureViewModel(feature)).filter(e => !e.isHidden));
+        this._features.next(result.filter(e => !e.isHidden));
       }
     });
   }

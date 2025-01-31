@@ -11,23 +11,27 @@ public class QuickFixRepository : Repository<QuickFixEntity>, IRepository<QuickF
 
     protected override string SelectSql { get; } = @"
 SELECT 
-    [Id],
-    [DateTimeInserted],
-    [DateTimeUpdated],
-    [FeatureId],
-    [TagAssetId],
-    [SourceUrl],
-    [Name],
-    [Summary],
-    [Remarks],
-    [CanFixMultiple],
-    [CanFixProcedure],
-    [CanFixModule],
-    [CanFixProject],
-    [CanFixAll],
-    [Inspections],
-    [JsonExamples]
-FROM [dbo].[QuickFixes]";
+    a.[Id],
+    a.[DateTimeInserted],
+    a.[DateTimeUpdated],
+    a.[FeatureId],
+    f.[Name] AS [FeatureName],
+    a.[TagAssetId],
+    a.[SourceUrl],
+    a.[Name],
+    a.[Summary],
+    a.[Remarks],
+    a.[CanFixMultiple],
+    a.[CanFixProcedure],
+    a.[CanFixModule],
+    a.[CanFixProject],
+    a.[CanFixAll],
+    a.[Inspections],
+    a.[JsonExamples],
+    a.[IsNew],
+    a.[IsDiscontinued]
+FROM [dbo].[QuickFixes] a
+INNER JOIN [dbo].[Features] f ON a.[FeatureId]=f.[Id]";
 
     protected override string InsertSql { get; } = @"
 INSERT INTO [dbo].[QuickFixes] (
@@ -44,7 +48,9 @@ INSERT INTO [dbo].[QuickFixes] (
     [CanFixProject],
     [CanFixAll],
     [Inspections],
-    [JsonExamples])
+    [JsonExamples],
+    [IsNew],
+    [IsDiscontinued])
 VALUES (
     GETDATE(),
     @featureId,
@@ -59,7 +65,9 @@ VALUES (
     @canFixProject,
     @canFixAll,
     @inspections,
-    @jsonExamples)";
+    @jsonExamples,
+    @isNew,
+    @isDiscontinued)";
 
     protected override string UpdateSql { get; } = @"
 UPDATE [dbo].[QuickFixes]
@@ -72,7 +80,9 @@ SET [DateTimeUpdated]=GETDATE(),
     [CanFixModule]=@canFixModule,
     [CanFixProject]=@canFixProject,
     [CanFixAll]=@canFixAll,
-    [JsonExamples]=@jsonExamples
+    [JsonExamples]=@jsonExamples,
+    [IsNew]=@isNew,
+    [IsDiscontinued]=@isDiscontinued
 WHERE [Id]=@id";
 
 }

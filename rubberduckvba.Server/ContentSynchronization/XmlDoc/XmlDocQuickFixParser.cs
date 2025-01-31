@@ -1,16 +1,16 @@
 ﻿using rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
 using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Services;
 using System.Reflection;
 using System.Xml.Linq;
 
 namespace rubberduckvba.Server.ContentSynchronization.XmlDoc;
 
-public class XmlDocQuickFixParser
+public class XmlDocQuickFixParser(IMarkdownFormattingService markdownService)
 {
     public QuickFix Parse(string name, int assetId, int featureId, XElement node, bool isPreRelease)
     {
-        var sourceObject = name[2..].Replace('.', '/').Replace("Rubberduck/CodeAnalysis/", "Rubberduck.CodeAnalysis/");
-        var typeName = name/*.Substring(name.LastIndexOf(".", StringComparison.Ordinal) + 1)/*.Replace("QuickFix", string.Empty)*/;
+        var sourceObject = node.Attribute("name").Value[2..].Replace('.', '/').Replace("Rubberduck/CodeAnalysis/", "Rubberduck.CodeAnalysis/");
 
         var summary = node.Element(XmlDocSchema.QuickFix.Summary.ElementName)?.Value.Trim().Replace("  ", " ") ?? string.Empty;
         var remarks = node.Element(XmlDocSchema.QuickFix.Remarks.ElementName)?.Value.Trim().Replace("  ", " ") ?? string.Empty;
@@ -67,7 +67,7 @@ public class XmlDocQuickFixParser
             .Where(m => m.Description != null)
             .ToDictionary(m => m.Description, m => (ExampleModuleType)Enum.Parse(typeof(ExampleModuleType), m.Name, true));
 
-    private static List<QuickFixExample> ParseExamples(XElement node)
+    private List<QuickFixExample> ParseExamples(XElement node)
     {
         var examples = new List<QuickFixExample>();
         foreach (var exampleNode in node.Elements(XmlDocSchema.QuickFix.Example.ElementName))
@@ -78,14 +78,14 @@ public class XmlDocQuickFixParser
                     {
                         ModuleName = m.Attribute(XmlDocSchema.QuickFix.Example.Before.Module.ModuleNameAttribute)?.Value ?? string.Empty,
                         ModuleType = ModuleTypes.TryGetValue(m.Attribute(XmlDocSchema.QuickFix.Example.Before.Module.ModuleTypeAttribute)?.Value ?? string.Empty, out var type) ? type : ExampleModuleType.Any,
-                        HtmlContent = m.Nodes().OfType<XCData>().Single().Value.Trim().Replace("  ", " ")
+                        HtmlContent = markdownService.FormatMarkdownDocument("<code>" + m.Nodes().OfType<XCData>().Single().Value.Trim().Replace("  ", " ") + "</code>", withSyntaxHighlighting: true)
                     })
                 .Concat(exampleNode.Element(XmlDocSchema.QuickFix.Example.Before.ElementName)?.Nodes().OfType<XCData>().Take(1).Select(x =>
                     new ExampleModule
                     {
                         ModuleName = "Module1",
                         ModuleType = ExampleModuleType.Any,
-                        HtmlContent = x.Value.Trim().Replace("  ", " ")
+                        HtmlContent = markdownService.FormatMarkdownDocument("<code>" + x.Value.Trim().Replace("  ", " ") + "</code>", withSyntaxHighlighting: true)
                     }) ?? []);
 
             var after = exampleNode.Element(XmlDocSchema.QuickFix.Example.After.ElementName)?
@@ -94,14 +94,14 @@ public class XmlDocQuickFixParser
                     {
                         ModuleName = m.Attribute(XmlDocSchema.QuickFix.Example.After.Module.ModuleNameAttribute)?.Value ?? string.Empty,
                         ModuleType = ModuleTypes.TryGetValue(m.Attribute(XmlDocSchema.QuickFix.Example.After.Module.ModuleTypeAttribute)?.Value ?? string.Empty, out var type) ? type : ExampleModuleType.Any,
-                        HtmlContent = m.Nodes().OfType<XCData>().Single().Value.Trim().Replace("  ", " ")
+                        HtmlContent = markdownService.FormatMarkdownDocument("<code>" + m.Nodes().OfType<XCData>().Single().Value.Trim().Replace("  ", " ") + "</code>", withSyntaxHighlighting: true)
                     })
                 .Concat(exampleNode.Element(XmlDocSchema.QuickFix.Example.After.ElementName)?.Nodes().OfType<XCData>().Take(1).Select(x =>
                     new ExampleModule
                     {
                         ModuleName = "Module1",
                         ModuleType = ExampleModuleType.Any,
-                        HtmlContent = x.Value.Trim().Replace("  ", " ")
+                        HtmlContent = markdownService.FormatMarkdownDocument("<code>" + x.Value.Trim().Replace("  ", " ") + "</code>", withSyntaxHighlighting: true)
                     }) ?? []);
 
             if (before != null && after != null)

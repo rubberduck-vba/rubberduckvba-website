@@ -45,7 +45,7 @@
 
 <section class="row text-center">
     <div class="col-12 mt-5">
-        <img alt="Rubberduck" src="../../assets/rubberduck.svg" />
+        <img alt="Rubberduck" src="../../assets/rubberduck.png" />
     </div>
     <div class="col-12 text-end">
         <span class="fw-bold">Free and open-source since 2014</span>
@@ -96,7 +96,7 @@
     <div class="col-md-3 px-3">
         <div class="row">
             <div class="col-12 col-sm-6 col-md-12 mt-1">
-                <a role="button" href="https://x.com/rubberduckvba" class="btn btn-outline-dark rounded-pill w-100"><span><fa-icon [icon]="['fab', 'twitter']"></fa-icon><fa-icon [icon]="['fab', 'x-twitter']" class="mx-1"></fa-icon>Twitter</span></a>
+                <a role="button" href="https://bsky.app/profile/rubberduckvba.bsky.social" class="btn btn-outline-dark rounded-pill w-100"><span><fa-icon class="mx-1" [icon]="['fab', 'bluesky']"></fa-icon>BlueSky</span></a>
             </div>
             <div class="col-12 col-sm-6 col-md-12 mt-1">
                 <a role="button" href="https://reddit.com/u/rubberduck-vba" class="btn btn-outline-dark rounded-pill w-100"><span><fa-icon class="mx-1" [icon]="['fab', 'reddit-alien']"></fa-icon>Reddit</span></a>
@@ -111,6 +111,21 @@
 
 <section class="row text-center my-3">
     <div class="col-md-6">
+        <div class="row my-2">
+            <div class="card">
+                <div class="card-body">
+                    <div>
+                        <h1>Features</h1>
+                    </div>
+                    <p class="my-2">
+                        Discover how Rubberduck changes your life as a VBA developer with what can only ever be a quick summary.
+                    </p>
+                </div>
+                <div>
+                    <a class="btn-ducky btn btn-dark rounded-pill mb-3" role="button" href="/features">Browse</a>
+                </div>
+            </div>
+        </div>
         <div class="row my-2">
             <div class="card">
                 <div class="card-body">
@@ -130,29 +145,14 @@
             <div class="card">
                 <div class="card-body">
                     <div>
-                        <h1>Rubberduck3</h1>
+                        <h1>Resources</h1>
+                        <p class="my-2">
+                            Featured articles from the project blog:
+                        </p>
                     </div>
-                    <p class="my-2">
-                        A completely separate project is under way, to rewrite Rubberduck into a client/server architecture and its own standalone editor - introducing a proper <em>language server</em> for VBA, this project will ultimately become the next major Rubberduck version (3.x).
-                    </p>
-                </div>
-                <div>
-                    <a class="btn-ducky btn btn-dark rounded-pill mb-3" role="button" href="https://rd3.rubberduckvba.com">Read more</a>
-                </div>
-            </div>
-        </div>
-        <div class="row my-2">
-            <div class="card">
-                <div class="card-body">
-                    <div>
-                        <h1>Blog</h1>
+                    <div *ngFor="let link of blogPosts">
+                        <blog-link-box [link]="link"></blog-link-box>
                     </div>
-                    <p class="my-2">
-                        Your source for intermediate/advanced VBA programming content. The blog is also where releases and upcoming features get announced, so make sure to subscribe!
-                    </p>
-                </div>
-                <div>
-                    <a class="btn-ducky btn btn-dark rounded-pill mb-3" role="button" href="https://rubberduckvba.blog">Read more</a>
                 </div>
             </div>
         </div>

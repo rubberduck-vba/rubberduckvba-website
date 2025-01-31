@@ -43,11 +43,13 @@ public class AdminController(ConfigurationOptions options, IBackgroundJobClient 
         return await ValueTask.FromResult(Ok(jobId));
     }
 
+#if DEBUG
     [HttpGet("admin/config/current")]
     public async ValueTask<IActionResult> Config()
     {
         return await ValueTask.FromResult(Ok(options));
     }
+#endif
 }
 
 public record class ConfigurationOptions(
@@ -55,5 +57,4 @@ public record class ConfigurationOptions(
     IOptions<GitHubSettings> GitHubOptions,
     IOptions<HangfireSettings> HangfireOptions)
 {
-
 }

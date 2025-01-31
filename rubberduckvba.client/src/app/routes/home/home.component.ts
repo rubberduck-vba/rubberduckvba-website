@@ -4,7 +4,7 @@ import { Tag } from '../../model/tags.model';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { BehaviorSubject } from 'rxjs';
-import { Feature } from '../../model/feature.model';
+import { BlogLink, BlogLinkViewModelClass } from '../../model/feature.model';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +27,14 @@ export class HomeComponent implements OnInit, OnChanges {
   }
   public get next(): Tag {
     return this._next.getValue();
+  }
+
+  public get blogPosts(): BlogLink[] {
+    return [
+      { name: 'Pre-release: v2.5.92.x', author: 'Mathieu Guindon', published: '2025-01-22', url: 'https://rubberduckvba.blog/2025/01/22/pre-release-2-5-92-x/' },
+      { name: 'About Class Modules', author: 'Ben Clothier', published: '2019-07-08', url: 'https://rubberduckvba.blog/2019/07/08/about-class-modules/' },
+      { name: 'Rubberduck Style Guide', author: 'Mathieu Guindon', published: '2021-05-29', url: 'https://rubberduckvba.blog/2021/05/29/rubberduck-style-guide/' }
+    ]
   }
 
   constructor(private api: ApiClientService, private fa: FaIconLibrary) {

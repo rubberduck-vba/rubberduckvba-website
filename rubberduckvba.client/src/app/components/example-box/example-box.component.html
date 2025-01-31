@@ -1,7 +1,7 @@
 <div class="accordion" id="exampleBoxAccordion">
     <div class="card my-2">
         <div class="card-header bg-light-subtle my-0 py-0" id="exampleBoxHeading">
-            <div *ngIf="inspectionExample" class="btn btn-link text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="inspectionExample.isCollapsed = !inspectionExample.isCollapsed">
+            <div *ngIf="isInspection && inspectionExample" class="btn btn-link text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="inspectionExample.isCollapsed = !inspectionExample.isCollapsed">
                 <div class="row my-0 py-0">
                     <div class="col-1">
                         &nbsp;
@@ -18,14 +18,51 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!--TODO:QuickFixes-->
-                <!--TODO:Annotations-->
+            <div *ngIf="isQuickFix && quickFixExample" class="btn btn-link text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="quickFixExample.isCollapsed = !quickFixExample.isCollapsed">
+                <div class="row my-0 py-0">
+                    <div class="col-1">
+                        &nbsp;
+                    </div>
+                    <div class="col-10">
+                        <h4>Example {{quickFixExample.sortOrder + 1}}</h4>
+                    </div>
+                    <div class="col-1">
+                        <div class="float-end">
+                            <h4>
+                                <fa-icon *ngIf="!quickFixExample.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                                <fa-icon *ngIf="quickFixExample.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="isAnnotation && annotationExample" class="btn btn-link text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="annotationExample.isCollapsed = !annotationExample.isCollapsed">
+                <div class="row my-0 py-0">
+                    <div class="col-1">
+                        &nbsp;
+                    </div>
+                    <div class="col-10">
+                        <h4>Example {{annotationExample.sortOrder + 1}}</h4>
+                    </div>
+                    <div class="col-1">
+                        <div class="float-end">
+                            <h4>
+                                <fa-icon *ngIf="!annotationExample.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                                <fa-icon *ngIf="annotationExample.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div *ngIf="inspectionExample">
+
+        <div *ngIf="isInspection && inspectionExample">
             <div class="collapse" id="exampleBoxCollapseBody" [ngClass]="{'show': !inspectionExample.isCollapsed}" aria-labelledby="exampleBoxHeading" data-parent="exampleBoxAccordion">
                 <div class="card-body">
+
                     <p *ngIf="inspectionExample.hasResult"><fa-icon class="text-warning" [icon]="'lightbulb'"></fa-icon> This inspection would produce a result with the code in this example.</p>
                     <p *ngIf="!inspectionExample.hasResult"><fa-icon class="text-success" [icon]="'circle-check'"></fa-icon> This inspection would <strong>NOT</strong> produce a result with the code in this example.</p>
 
@@ -33,14 +70,109 @@
                         <div class="col-12">
                             <div class="card mb-1 border-primary border-2">
                                 <div class="card-header bg-primary-subtle">
-                                    <!--TODO icon for module.moduleType-->
-                                    <h6 class="align-text-bottom" title="{{module.moduleName}} ({{module.moduleTypeName}})">
-                                        <span class="icon {{module.moduleTypeIconClass}}"></span>
+                                    <h6 class="align-text-bottom">
+                                        <span class="icon {{module.moduleTypeName}}" title="{{module.moduleTypeName}}" [ngClass]="getModuleIconClass(module)"></span>
+                                        <span>{{module.moduleName}} | {{module.moduleTypeName}}</span>
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div [innerHtml]="module.htmlContent"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="isQuickFix && quickFixExample">
+            <div class="collapse" id="exampleBoxCollapseBody" [ngClass]="{'show': !quickFixExample.isCollapsed}" aria-labelledby="exampleBoxHeading" data-parent="exampleBoxAccordion">
+                <div class="card-body">
+
+                    <p class="text-center mt-2" *ngIf="quickFixExample.modulesBefore.length > 0">Module(s) <strong>before</strong> executing the quickfix action:</p>
+                    <div *ngFor="let module of quickFixExample.modulesBefore" class="row mx-1">
+                        <div class="col-12">
+                            <div class="card mb-1 border-primary border-2">
+                                <div class="card-header bg-primary-subtle">
+                                    <h6 class="align-text-bottom">
+                                        <span class="icon {{module.moduleTypeName}}" title="{{module.moduleTypeName}}" [ngClass]="getModuleIconClass(module)"></span>
+                                        <span>{{module.moduleName}} | {{module.moduleTypeName}}</span>
+                                    </h6>
+                                </div>
+                                <div class="card-body ">
+                                    <div [innerHtml]="module.htmlContent"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <p class="text-center mt-2" *ngIf="quickFixExample.modulesAfter.length > 0">Module(s) <strong>after</strong> executing the quickfix action:</p>
+                    <div *ngFor="let module of quickFixExample.modulesAfter" class="row mx-1">
+                        <div class="col-12">
+                            <div class="card mb-1 border-primary border-2">
+                                <div class="card-header bg-primary-subtle">
+                                    <h6 class="align-text-bottom">
+                                        <span class="icon {{module.moduleTypeName}}" title="{{module.moduleTypeName}}" [ngClass]="getModuleIconClass(module)"></span>
+                                        <span>{{module.moduleName}} | {{module.moduleTypeName}}</span>
+                                    </h6>
+                                </div>
+                                <div class="card-body ">
+                                    <div [innerHtml]="module.htmlContent"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="isAnnotation && annotationExample">
+            <div class="collapse" id="exampleBoxCollapseBody" [ngClass]="{'show': !annotationExample.isCollapsed}" aria-labelledby="exampleBoxHeading" data-parent="exampleBoxAccordion">
+                <div class="card-body">
+                    <div *ngFor="let module of annotationExample.modules" class="row mx-1">
+                        <div class="col-12">
+                            <div class="card mb-1 border-primary border-2">
+                                <div class="card-header bg-primary-subtle">
+                                    <h6 class="align-text-bottom">
+                                        <span class="icon {{module.moduleTypeName}}" title="{{module.moduleTypeName}}" [ngClass]="getModuleIconClass(module)"></span>
                                         <span>{{module.moduleName}}</span>
                                     </h6>
                                 </div>
                                 <div class="card-body ">
-                                    <div class="code" [innerHtml]="module.htmlContent"></div>
+                                    <div [innerHtml]="module.htmlContent"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p *ngIf="annotationExample.modulesBefore.length > 0">Module(s) <strong>before</strong> synchronizing attributes</p>
+                    <div *ngFor="let module of annotationExample.modulesBefore" class="row mx-1">
+                        <div class="col-12">
+                            <div class="card mb-1 border-primary border-2">
+                                <div class="card-header bg-primary-subtle">
+                                    <h6 class="align-text-bottom">
+                                        <span class="icon {{module.moduleTypeName}}" title="{{module.moduleTypeName}}" [ngClass]="getModuleIconClass(module)"></span>
+                                        <span>{{module.moduleName}}</span>
+                                    </h6>
+                                </div>
+                                <div class="card-body ">
+                                    <div [innerHtml]="module.htmlContent"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p *ngIf="annotationExample.modulesAfter.length > 0">Module(s) <strong>after</strong> synchronizing attributes</p>
+                    <div *ngFor="let module of annotationExample.modulesAfter" class="row mx-1">
+                        <div class="col-12">
+                            <div class="card mb-1 border-primary border-2">
+                                <div class="card-header bg-primary-subtle">
+                                    <h6 class="align-text-bottom">
+                                        <span class="icon {{module.moduleTypeName}}" title="{{module.moduleTypeName}}" [ngClass]="getModuleIconClass(module)"></span>
+                                        <span>{{module.moduleName}}</span>
+                                    </h6>
+                                </div>
+                                <div class="card-body ">
+                                    <div [innerHtml]="module.htmlContent"></div>
                                 </div>
                             </div>
                         </div>

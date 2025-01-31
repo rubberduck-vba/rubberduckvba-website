@@ -1,0 +1,124 @@
+<div *ngIf="item" class="card mb-2">
+    <div class="card-body" id="featureItemBoxHeading">
+        <button class="btn btn-link text-dark text-nowrap text-decoration-none w-100" role="button" (click)="showDetailsModal()">
+            <div class="row">
+                <div *ngIf="item.isNew || item.isDiscontinued">
+                    <div *ngIf="item.isDiscontinued" title="This feature is no longer present in the latest pre-release build">
+                        <div class="btn-ducky bg-danger rounded-pill">Discontinued</div>
+                        <div class="small text-start mb-3">
+                            <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="text-start border-top border-bottom p-1 bg-light-subtle">
+                    <h6 class="d-inline text-wrap">&nbsp;{{quickFixInfo.title}}</h6>
+                </div>
+                <p class="text-wrap text-black-50 mt-3" [innerHtml]="quickFixInfo.summary"></p>
+            </div>
+
+            <div *ngIf="item.isNew" title="This feature is currently only available in pre-release builds">
+                <div class="btn-ducky rounded-pill">New!</div>
+                <div class="small text-start mb-3">
+                    <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
+                </div>
+            </div>
+        </button>
+    </div>
+</div>
+
+
+<ng-template #quickFixDetails let-modal>
+    <div class="modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>
+                    <img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{quickFixInfo.title}}
+                </h4>
+                <button type="button" class="btn-close" aria-label="close" title="Close" (click)="modal.dismiss('x')"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="p-2">
+                        <p [innerHtml]="quickFixInfo.summary"></p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div *ngIf="quickFixInfo.remarks && quickFixInfo.remarks.length > 0" class="row">
+                        <div class="alert alert-info bg-light-subtle mt-2 col-12">
+                            <h5>Remarks</h5>
+                            <p [innerHtml]="quickFixInfo.remarks"></p>
+                        </div>
+                    </div>
+                    <!-- if all "CanFix" flags are unset, the xmldoc is more likely to just missing the information, vs the quickfix not being enabled anywhere -->
+                    <div class="row">
+                        <div class="col-12 d-inline flex-nowrap">
+                            <div role="status" class="btn disabled" [ngClass]="quickFixInfo.canFixAll ? 'btn-success' : 'btn-outline-danger'">
+                                <span><fa-icon [icon]="['fas', quickFixInfo.canFixAll ? 'check-circle' : 'xmark-circle']"></fa-icon>&nbsp;All</span>
+                            </div>
+                            <div role="status" class="btn disabled mx-1" [ngClass]="quickFixInfo.canFixMultiple ? 'btn-success' : 'btn-outline-danger'">
+                                <span><fa-icon [icon]="['fas', quickFixInfo.canFixMultiple ? 'list-check' : 'xmark-circle']"></fa-icon>&nbsp;Multiple</span>
+                            </div>
+                            <div role="status" class="btn disabled" [ngClass]="quickFixInfo.canFixProject ? 'btn-success' : 'btn-outline-danger'">
+                                <span>Project</span>
+                            </div>
+                            <div role="status" class="btn disabled mx-1" [ngClass]="quickFixInfo.canFixModule ? 'btn-success' : 'btn-outline-danger'">
+                                <span>Module</span>
+                            </div>
+                            <div role="status" class="btn disabled" [ngClass]="quickFixInfo.canFixProcedure ? 'btn-success' : 'btn-outline-danger'">
+                                <span>Procedure</span>
+                            </div>
+                        </div>
+                        <div *ngIf="!(quickFixInfo.canFixAll || quickFixInfo.canFixModule || quickFixInfo.canFixMultiple || quickFixInfo.canFixProcedure || quickFixInfo.canFixProject)">
+                            <small class="text-black-50">This action applies to a single selected inspection result.</small>
+                        </div>
+                        <div *ngIf="quickFixInfo.canFixMultiple && !(quickFixInfo.canFixAll || quickFixInfo.canFixModule || quickFixInfo.canFixProcedure || quickFixInfo.canFixProject)">
+                            <small class="text-black-50">This action can be applied to a selection of inspection results.</small>
+                        </div>
+                        <div *ngIf="!quickFixInfo.canFixProcedure && (quickFixInfo.canFixAll && quickFixInfo.canFixModule && quickFixInfo.canFixProject)">
+                            <small class="text-black-50">This action is not applicable at procedure level.</small>
+                        </div>
+                        <div *ngIf="quickFixInfo.canFixAll && quickFixInfo.canFixModule && quickFixInfo.canFixMultiple && quickFixInfo.canFixProcedure && quickFixInfo.canFixProject">
+                            <small class="text-black-50">This action can be applied simultaneously for all inspection results.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="quickFixInfo.examples && quickFixInfo.examples.length > 0" class="row my-3">
+                    <div class="text-center">
+                        <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureItemBoxDetailsBody" aria-controls="featureItemBoxDetailsBody" (click)="item.isDetailsCollapsed = !item.isDetailsCollapsed">
+                            <div *ngIf="item && item.isDetailsCollapsed">
+                                Show examples ▾
+                            </div>
+                            <div *ngIf="item && !item.isDetailsCollapsed">
+                                Hide examples ▴
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                <div id="featureItemBoxDetailsBody" class="collapse" [ngClass]="{'show': !item.isDetailsCollapsed}">
+                    <div class="row">
+                        <div>
+                            <div id="quickFixInfoBody">
+                                <div *ngFor="let example of quickFixInfo.examples">
+                                    <example-box [quickFixExample]="example"></example-box>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <div class="small text-muted text-center">
+                    <a href="{{quickFixInfo.getGitHubViewLink()}}">View</a> | <a href="{{quickFixInfo.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
+                </div>
+                <a href="/quickfixes/{{quickFixInfo.name}}" class="btn btn-expand" title="Expand to page"><fa-icon [icon]="['fas', 'expand']"></fa-icon></a>
+            </div>
+        </div>
+    </div>
+</ng-template>

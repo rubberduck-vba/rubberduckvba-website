@@ -21,7 +21,7 @@ SELECT
     [InstallerDownloadUrl],
     [InstallerDownloads],
     [IsPreRelease]
-FROM [dbo].[Tags]";
+FROM [dbo].[Tags] a";
 
     protected override string InsertSql { get; } = @"
 INSERT INTO [Tags] (
@@ -29,6 +29,7 @@ INSERT INTO [Tags] (
     [RepositoryId],
     [Name],
     [DateCreated],
+    [ReleaseId],
     [InstallerDownloadUrl],
     [InstallerDownloads],
     [IsPreRelease])
@@ -37,6 +38,7 @@ VALUES (
     @repositoryId, 
     @name, 
     @dateCreated, 
+    @releaseId,
     @installerDownloadUrl, 
     @installerDownloads, 
     @isPreRelease)";

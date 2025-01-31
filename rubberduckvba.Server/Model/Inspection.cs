@@ -10,9 +10,11 @@ public record class Inspection() : IFeature
         Id = entity.Id;
         DateTimeInserted = entity.DateTimeInserted;
         DateTimeUpdated = entity.DateTimeUpdated;
-        FeatureId = entity.FeatureId;
         TagAssetId = entity.TagAssetId;
         SourceUrl = entity.SourceUrl;
+
+        FeatureId = entity.FeatureId;
+        FeatureName = entity.FeatureName;
 
         IsNew = entity.IsNew;
         IsDiscontinued = entity.IsDiscontinued;
@@ -33,9 +35,11 @@ public record class Inspection() : IFeature
     public int Id { get; init; }
     public DateTime DateTimeInserted { get; init; }
     public DateTime? DateTimeUpdated { get; init; }
-    public int FeatureId { get; init; }
     public int TagAssetId { get; init; }
     public string SourceUrl { get; init; } = string.Empty;
+
+    public int FeatureId { get; init; }
+    public string FeatureName { get; init; }
 
     public bool IsNew { get; init; }
     public bool IsDiscontinued { get; init; }
@@ -56,6 +60,7 @@ public record class Inspection() : IFeature
     {
         Id = Id,
         FeatureId = FeatureId,
+        FeatureName = FeatureName,
         DateTimeInserted = DateTimeInserted,
         DateTimeUpdated = DateTimeUpdated,
         TagAssetId = TagAssetId,

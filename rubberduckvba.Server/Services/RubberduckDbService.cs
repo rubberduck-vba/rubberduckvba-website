@@ -57,7 +57,6 @@ public enum RepositoryId
 
 public interface IRubberduckDbService
 {
-    Task<IEnumerable<Tag>> GetAllTagsAsync();
     Task<IEnumerable<Tag>> GetLatestTagsAsync(RepositoryId repositoryId);
     Task<TagGraph> GetLatestTagAsync(RepositoryId repositoryId, bool includePreRelease);
     Task UpdateAsync(IEnumerable<Tag> tags);
@@ -156,7 +155,7 @@ public class RubberduckDbService : IRubberduckDbService
     {
         var features = _featureServices.Get(topLevelOnly: false).ToList();
         var feature = features.Single(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
-        var children = features.Where(e => e.ParentId == feature.Id);
+        var children = features.Where(e => e.FeatureId == feature.Id);
         return new FeatureGraph(feature.ToEntity())
         {
             Features = children.ToArray()
@@ -314,17 +313,17 @@ public class RubberduckDbService : IRubberduckDbService
     }
 
     public async Task CreateAsync(IEnumerable<TagGraph> tags, RepositoryId repositoryId)
-        => _tagServices.Create(tags);
+        => await Task.Run(() => _tagServices.Create(tags));
 
     public async Task<IEnumerable<Tag>> GetLatestTagsAsync(RepositoryId repositoryId)
-        => _tagServices.GetLatestTags();
+        => await Task.Run(() => _tagServices.GetLatestTags());
 
     public async Task<TagGraph> GetLatestTagAsync(RepositoryId repositoryId, bool preRelease)
-        => _tagServices.GetLatestTag(preRelease);
+        => await Task.Run(() => _tagServices.GetLatestTag(preRelease));
 
     public async Task UpdateAsync(IEnumerable<Tag> tags)
-        => _tagServices.Update(tags);
+        => await Task.Run(() => _tagServices.Update(tags));
 
     public async Task<int?> GetFeatureId(RepositoryId repositoryId, string name)
-        => _featureServices.GetId(name);
+        => await Task.Run(() => _featureServices.GetId(name));
 }
