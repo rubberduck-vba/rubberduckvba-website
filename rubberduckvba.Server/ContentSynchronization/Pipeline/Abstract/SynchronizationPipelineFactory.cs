@@ -5,6 +5,7 @@ using rubberduckvba.Server.ContentSynchronization.XmlDoc.Abstract;
 using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
+using rubberduckvba.Server.Services.rubberduckdb;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 
@@ -20,13 +21,16 @@ public class SynchronizationPipelineFactory : ISynchronizationPipelineFactory<Sy
     private readonly IRepository<QuickFixEntity> _quickfixes;
     private readonly IRepository<AnnotationEntity> _annotations;
 
+    private readonly TagServices _tagServices;
+
     private readonly XmlDocAnnotationParser _annotationParser;
     private readonly XmlDocQuickFixParser _quickFixParser;
     private readonly XmlDocInspectionParser _inspectionParser;
 
     public SynchronizationPipelineFactory(ILogger<PipelineLogger> logger, IRubberduckDbService content, IGitHubClientService github, IXmlDocMerge merge, IStagingServices staging, IMarkdownFormattingService markdown,
         IRepository<InspectionEntity> inspections, IRepository<QuickFixEntity> quickfixes, IRepository<AnnotationEntity> annotations,
-        XmlDocAnnotationParser xmlAnnotationParser, XmlDocQuickFixParser xmlQuickFixParser, XmlDocInspectionParser xmlInspectionParser)
+        XmlDocAnnotationParser xmlAnnotationParser, XmlDocQuickFixParser xmlQuickFixParser, XmlDocInspectionParser xmlInspectionParser,
+        TagServices tagServices)
     {
         _logger = logger;
         _content = content;
@@ -38,6 +42,8 @@ public class SynchronizationPipelineFactory : ISynchronizationPipelineFactory<Sy
         _quickfixes = quickfixes;
         _annotations = annotations;
 
+        _tagServices = tagServices;
+
         _annotationParser = xmlAnnotationParser;
         _quickFixParser = xmlQuickFixParser;
         _inspectionParser = xmlInspectionParser;
@@ -47,7 +53,7 @@ public class SynchronizationPipelineFactory : ISynchronizationPipelineFactory<Sy
     {
         return parameters switch
         {
-            XmldocSyncRequestParameters => new SynchronizeXmlPipeline(parameters, _logger, _content, _github, _merge, _staging, _markdown, tokenSource, _inspections, _quickfixes, _annotations, _annotationParser, _quickFixParser, _inspectionParser),
+            XmldocSyncRequestParameters => new SynchronizeXmlPipeline(parameters, _logger, _content, _github, _merge, _staging, _markdown, tokenSource, _inspections, _quickfixes, _annotations, _annotationParser, _quickFixParser, _inspectionParser, _tagServices),
             TagSyncRequestParameters => new SynchronizeTagsPipeline(parameters, _logger, _content, _github, _merge, _staging, tokenSource),
             _ => throw new NotSupportedException(),
         };

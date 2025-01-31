@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace rubberduckvba.Server.Model;
 
@@ -7,7 +8,7 @@ public record class ExampleModule
     private static readonly IDictionary<ExampleModuleType, string> ModuleTypes =
         typeof(ExampleModuleType)
             .GetMembers()
-            .Select(m => (m.Name, m.GetCustomAttributes().OfType<System.ComponentModel.DescriptionAttribute>().SingleOrDefault()?.Description))
+            .Select(m => (m.Name, Description: m.GetCustomAttributes().OfType<DisplayAttribute>().SingleOrDefault()?.Name))
             .Where(m => m.Description != null)
             .ToDictionary(m => (ExampleModuleType)Enum.Parse(typeof(ExampleModuleType), m.Name, true), m => m.Description!);
 

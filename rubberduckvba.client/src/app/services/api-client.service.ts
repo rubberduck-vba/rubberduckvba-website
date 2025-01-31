@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { LatestTags, Tag } from "../model/tags.model";
-import { AnnotationsFeatureViewModel, FeatureViewModel, InspectionsFeatureViewModel, QuickFixViewModel, QuickFixesFeatureViewModel, SubFeatureViewModel } from "../model/feature.model";
+import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, XmlDocOrFeatureViewModel } from "../model/feature.model";
 import { DownloadInfo } from "../model/downloads.model";
 import { DataService } from "./data.service";
 import { environment } from "../../environments/environment.prod";
@@ -25,19 +25,32 @@ export class ApiClientService {
     return this.data.getAsync<FeatureViewModel[]>(`${environment.apiBaseUrl}features`);
   }
 
-  public getFeature(name: string): Observable<SubFeatureViewModel|InspectionsFeatureViewModel|QuickFixesFeatureViewModel|AnnotationsFeatureViewModel> {
+  public getFeature(name: string): Observable<XmlDocOrFeatureViewModel> {
     const url = `${environment.apiBaseUrl}features/${name}`;
     const featureName = name.toLowerCase();
 
     switch (featureName) {
       case "inspections":
-        return this.data.getAsync<InspectionsFeatureViewModel>(url);
+        return this.data.getAsync<InspectionsFeatureViewModel>(url).pipe(map(e => new InspectionsFeatureViewModelClass(e)));
       case "quickfixes":
-        return this.data.getAsync<QuickFixesFeatureViewModel>(url);
+        return this.data.getAsync<QuickFixesFeatureViewModel>(url).pipe(map(e => new QuickFixesFeatureViewModelClass(e)));
       case "annotations":
-        return this.data.getAsync<AnnotationsFeatureViewModel>(url);
+        return this.data.getAsync<AnnotationsFeatureViewModel>(url).pipe(map(e => new AnnotationsFeatureViewModelClass(e)));
       default:
-        return this.data.getAsync<SubFeatureViewModel>(`${environment.apiBaseUrl}features/${name}`);
+        return this.data.getAsync<FeatureViewModel>(url).pipe(map(e => new FeatureViewModelClass(e)));
     }
+  }
+
+  public getInspection(name: string): Observable<InspectionViewModel> {
+    const url = `${environment.apiBaseUrl}inspections/${name}`
+    return this.data.getAsync<InspectionViewModel>(url).pipe(map(e => new InspectionViewModelClass(e)));
+  }
+  public getAnnotation(name: string): Observable<AnnotationViewModel> {
+    const url = `${environment.apiBaseUrl}annotations/${name}`
+    return this.data.getAsync<AnnotationViewModel>(url).pipe(map(e => new AnnotationViewModelClass(e)));
+  }
+  public getQuickFix(name: string): Observable<QuickFixViewModel> {
+    const url = `${environment.apiBaseUrl}quickfixes/${name}`
+    return this.data.getAsync<QuickFixViewModel>(url).pipe(map(e => new QuickFixViewModelClass(e)));
   }
 }

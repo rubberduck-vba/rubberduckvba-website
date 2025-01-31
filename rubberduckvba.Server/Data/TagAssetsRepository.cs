@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using rubberduckvba.Server;
 using rubberduckvba.Server.Model.Entity;
 
 namespace rubberduckvba.Server.Data;
@@ -20,7 +19,7 @@ SELECT
     [TagId],
     [Name],
     [DownloadUrl]
-FROM [dbo].[TagAssets]";
+FROM [dbo].[TagAssets] a";
 
     protected override string InsertSql { get; } = @"
 INSERT INTO [dbo].[TagAssets] (

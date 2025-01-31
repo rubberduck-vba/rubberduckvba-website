@@ -11,17 +11,23 @@ public class AnnotationsRepository : Repository<AnnotationEntity>, IRepository<A
     protected override string TableName { get; } = "Annotations";
     protected override string SelectSql { get; } = @"
 SELECT 
-    [Id],
-    [DateTimeInserted],
-    [DateTimeUpdated],
-    [FeatureId],
-    [TagAssetId],
-    [SourceUrl],
-    [Name],
-    [Remarks],
-    [JsonParameters],
-    [JsonExamples]
-FROM [dbo].[Annotations]";
+    a.[Id],
+    a.[DateTimeInserted],
+    a.[DateTimeUpdated],
+    a.[FeatureId],
+    f.[Name] AS [FeatureName],
+    a.[TagAssetId],
+    a.[SourceUrl],
+    a.[Name],
+    a.[Summary],
+    a.[Remarks],
+    a.[JsonParameters],
+    a.[JsonExamples],
+    a.[IsNew],
+    a.[IsDiscontinued],
+    a.[IsHidden]
+FROM [dbo].[Annotations] a
+INNER JOIN [dbo].[Features] f ON a.[FeatureId]=f.[Id]";
 
     protected override string InsertSql { get; } = @"
 INSERT INTO [dbo].[Annotations] (
@@ -30,26 +36,38 @@ INSERT INTO [dbo].[Annotations] (
     [TagAssetId],
     [SourceUrl],
     [Name],
+    [Summary],
     [Remarks],
     [JsonParameters],
-    [JsonExamples])
+    [JsonExamples],
+    [IsNew],
+    [IsDiscontinued],
+    [IsHidden])
 VALUES (
     GETDATE(),
     @featureId,
     @tagAssetId,
     @sourceUrl,
     @name,
+    @summary,
     @remarks,
     @jsonParameters,
-    @jsonExamples)";
+    @jsonExamples,
+    @isNew,
+    @isDiscontinued,
+    @isHidden)";
 
     protected override string UpdateSql { get; } = @"
 UPDATE [dbo].[Annotations]
 SET [DateTimeUpdated]=GETDATE(),
     [TagAssetId]=@tagAssetId,
+    [Summary]=@summary,
     [Remarks]=@remarks,
     [JsonParameters]=@jsonParameters,
-    [JsonExamples]=@jsonExamples
+    [JsonExamples]=@jsonExamples,
+    [IsNew]=@isNew,
+    [IsDiscontinued]=@isDiscontinued,
+    [IsHidden]=@isHidden
 WHERE [Id]=@id";
 
 }

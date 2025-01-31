@@ -1,24 +1,24 @@
 ﻿using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.Model;
-using rubberduckvba.Server.Services;
+using rubberduckvba.Server.Services.rubberduckdb;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncXmldoc;
 
 public class AcquireDbTagsBlock : TransformBlockBase<SyncRequestParameters, IEnumerable<Tag>, SyncContext>
 {
-    private readonly IRubberduckDbService _service;
+    private readonly TagServices _service;
 
     public AcquireDbTagsBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger,
-        IRubberduckDbService service)
+        TagServices service)
         : base(parent, tokenSource, logger)
     {
         _service = service;
     }
 
-    public override async Task<IEnumerable<Tag>> TransformAsync(SyncRequestParameters input)
+    public override IEnumerable<Tag> Transform(SyncRequestParameters input)
     {
-        return await _service.GetAllTagsAsync();
+        return _service.GetAllTags();
     }
 }
 

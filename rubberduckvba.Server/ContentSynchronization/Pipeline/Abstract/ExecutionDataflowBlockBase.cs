@@ -163,14 +163,14 @@ public abstract class ExecutionDataflowBlockBase<TBlock, TInput, TContext> : Dat
                             completionTasks.Add(sourceBlock.Completion);
                         }
                     }
-                    else if (srcBlock != null)
+                    else if (srcBlock != null && !propagate)
                     {
-                        //completionTasks.Add(srcBlock.Completion);
-                        Logger.LogWarning(Context.Parameters, $"{Name} | ⚠️ Source block ({srcBlock.GetType().Name}) is not ISourceBlock<{typeof(TInput).Name}>. Pipeline may not complete.");
-                        throw new InvalidOperationException($"Source block ({srcBlock.GetType().Name}) is not ISourceBlock<{typeof(TInput).Name}>");
+                        completionTasks.Add(srcBlock.Completion);
                     }
                     else
                     {
+                        //completionTasks.Add(srcBlock.Completion);
+                        Logger.LogWarning(Context.Parameters, $"{Name} | ⚠️ Source block ({srcBlock?.GetType().Name}) is not ISourceBlock<{typeof(TInput).Name}>. Pipeline may not complete.");
                         throw new InvalidOperationException($"Source block is not defined.");
                     }
                 }

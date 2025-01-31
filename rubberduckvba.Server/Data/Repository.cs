@@ -55,11 +55,11 @@ public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity :
     protected virtual string? ParentFKColumnName => null;
 
     public virtual int GetId(string name) => Get(db => db.QuerySingle<int>($"SELECT [Id] FROM [dbo].[{TableName}] WHERE [Name]=@name", new { name }));
-    public virtual TEntity GetById(int id) => Get(db => db.QuerySingle<TEntity>(SelectSql + " WHERE [Id]=@id", new { id }));
+    public virtual TEntity GetById(int id) => Get(db => db.QuerySingle<TEntity>(SelectSql + " WHERE a.[Id]=@id", new { id }));
     public virtual IEnumerable<TEntity> GetAll(int? parentId = default) =>
         ParentFKColumnName is null || !parentId.HasValue
             ? Query(db => db.Query<TEntity>(SelectSql))
-            : Query(db => db.Query<TEntity>($"{SelectSql} WHERE [{ParentFKColumnName}]=@parentId", new { parentId }));
+            : Query(db => db.Query<TEntity>($"{SelectSql} WHERE a.[{ParentFKColumnName}]=@parentId", new { parentId }));
     public virtual TEntity Insert(TEntity entity) => Insert([entity]).Single();
     public virtual IEnumerable<TEntity> Insert(IEnumerable<TEntity> entities)
     {

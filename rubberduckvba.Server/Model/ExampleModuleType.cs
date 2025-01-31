@@ -1,15 +1,15 @@
-﻿using System.ComponentModel;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace rubberduckvba.Server.Model;
 
 public enum ExampleModuleType
 {
     None = 0,
-    [Description("(Any)")] Any,
-    [Description("Class Module")] ClassModule,
-    [Description("Document Module")] DocumentModule,
-    [Description("Interface Module")] InterfaceModule,
-    [Description("Predeclared Class")] PredeclaredClass,
-    [Description("Standard Module")] StandardModule,
-    [Description("UserForm Module")] UserFormModule
+    [Display(Name = "(Any)")] Any,
+    [Display(Name = "Class Module")] ClassModule,
+    [Display(Name = "Document Module")] DocumentModule,
+    [Display(Name = "Interface Module")] InterfaceModule,
+    [Display(Name = "Predeclared Class")] PredeclaredClass,
+    [Display(Name = "Standard Module")] StandardModule,
+    [Display(Name = "UserForm Module")] UserFormModule
 }

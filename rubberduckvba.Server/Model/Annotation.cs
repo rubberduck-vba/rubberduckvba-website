@@ -14,8 +14,15 @@ public record class Annotation() : IFeature
         TagAssetId = entity.TagAssetId;
         SourceUrl = entity.SourceUrl;
         Name = entity.Name;
+        Summary = entity.Summary;
+        Remarks = entity.Remarks;
+
         Parameters = entity.JsonParameters is null ? [] : JsonSerializer.Deserialize<AnnotationParameter[]>(entity.JsonParameters) ?? [];
         Examples = entity.JsonExamples is null ? [] : JsonSerializer.Deserialize<AnnotationExample[]>(entity.JsonExamples) ?? [];
+
+        IsNew = entity.IsNew;
+        IsDiscontinued = entity.IsDiscontinued;
+        IsHidden = entity.IsHidden;
     }
 
     public int Id { get; init; }
@@ -44,6 +51,9 @@ public record class Annotation() : IFeature
         Name = Name,
         Summary = Summary,
         Remarks = Remarks,
+        IsNew = IsNew,
+        IsDiscontinued = IsDiscontinued,
+        IsHidden = IsHidden,
         JsonParameters = JsonSerializer.Serialize(Parameters),
         JsonExamples = JsonSerializer.Serialize(Examples),
     };
@@ -54,6 +64,9 @@ public record class Annotation() : IFeature
         hash.Add(Name);
         hash.Add(Summary);
         hash.Add(Remarks);
+        hash.Add(IsNew);
+        hash.Add(IsDiscontinued);
+        hash.Add(IsHidden);
         hash.Add(JsonSerializer.Serialize(Parameters));
         hash.Add(JsonSerializer.Serialize(Examples));
         return hash.ToHashCode();

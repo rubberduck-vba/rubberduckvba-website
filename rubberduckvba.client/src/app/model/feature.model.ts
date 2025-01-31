@@ -32,11 +32,35 @@ export interface FeatureViewModel extends SubFeatureViewModel {
   hasImage: boolean;
 
   features: FeatureViewModel[];
+  links: BlogLink[];
+}
+
+export interface BlogLink {
+  name: string;
+  url: string;
+  author: string;
+  published: string;
+}
+
+export class BlogLinkViewModelClass implements BlogLink {
+  name: string;
+  url: string;
+  author: string;
+  published: string;
+
+  constructor(model: BlogLink) {
+    this.name = model.name;
+    this.url = model.url;
+    this.author = model.author;
+    this.published = model.published;
+  }
 }
 
 export interface Example {
   description: string;
   sortOrder: number;
+
+  isCollapsed: boolean | undefined;
 }
 
 export interface BeforeAfterExample extends Example {
@@ -46,7 +70,7 @@ export interface BeforeAfterExample extends Example {
 
 export interface ExampleModule {
   moduleName: string;
-  moduleType: string;
+  moduleTypeName: string;
   htmlContent: string;
   description: string;
 }
@@ -54,8 +78,6 @@ export interface ExampleModule {
 export interface InspectionExample extends Example {
   hasResult: boolean;
   modules: ExampleModule[];
-
-  isCollapsed: boolean | undefined;
 }
 
 export interface QuickFixExample extends BeforeAfterExample {
@@ -89,6 +111,9 @@ export interface InspectionViewModel extends XmlDocViewModel {
   quickFixes: string[];
 
   examples: InspectionExample[];
+
+  getGitHubViewLink(): string;
+  getGitHubEditLink(): string;
 }
 
 export interface InspectionsFeatureViewModel extends SubFeatureViewModel {
@@ -103,7 +128,7 @@ export interface AnnotationsFeatureViewModel extends SubFeatureViewModel {
   annotations: AnnotationViewModel[];
 }
 
-export type XmlDocOrFeatureViewModel = FeatureViewModel | InspectionsFeatureViewModel | QuickFixesFeatureViewModel | AnnotationsFeatureViewModel;
+export type XmlDocOrFeatureViewModel = SubFeatureViewModel | InspectionsFeatureViewModel | QuickFixesFeatureViewModel | AnnotationsFeatureViewModel;
 
 export interface QuickFixViewModel extends XmlDocViewModel {
   summary: string;
@@ -116,6 +141,9 @@ export interface QuickFixViewModel extends XmlDocViewModel {
 
   inspections: string[];
   examples: QuickFixExample[];
+
+  getGitHubViewLink(): string;
+  getGitHubEditLink(): string;
 }
 
 export interface AnnotationViewModel extends XmlDocViewModel {
@@ -124,86 +152,250 @@ export interface AnnotationViewModel extends XmlDocViewModel {
 
   parameters: AnnotationParameter[];
   examples: AnnotationExample[];
+
+  getGitHubViewLink(): string;
+  getGitHubEditLink(): string;
 }
 
 export type XmlDocItemViewModel = InspectionViewModel | QuickFixViewModel | AnnotationViewModel;
 
-//export class FeatureItemViewModel {
-//  id: number;
-//  dateInserted: Date;
-//  dateUpdated: Date | undefined;
-//  featureId: number;
-//  featureName: string;
-//  featureTitle: string;
-//  name: string;
-//  title: string;
-//  summary: string;
-//  reasoning: string;
-//  remarks: string;
-//  isNew: boolean;
-//  isDiscontinued: boolean;
-//  isHidden: boolean;
-//  tagAssetId: number;
-//  sourceUrl: string;
-//  serialized: string;
-//  tagName: string;
+export class ViewModelBase implements ViewModel {
+  id: number;
+  dateInserted: string;
+  dateUpdated: string;
+  name: string;
+  isNew: boolean;
+  isHidden: boolean;
+  isCollapsed: boolean;
+  isDetailsCollapsed: boolean;
 
-//  isCollapsed: boolean;
-//  isDetailsCollapsed: boolean;
+  constructor(model: ViewModel) {
+    this.id = model.id;
+    this.dateInserted = model.dateInserted;
+    this.dateUpdated = model.dateUpdated;
+    this.name = model.name;
+    this.isNew = model.isNew;
+    this.isHidden = model.isHidden;
 
-//  info: any; // QuickFixInfo | AnnotationInfo | InspectionInfo;
-//  examples: any[];
+    this.isCollapsed = model.isCollapsed;
+    this.isDetailsCollapsed = true;
+  }
 
-//  constructor(model: any) {
-//    const info: any = JSON.parse(model.serialized);
-//    info.Id = model.id;
-//    info.FeatureName = model.featureName;
-//    info.FeatureTitle = model.featureTitle;
+  protected depascalize(name: string): string {
+    const lWords = ["The", "Is", "As", "Of", "In", "On", "Not"];
+    const uWords = ["Udf", "Id"];
+    const nsWords = ["By Ref", "By Val", "Def Type", "I If", "U D T", "UD T", "Is Missing", "Param Array", "Predeclared ID"];
 
-//    if (model.featureName == 'Inspections') {
-//      this.info = new InspectionInfoViewModel(model);
-//    }
-//    else if (model.featureName == 'QuickFixes') {
-//      //this.info = new QuickFixInfoViewModel(JSON.parse(model.serialized));
-//    }
-//    else if (model.featureName == 'Annotations') {
-//      //this.info = new AnnotationInfoViewModel(JSON.parse(model.serialized));
-//    }
+    const words = name.split(/(?=[A-Z])/)
 
-//    this.id = model.id;
-//    this.dateInserted = model.dateTimeInserted;
-//    this.dateUpdated = model.dateTimeUpdated;
-//    this.featureId = model.featureId;
-//    this.featureName = model.featureName;
-//    this.featureTitle = model.featureTitle;
-//    this.name = model.name;
-//    this.title = model.title;
-//    this.summary = model.summary;
+      .map(e => uWords.find(w => w == e) ? e.toUpperCase() : lWords.find(w => w == e) ? e.toLowerCase() : e);
 
-//    this.reasoning = this.info.Reasoning;
-//    this.remarks = this.info.Remarks;
+    let depascalized = words.join(' ');
 
-//    this.isNew = model.isNew;
-//    this.isDiscontinued = model.isDiscontinued;
-//    this.isHidden = model.isHidden;
+    nsWords.forEach(w => {
+      depascalized = depascalized.replace(w, w.replace(' ', ''));
+    });
 
-//    this.tagAssetId = model.tagAssetId;
-//    this.tagName = model.tagName;
-//    this.sourceUrl = model.sourceUrl;
-//    this.serialized = model.serialized;
+    depascalized = depascalized.replace("is Missing", "IsMissing");
+    let [first, ...rest] = depascalized;
+    return first.toUpperCase() + rest.join('');
+  }
+}
 
-//    this.examples = this.info.examples;
+export class FeatureViewModelClass extends ViewModelBase {
+  featureId?: number;
+  featureName?: string;
+  featureTitle?: string;
 
-//    this.isCollapsed = true;
-//    this.isDetailsCollapsed = true;
-//  }
+  title: string;
+  description: string;
 
-//  public getGitHubEditLink(): string {
-//    const url = this.sourceUrl;
-//    return `https://github.com/rubberduck-vba/Rubberduck/edit/next/${url}.cs`;
-//  }
-//  public getGitHubViewLink(): string {
-//    const url = this.sourceUrl;
-//    return `https://github.com/rubberduck-vba/Rubberduck/tree/next/${url}.cs`;
-//  }
-//}
+  shortDescription: string;
+
+  hasImage: boolean;
+
+  features: FeatureViewModel[];
+  links: BlogLink[];
+
+  constructor(model: FeatureViewModel) {
+    super(model);
+    this.title = model.title;
+    this.description = model.description;
+    this.shortDescription = model.shortDescription;
+    this.hasImage = model.hasImage;
+    this.features = model.features.map(e => new FeatureViewModelClass(e));
+    this.links = model.links?.map(e => new BlogLinkViewModelClass(e)) ?? [];
+
+    this.isCollapsed = !model.hasImage;
+  }
+}
+
+export class SubFeatureViewModelClass extends ViewModelBase implements SubFeatureViewModel {
+  featureId?: number | undefined;
+  featureName?: string | undefined;
+  featureTitle?: string | undefined;
+  title: string;
+  description: string;
+
+  constructor(model: SubFeatureViewModel) {
+    super(model);
+    this.title = model.title;
+    this.description = model.description;
+    this.isDetailsCollapsed = true;
+    this.featureId = model.featureId;
+    this.featureName = model.featureName;
+  }
+}
+
+export class InspectionViewModelClass extends SubFeatureViewModelClass implements InspectionViewModel {
+  inspectionType: string;
+  defaultSeverity: string;
+  summary: string;
+  reasoning: string;
+  remarks?: string | undefined;
+  hostApp?: string | undefined;
+  references: string[];
+  quickFixes: string[];
+  examples: InspectionExample[];
+  tagAssetId: number;
+  tagName: string;
+  sourceUrl: string;
+  isDiscontinued: boolean;
+
+  public getGitHubViewLink(): string {
+    return `https://github.com/rubberduck-vba/Rubberduck/blob/next/${this.sourceUrl}.cs`
+  }
+
+  public getGitHubEditLink(): string {
+    return `https://github.com/rubberduck-vba/Rubberduck/edit/next/${this.sourceUrl}.cs`;
+  }
+
+  constructor(model: InspectionViewModel) {
+    super(model);
+    this.name = model.name;
+    this.title = this.depascalize(model.name);
+
+    this.inspectionType = model.inspectionType;
+    this.defaultSeverity = model.defaultSeverity;
+    this.summary = model.summary;
+    this.reasoning = model.reasoning;
+    this.remarks = model.remarks;
+    this.hostApp = model.hostApp;
+    this.references = model.references;
+
+    this.quickFixes = model.quickFixes;
+    this.examples = model.examples;
+
+    this.tagAssetId = model.tagAssetId;
+    this.tagName = model.tagName;
+    this.sourceUrl = model.sourceUrl;
+    this.isDiscontinued = model.isDiscontinued;
+  }
+}
+
+export class QuickFixViewModelClass extends SubFeatureViewModelClass implements QuickFixViewModel {
+  summary: string;
+  remarks?: string | undefined;
+  canFixMultiple: boolean;
+  canFixProcedure: boolean;
+  canFixModule: boolean;
+  canFixProject: boolean;
+  canFixAll: boolean;
+  inspections: string[];
+  examples: QuickFixExample[];
+  tagAssetId: number;
+  tagName: string;
+  sourceUrl: string;
+  isDiscontinued: boolean;
+
+  public getGitHubViewLink(): string {
+    return `https://github.com/rubberduck-vba/Rubberduck/blob/next/${this.sourceUrl}.cs`
+  }
+
+  public getGitHubEditLink(): string {
+    return `https://github.com/rubberduck-vba/Rubberduck/edit/next/${this.sourceUrl}.cs`;
+  }
+  constructor(model: QuickFixViewModel) {
+    super(model);
+    this.title = this.depascalize(model.name.replace('QuickFix',''));
+
+    this.summary = model.summary;
+    this.remarks = model.remarks;
+
+    this.examples = model.examples;
+    this.inspections = model.inspections;
+
+    this.tagAssetId = model.tagAssetId;
+    this.tagName = model.tagName;
+    this.sourceUrl = model.sourceUrl;
+    this.isDiscontinued = model.isDiscontinued;
+
+    this.canFixMultiple = model.canFixMultiple;
+    this.canFixAll = model.canFixAll;
+    this.canFixProject = model.canFixProject;
+    this.canFixModule = model.canFixModule;
+    this.canFixProcedure = model.canFixProcedure;
+  }
+}
+
+export class AnnotationViewModelClass extends SubFeatureViewModelClass implements AnnotationViewModel {
+  summary: string;
+  remarks?: string | undefined;
+  examples: AnnotationExample[];
+  tagAssetId: number;
+  tagName: string;
+  sourceUrl: string;
+  isDiscontinued: boolean;
+
+  parameters: AnnotationParameter[];
+
+  public getGitHubViewLink(): string {
+    return `https://github.com/rubberduck-vba/Rubberduck/blob/next/${this.sourceUrl}.cs`
+  }
+
+  public getGitHubEditLink(): string {
+    return `https://github.com/rubberduck-vba/Rubberduck/edit/next/${this.sourceUrl}.cs`;
+  }
+  constructor(model: AnnotationViewModel) {
+    super(model);
+    this.title = this.depascalize(model.name.replace('Annotation', ''));
+
+    this.summary = model.summary;
+    this.remarks = model.remarks;
+
+    this.examples = model.examples;
+
+    this.tagAssetId = model.tagAssetId;
+    this.tagName = model.tagName;
+    this.sourceUrl = model.sourceUrl;
+    this.isDiscontinued = model.isDiscontinued;
+
+    this.parameters = model.parameters;
+  }
+}
+
+export class InspectionsFeatureViewModelClass extends SubFeatureViewModelClass implements InspectionsFeatureViewModel {
+  inspections: InspectionViewModel[];
+  constructor(model: InspectionsFeatureViewModel) {
+    super(model);
+    this.inspections = model.inspections.map(e => new InspectionViewModelClass(e));
+  }
+}
+
+export class QuickFixesFeatureViewModelClass extends SubFeatureViewModelClass implements QuickFixesFeatureViewModel {
+  quickFixes: QuickFixViewModel[];
+
+  constructor(model: QuickFixesFeatureViewModel) {
+    super(model);
+    this.quickFixes = model.quickFixes.map(e => new QuickFixViewModelClass(e));
+  }
+}
+
+export class AnnotationsFeatureViewModelClass extends SubFeatureViewModelClass implements AnnotationsFeatureViewModel {
+  annotations: AnnotationViewModel[];
+
+  constructor(model: AnnotationsFeatureViewModel) {
+    super(model);
+    this.annotations = model.annotations.map(e => new AnnotationViewModelClass(e));
+  }
+}

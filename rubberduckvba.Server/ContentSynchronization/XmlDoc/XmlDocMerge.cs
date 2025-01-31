@@ -67,14 +67,23 @@ public class XmlDocMerge(ILogger<XmlDocMerge> logger) : IXmlDocMerge
 
         var comparer = new XmlDocBranchIntersectComparer<Inspection>();
         var insertItems = new HashSet<Inspection>(
-            from item in nextBranch.Intersect(mainBranch, comparer)
-            where !dbItems.ContainsKey(item.Name)
-            select item with
-            {
-                IsNew = mainBranch.Any() && !mainBranch.Any(a => a.Name == item.Name),
-                IsDiscontinued = !nextBranch.Any(a => a.Name == item.Name),
-                DateTimeInserted = timestamp
-            }
+            (from item in nextBranch.Intersect(mainBranch, comparer)
+             where !dbItems.ContainsKey(item.Name)
+             select item with
+             {
+                 IsNew = mainBranch.Any() && !mainBranch.Any(a => a.Name == item.Name),
+                 IsDiscontinued = !nextBranch.Any(a => a.Name == item.Name),
+                 DateTimeInserted = timestamp
+             })
+            .Concat(
+                from item in nextBranch.Except(mainBranch, comparer)
+                where !dbItems.ContainsKey(item.Name)
+                select item with
+                {
+                    IsNew = mainBranch.Any() && !mainBranch.Any(a => a.Name == item.Name),
+                    IsDiscontinued = !nextBranch.Any(a => a.Name == item.Name),
+                    DateTimeInserted = timestamp
+                })
         );
 
         merged.UnionWith(updatedItems);

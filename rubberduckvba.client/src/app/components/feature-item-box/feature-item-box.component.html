@@ -1,171 +1,24 @@
-<div class="accordion">
-    <div *ngIf="item" class="card my-1">
-        <div class="card-header bg-light-subtle" id="featureItemBoxHeading">
-            <button class="btn btn-link text-dark text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="item.isCollapsed = !item.isCollapsed">
-                <div class="row">
-                    <div class="col-2">
-                        <div *ngIf="item.isNew || item.isDiscontinued">
-                            <div *ngIf="item.isNew" title="This feature is currently only available in pre-release builds">
-                                <div class="btn-ducky rounded-pill">New!</div>
-                                <div class="small text-start mb-3">
-                                    <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
-                                </div>
-                            </div>
-                            <div *ngIf="item.isDiscontinued" title="This feature is no longer present in the latest pre-release build">
-                                <div class="btn-ducky bg-danger rounded-pill">Discontinued</div>
-                                <div class="small text-start mb-3">
-                                    <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
-                                </div>
-                            </div>
-                        </div>
-                        <div *ngIf="!(item.isNew || item.isDiscontinued)">
-                            <div class="small text-start mb-3" title="This feature is available since at least the last official release">
-                                <fa-icon [icon]="'code-branch'"></fa-icon>&nbsp;main | next
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-9">
-                        <h4>{{item.title}}</h4>
-                        <p class="text-wrap text-black-50 mt-3" [innerHtml]="item.summary"></p>
-                    </div>
-                    <div class="col-1">
-                        <div class="float-end">
-                            <h4>
-                                <fa-icon *ngIf="!item.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
-                                <fa-icon *ngIf="item.isCollapsed" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
-                            </h4>
-                        </div>
-                    </div>
+<div *ngIf="item" class="card mb-2">
+    <div class="card-body" id="featureItemBoxHeading">
+        <div class="row">
+            <div *ngIf="item.isNew || item.isDiscontinued">
+                <div *ngIf="item.isNew" title="This feature is currently only available in pre-release builds">
+                    <div class="btn-ducky bg-success rounded-pill text-uppercase">NEW!</div>
                 </div>
-            </button>
-        </div>
-        <div *ngIf="isInspectionInfo && inspectionInfo" class="collapse" id="featureItemBoxCollapseBody" [ngClass]="{'show': !item.isCollapsed}" aria-labelledby="featureItemBoxHeading" data-parent="featureItemBoxAccordion">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="row">
-                            <div class="col-6 text-start">
-                                <div class="row">
-                                    <div class="col-1">
-                                    </div>
-                                    <div class="col-10">
-                                        <h5>
-                                            <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{inspectionInfo.inspectionType}}
-                                        </h5>
-                                    </div>
-                                    <div class="col-1">
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-1">
-                                    </div>
-                                    <div class="col-10">
-                                        Default Severity: <strong>{{inspectionInfo.defaultSeverity}}</strong>
-                                        <p class="small text-black-50">{{severityTitle}}</p>
-                                    </div>
-                                    <div class="col-1">
-                                    </div>
-                                </div>
-                                <div *ngIf="(inspectionInfo.hostApp?.length ?? 0) > 0" class="row">
-                                    <div class="col-1"></div>
-                                    <div class="col-11">
-                                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when hosted in <strong>{{inspectionInfo.hostApp}}</strong>.</p>
-                                    </div>
-                                </div>
-                                <div *ngIf="inspectionInfo.references.length == 1" class="row">
-                                    <div class="col-1"></div>
-                                    <div class="col-11">
-                                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when the <strong>{{inspectionInfo.references[0]}}</strong> library is referenced.</p>
-                                    </div>
-                                </div>
-                                <div *ngIf="inspectionInfo.references.length > 1" class="row">
-                                    <div class="col-1"></div>
-                                    <div class="col-11">
-                                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when any of the following libraries is referenced:</p>
-                                        <ul>
-                                            <li *ngFor="let library of this.inspectionInfo.references">{{library}}</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-1">
-                                    </div>
-                                    <div *ngIf="inspectionInfo.quickFixes.length > 0" class="col-10">
-                                        <hr/>
-                                        <h5>
-                                            <fa-icon [icon]="'wand-magic-sparkles'"></fa-icon>&nbsp;QuickFixes
-                                        </h5>
-                                        <p class="small">This inspection offers the following fixes:</p>
-                                        <ul class="list-unstyled ms-2">
-                                            <li *ngFor="let fix of this.inspectionInfo.quickFixes" class="my-1">
-                                                <a class="text-decoration-none" href="/features/quickfixes/{{fix}}">
-                                                    <div class="card-highlight rounded-4 p-2">
-                                                        <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.replace('QuickFix','')}}</h6>
-                                                        <p class="text-black-50 small" [innerHTML]="getQuickFixSummary(fix)"></p>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-1">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 text-center">
-                                <div class="row text-center">
-                                    <div class="col-11">
-                                        <div class="p-2">
-                                            <h5>Reasoning</h5>
-                                            <p [innerHtml]="inspectionInfo.reasoning"></p>
-                                        </div>
-                                    </div>
-                                    <div class="col-1"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div *ngIf="inspectionInfo.remarks && inspectionInfo.remarks.length > 0" class="row">
-                            <div class="alert alert-info bg-light-subtle mt-2 col-12">
-                                <h5>Remarks</h5>
-                                <p [innerHtml]="inspectionInfo.remarks"></p>
-                            </div>
-                        </div>
-                    </div>
+                <div *ngIf="item.isDiscontinued" title="The {{item.name}} inspection is no longer present in the latest pre-release build">
+                    <div class="btn-ducky rounded-pill">Discontinued</div>
                 </div>
-                <div *ngIf="((inspectionInfo.examples && inspectionInfo.examples.length > 0) || (annotationInfo?.parameters?.length ?? 0) > 0 || (inspectionInfo.quickFixes.length > 0))"
-                     class="row my-3">
-                    <div class="col-1"></div>
-                    <div class="col-10 text-center">
-                        <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureItemBoxDetailsBody" aria-controls="featureItemBoxDetailsBody" (click)="item.isDetailsCollapsed = !item.isDetailsCollapsed">
-                            <div *ngIf="item && item.isDetailsCollapsed">
-                                Show examples ▾
-                            </div>
-                            <div *ngIf="item && !item.isDetailsCollapsed">
-                                Hide examples ▴
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-1"></div>
-                </div>
-                <div id="featureItemBoxDetailsBody" class="collapse" [ngClass]="{'show': !item.isDetailsCollapsed}">
-                    <div class="row">
-                        <div class="col-1"></div>
-                        <div class="col-10">
-                            <div id="inspectionInfoBody" *ngIf="isInspectionInfo">
-                                <div *ngFor="let example of inspectionInfo.examples">
-                                    <example-box [inspectionExample]="example"></example-box>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-1"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="small text-muted">
-                    <!--p><a href="{{item.getGitHubViewLink()}}">View</a> | <a href="{{item.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub</p-->
+                <div class="small text-start text-muted mb-3">
+                    <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
                 </div>
             </div>
         </div>
+        <button class="btn btn-link text-dark text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="item.isCollapsed = !item.isCollapsed">
+            <div>
+                <h4 class="text-wrap">{{item.title}}</h4>
+                <p class="text-wrap text-black-50 mt-3" [innerHtml]="item.summary"></p>
+            </div>
+        </button>
     </div>
 </div>
 

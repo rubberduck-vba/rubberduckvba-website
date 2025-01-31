@@ -19,6 +19,8 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
   private readonly _quickfixes: BehaviorSubject<QuickFixViewModel[]> = new BehaviorSubject<QuickFixViewModel[]>(null!);
   private _quickfixMap: Map<string, QuickFixViewModel> = null!;
 
+  public readonly _iconClass: BehaviorSubject<string> = new BehaviorSubject<string>(null!);
+
   constructor(private fa: FaIconLibrary) {
     fa.addIconPacks(fas);
   }
@@ -59,10 +61,8 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
 
       if (value.featureName == 'Inspections') {
         this._inspectionInfo.next(value as InspectionViewModel);
+        this._iconClass.next(`icon icon-severity-${this.inspectionInfo?.defaultSeverity.toLowerCase()}`);
         this.isInspectionInfo = true;
-        if (this.item.isNew) {
-          console.log(this.item);
-        }
       }
 
       if (value.featureName == 'QuickFixes') {
@@ -120,6 +120,10 @@ export class FeatureItemBoxComponent implements OnInit, OnChanges {
       default:
         return '';
     }
+  }
+
+  public get severityIconClass(): string {
+    return this._iconClass.value;
   }
 
   isQuickfixInfo: boolean = false;

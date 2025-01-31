@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { AnnotationsFeatureViewModel, FeatureViewModel, InspectionViewModel, InspectionsFeatureViewModel, QuickFixViewModel, QuickFixesFeatureViewModel, XmlDocItemViewModel, XmlDocOrFeatureViewModel, XmlDocViewModel } from '../../model/feature.model';
+import { AnnotationViewModel, AnnotationsFeatureViewModel, BlogLink, FeatureViewModel, InspectionViewModel, InspectionsFeatureViewModel, QuickFixViewModel, QuickFixesFeatureViewModel, SubFeatureViewModel, XmlDocItemViewModel, XmlDocOrFeatureViewModel, XmlDocViewModel } from '../../model/feature.model';
 import { BehaviorSubject } from 'rxjs';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -14,12 +14,19 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
   private readonly _info: BehaviorSubject<XmlDocOrFeatureViewModel> = new BehaviorSubject<XmlDocOrFeatureViewModel>(null!);
 
   public filterState = {
+    // searchbox
     filterText: '',
+    // inspection severity
     donotshow: false,
     hint: true,
     suggestion: true,
     warning: true,
     error: true,
+    // inspection type
+    codeQualityIssues: true,
+    languageOpportunities: true,
+    namingAndConventionsIssues: true,
+    rubberduckOpportunities: true
   };
 
   @Input()
@@ -40,13 +47,20 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
   }
 
   public get inspectionItems(): InspectionViewModel[] {
-    return (this.feature as InspectionsFeatureViewModel).inspections ?? [];
+    return (this.feature as InspectionsFeatureViewModel)?.inspections?.filter(e => !e.isHidden) ?? [];
   }
 
+  public get annotationItems(): AnnotationViewModel[] {
+    return (this.feature as AnnotationsFeatureViewModel)?.annotations?.filter(e => !e.isHidden) ?? [];
+  }
+
+  public get quickfixItems(): QuickFixViewModel[] {
+    return (this.feature as QuickFixesFeatureViewModel)?.quickFixes?.filter(e => !e.isHidden) ?? [];
+  }
   private readonly _quickfixes: BehaviorSubject<QuickFixViewModel[]> = new BehaviorSubject<QuickFixViewModel[]>(null!);
 
   public get subfeatures(): FeatureViewModel[] {
-    return (this.feature as FeatureViewModel).features
+    return (this.feature as FeatureViewModel)?.features ?? [];
   }
 
   @Input()
@@ -58,6 +72,11 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
 
   public get quickFixes(): QuickFixViewModel[] {
     return this._quickfixes.value;
+  }
+
+  public get links(): BlogLink[] {
+    let feature = <FeatureViewModel>this.feature;
+    return feature?.links ?? [];
   }
 
   constructor(private api: ApiClientService, private fa: FaIconLibrary) {
@@ -86,24 +105,52 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
       if (vm.isHidden /* !this.filterState.showHiddenStuff? */) {
         return false;
       }
-      if (!this.filterState.donotshow && vm.defaultSeverity == 'DoNotShow') {
-        return false;
+
+      if (this.feature?.name == 'Inspections') {
+        if (!this.filterState.donotshow && vm.defaultSeverity == 'DoNotShow') {
+          return false;
+        }
+        if (!this.filterState.hint && vm.defaultSeverity == 'Hint') {
+          return false;
+        }
+        if (!this.filterState.suggestion && vm.defaultSeverity == 'Suggestion') {
+          return false;
+        }
+        if (!this.filterState.warning && vm.defaultSeverity == 'Warning') {
+          return false;
+        }
+        if (!this.filterState.error && vm.defaultSeverity == 'Error') {
+          return false;
+        }
       }
-      if (!this.filterState.hint && vm.defaultSeverity == 'Hint') {
-        return false;
-      }
-      if (!this.filterState.suggestion && vm.defaultSeverity == 'Suggestion') {
-        return false;
-      }
-      if (!this.filterState.warning && vm.defaultSeverity == 'Warning') {
-        return false;
-      }
-      if (!this.filterState.error && vm.defaultSeverity == 'Error') {
+      return true;
+    });
+  }
+
+  private onInspectionTypeFilter(): void {
+    this._filteredItems = this._filteredItems.filter(item => {
+      const vm = <InspectionViewModel>item;
+      if (vm.isHidden) {
         return false;
       }
 
+      if (this.feature?.name == 'Inspections') {
+        if (!this.filterState.codeQualityIssues && vm.inspectionType == 'Code Quality Issues') {
+          return false;
+        }
+        if (!this.filterState.languageOpportunities && vm.inspectionType == 'Language Opportunities') {
+          return false;
+        }
+        if (!this.filterState.namingAndConventionsIssues && vm.inspectionType == 'Naming and Convention Issues') {
+          return false;
+        }
+        if (!this.filterState.rubberduckOpportunities && vm.inspectionType == 'Rubberduck Opportunities') {
+          return false;
+        }
+      }
+
       return true;
-    });
+    })
   }
 
   private filterByNameOrDescription(filter: string) {
@@ -123,6 +170,7 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
 
     if (this.feature?.name === 'Inspections') {
       this.onSeverityFilter();
+      this.onInspectionTypeFilter();
     }
   }
 

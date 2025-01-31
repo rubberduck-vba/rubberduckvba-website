@@ -9,7 +9,6 @@ using NLog.Extensions.Logging;
 using NLog.Targets;
 using RubberduckServices;
 using rubberduckvba.Server.Api.Admin;
-using rubberduckvba.Server.Api.Features;
 using rubberduckvba.Server.ContentSynchronization;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Abstract;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
@@ -170,7 +169,6 @@ public class Program
         services.AddSingleton<XmlDocQuickFixParser>();
         services.AddSingleton<XmlDocInspectionParser>();
 
-        services.AddSingleton<FeatureViewModelFactory>();
         services.AddSingleton<IDistributedCache, MemoryDistributedCache>();
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<IContentCacheService, ContentCacheService>(); // TODO deprecate
