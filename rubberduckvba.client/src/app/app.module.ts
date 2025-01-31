@@ -47,8 +47,14 @@ import { LoadingContentComponent } from './components/loading-content/loading-co
     CommonModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
-      { path: 'features', component: FeaturesComponent, pathMatch: 'full' },
-      { path: 'features/:name', component: FeatureComponent, pathMatch: 'full' }
+      { path: 'features', component: FeaturesComponent },
+      { path: 'features/:name', component: FeatureComponent },
+      { path: 'inspections/:name', component: InspectionComponent },
+      { path: 'annotations/:name', component: AnnotationComponent },
+      { path: 'quickfixes/:name', component: QuickFixComponent },
+      { path: 'about', component: AboutComponent},
+      // legacy routes:
+      { path: 'inspections/details/:name', redirectTo: 'inspections/:name' }
     ]),
     FontAwesomeModule,
     NgbModule
@@ -57,7 +63,6 @@ import { LoadingContentComponent } from './components/loading-content/loading-co
     DataService,
     ApiClientService,
     provideHttpClient(withInterceptorsFromDi()),
-    //httpInterceptorProviders
   ]
 })
 export class AppModule { }
