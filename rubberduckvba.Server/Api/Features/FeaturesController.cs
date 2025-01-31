@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
 using rubberduckvba.Server.Services.rubberduckdb;
 using System.ComponentModel;
@@ -17,7 +19,10 @@ public record class MarkdownFormattingRequestViewModel
 
 [ApiController]
 [AllowAnonymous]
-public class FeaturesController(IRubberduckDbService db, FeatureServices features, IMarkdownFormattingService md, ICacheService cache) : ControllerBase
+public class FeaturesController(IRubberduckDbService db, FeatureServices features,
+    IMarkdownFormattingService md, ICacheService cache,
+    IRepository<TagAssetEntity> assetsRepository,
+    IRepository<TagEntity> tagsRepository) : ControllerBase
 {
     private static RepositoryOptionViewModel[] RepositoryOptions { get; } =
         Enum.GetValues<RepositoryId>().Select(e => new RepositoryOptionViewModel { Id = e, Name = e.ToString() }).ToArray();
@@ -26,13 +31,19 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
         await db.GetTopLevelFeatures(repositoryId)
             .ContinueWith(t => t.Result.Select(e => new FeatureOptionViewModel { Id = e.Id, Name = e.Name, Title = e.Title }).ToArray());
 
+    private bool TryGetCachedContent(out string key, out object cached)
+    {
+        key = HttpContext.Request.Path;
+        return cache.TryGet(key, out cached);
+    }
+
     [HttpGet("features")]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<FeatureViewModel>>> Index()
+    public async Task<IActionResult> Index()
     {
-        //if (cache.TryGet<FeatureViewModel[]>(HttpContext.Request.Path, out var cached))
+        //if (TryGetCachedContent(out var key, out var cached))
         //{
-        //    return cached;
+        //    return Ok(cached);
         //}
 
         var features = await db.GetTopLevelFeatures(RepositoryId.Rubberduck);
@@ -41,8 +52,8 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
             return NoContent();
         }
 
-        var model = features.Select(feature => new FeatureViewModel(feature)).ToArray();
-        //cache.Write(HttpContext.Request.Path, model);
+        var model = features.Select(e => new FeatureViewModel(e, summaryOnly: true));
+        //cache.Write(key, model);
 
         return Ok(model);
     }
@@ -52,11 +63,11 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
 
     [HttpGet("features/{name}")]
     [AllowAnonymous]
-    public async Task<ActionResult<FeatureViewModel>> Info([FromRoute] string name)
+    public async Task<IActionResult> Info([FromRoute] string name)
     {
-        //if (cache.TryGet<FeatureViewModel>(HttpContext.Request.Path, out var cached))
+        //if (TryGetCachedContent(out var key, out var cached))
         //{
-        //    return cached;
+        //    return Ok(cached);
         //}
 
         var feature = features.Get(name);
@@ -65,9 +76,61 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
             return NotFound();
         }
 
-        var model = new FeatureViewModel(feature);
-        //cache.Write(HttpContext.Request.Path, model);
+        var model = feature is not FeatureGraph graph ? new FeatureViewModel(feature) : feature.Name switch
+        {
+            "Inspections" => new InspectionsFeatureViewModel(graph,
+                graph.Inspections.Select(e => e.TagAssetId).Distinct()
+                     .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))))
+            ,
+            "QuickFixes" => new QuickFixesFeatureViewModel(graph,
+                graph.QuickFixes.Select(e => e.TagAssetId).Distinct()
+                     .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))),
+                features.Get("Inspections").Inspections.ToDictionary(inspection => inspection.Name))
+            ,
+            "Annotations" => new AnnotationsFeatureViewModel(graph,
+                graph.Annotations.Select(e => e.TagAssetId).Distinct()
+                     .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))))
+            ,
+            _ => new FeatureViewModel(feature)
+        };
+        //cache.Write(key, model);
+
         return Ok(model);
+    }
+
+    [HttpGet("inspections/{name}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Inspection([FromRoute] string name)
+    {
+        var inspection = features.GetInspection(name);
+        var tagsByAssetId = new[] { inspection.TagAssetId }.ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId)));
+        var vm = new InspectionViewModel(inspection, tagsByAssetId);
+
+        return Ok(vm);
+    }
+
+    [HttpGet("annotations/{name}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Annotation([FromRoute] string name)
+    {
+        var annotation = features.GetAnnotation(name);
+        var tagsByAssetId = new[] { annotation.TagAssetId }.ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId)));
+        var vm = new AnnotationViewModel(annotation, tagsByAssetId);
+
+        return Ok(vm);
+    }
+
+    [HttpGet("quickfixes/{name}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> QuickFix([FromRoute] string name)
+    {
+        var quickfix = features.GetQuickFix(name);
+        var inspectionsByName = features.Get("Inspections").Inspections.ToDictionary(inspection => inspection.Name);
+
+        var tagsByAssetId = new[] { quickfix.TagAssetId }.ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId)));
+        var vm = new QuickFixViewModel(quickfix, tagsByAssetId, inspectionsByName);
+
+        return Ok(vm);
     }
 
     [HttpGet("features/resolve")]

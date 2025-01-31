@@ -23,7 +23,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Build with dotnet
+      - name: dotnet build
         run: dotnet build rubberduckvba.Server --configuration Release
 
       - name: dotnet publish
@@ -33,7 +33,7 @@ jobs:
     runs-on: self-hosted
     needs: build
     steps:
-      - name: Deploy to IIS
+      - name: deploy iis site
         run: |
             stop-webapppool -name "rubberduckvba"
             stop-iissite -name api -confirm: $false

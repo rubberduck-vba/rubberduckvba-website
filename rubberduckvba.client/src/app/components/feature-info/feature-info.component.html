@@ -1,41 +1,74 @@
-<loading-content [show]="!feature"></loading-content>
 <section class="row">
-    <h2>{{feature?.title}}</h2>
-    <div class="row">
-        <div class="col-1"></div>
-        <div class="col-10">
+    <div class="row text-start">
+        <p *ngIf="!(feature?.featureId)"><a href="/">Home</a>▸<a href="/features">Features</a>▸</p>
+        <p *ngIf="(feature?.featureId) && feature?.featureId != 0"><a href="/">Home</a>▸<a href="/features">Features</a>▸<a href="/features/{{feature?.featureName}}">{{feature?.featureName}}</a>▸</p>
+        <div [ngClass]="(feature?.name != 'CodeInspections' && feature?.name != 'CommentAnnotations') && (!links || links.length == 0) ? 'col-12' : 'col-lg-8'">
+            <h2>{{feature?.title}}</h2>
             <p [innerHtml]="feature?.description"></p>
         </div>
-        <div class="col-1"></div>
+        <div [ngClass]="(feature?.name != 'CodeInspections' && feature?.name != 'CommentAnnotations') && (!links || links.length == 0) ? 'col-12' : 'col-lg-4'">
+            <!-- subfeatures -->
+            <div *ngIf="feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0">
+                <div *ngFor="let subFeature of subfeatures">
+                    <feature-box *ngIf="!feature.isHidden && (subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [quickFixes]="quickFixes" [hasOwnDetailsPage]="true"></feature-box>
+                </div>
+            </div>
+
+            <div *ngIf="links && links.length != 0" class="my-5">
+                <div *ngFor="let link of links">
+                    <blog-link-box [link]="link"></blog-link-box>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<section *ngIf="(feature?.features?.length ?? 0) > 0 || (feature?.items?.length ?? 0) > 0" class="row text-center mb-3">
+<loading-content [show]="!feature"></loading-content>
+
+<section *ngIf="subfeatures && (subfeatures.length ?? 0) > 0 || (inspectionItems.length ?? 0) > 0" class="row text-center mb-3">
     <div class="col-12">
-        <img class="ducky my-2 w-10" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+        <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
     </div>
 </section>
 <section class="row">
+
     <!-- subfeatures -->
-    <div *ngIf="feature != null && (feature.features?.length ?? 0) > 0" class="col-12">
-        <div *ngFor="let subFeature of feature?.features">
-            <feature-box *ngIf="!feature.isHidden" [parentFeatureName]="feature.name" [feature]="subFeature" [quickFixes]="quickFixes" [hasOwnDetailsPage]="subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations'"></feature-box>
+    <div *ngIf="feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0" class="col-12">
+        <div *ngFor="let subFeature of subfeatures">
+            <feature-box *ngIf="!feature.isHidden && !(subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [quickFixes]="quickFixes" [hasOwnDetailsPage]="false"></feature-box>
         </div>
     </div>
+
     <!-- xmldoc items -->
-    <div *ngIf="(feature?.items?.length ?? 0) > 0" class="col-12">
+    <div *ngIf="(inspectionItems.length ?? 0) > 0 || (annotationItems.length ?? 0) > 0 || (quickfixItems.length ?? 0) > 0" class="col-12">
         <h3>Search &amp; Filter</h3>
-        <small class="small text-black-50">Showing {{filteredItems.length}} of {{feature!.items.length}} items</small>
+        <small *ngIf="feature?.name == 'Inspections' && filteredItems.length != inspectionItems.length" class="small text-black-50">Showing {{filteredItems.length}} of {{inspectionItems.length}} items</small>
+        <small *ngIf="feature?.name == 'Annotations' && filteredItems.length != annotationItems.length" class="small text-black-50">Showing {{filteredItems.length}} of {{annotationItems.length}} items</small>
+        <small *ngIf="feature?.name == 'QuickFixes' && filteredItems.length != quickfixItems.length" class="small text-black-50">Showing {{filteredItems.length}} of {{quickfixItems.length}} items</small>
         <div class="row my-3">
             <div class="col-8">
                 <div *ngIf="feature?.name == 'Inspections'" class="text-start">
-                    <h6>Default Severity</h6>
-                    <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-ducky': filterState.donotshow}" (click)="filterState.donotshow = !filterState.donotshow; onFilter();">DoNotShow</button>
-                    <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-ducky': filterState.hint}" (click)="filterState.hint = !filterState.hint; onFilter();">Hint</button>
-                    <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-ducky': filterState.suggestion}" (click)="filterState.suggestion = !filterState.suggestion; onFilter();">Suggestion</button>
-                    <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-ducky': filterState.warning}" (click)="filterState.warning = !filterState.warning; onFilter();">Warning</button>
-                    <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-ducky': filterState.error}" (click)="filterState.error = !filterState.error; onFilter();">Error</button>
+                    <div class="row my-1">
+                        <div class="col">
+                            <h6>Default Severity</h6>
+                            <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-toggle': filterState.donotshow}" (click)="filterState.donotshow = !filterState.donotshow; onFilter();"><span class="icon icon-severity-donotshow"></span>&nbsp;DoNotShow</button>
+                            <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-toggle': filterState.hint}" (click)="filterState.hint = !filterState.hint; onFilter();"><span class="icon icon-severity-hint"></span>&nbsp;Hint</button>
+                            <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-toggle': filterState.suggestion}" (click)="filterState.suggestion = !filterState.suggestion; onFilter();"><span class="icon icon-severity-suggestion"></span>&nbsp;Suggestion</button>
+                            <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-toggle': filterState.warning}" (click)="filterState.warning = !filterState.warning; onFilter();"><span class="icon icon-severity-warning"></span>&nbsp;Warning</button>
+                            <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-toggle': filterState.error}" (click)="filterState.error = !filterState.error; onFilter();"><span class="icon icon-severity-error"></span>&nbsp;Error</button>
+                        </div>
+                    </div>
+                    <div class="row my-1">
+                        <div class="col">
+                            <h6>Inspection Type</h6>
+                            <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-toggle': filterState.codeQualityIssues}" (click)="filterState.codeQualityIssues = !filterState.codeQualityIssues; onFilter();">&nbsp;Code Quality</button>
+                            <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-toggle': filterState.languageOpportunities}" (click)="filterState.languageOpportunities = !filterState.languageOpportunities; onFilter();">&nbsp;Language Opportunities</button>
+                            <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-toggle': filterState.namingAndConventionsIssues}" (click)="filterState.namingAndConventionsIssues = !filterState.namingAndConventionsIssues; onFilter();">&nbsp;Naming &amp; Conventions</button>
+                            <button class="btn btn-outline-dark rounded-pill mx-1" role="button" [ngClass]="{'btn-toggle': filterState.rubberduckOpportunities}" (click)="filterState.rubberduckOpportunities = !filterState.rubberduckOpportunities; onFilter();">&nbsp;Rubberduck Opportunities</button>
+                        </div>
+                    </div>
                 </div>
+                <!-- TODO other filters here -->
             </div>
             <div class="col-4">
                 <div class="text-end">
@@ -47,14 +80,30 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <ul class="navbar-nav">
-                <li class="nav-item" *ngFor="let item of filteredItems">
-                    <div class="col-12">
-                        <feature-item-box *ngIf="!item.isHidden" [item]="item" [quickFixes]="quickFixes"></feature-item-box>
-                    </div>
-                </li>
-            </ul>
+
+        <div *ngIf="feature?.name == 'Inspections'" class="row">
+            <div class="card-columns">
+                <div *ngFor="let item of filteredItems">
+                    <inspection-item-box *ngIf="!item.isHidden" [item]="item" [quickFixes]="quickFixes"></inspection-item-box>
+                </div>
+            </div>
         </div>
+
+        <div *ngIf="feature?.name == 'Annotations'" class="row">
+            <div class="card-columns">
+                <div *ngFor="let item of filteredItems">
+                    <annotation-item-box *ngIf="!item.isHidden" [item]="item"></annotation-item-box>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="feature?.name == 'QuickFixes'" class="row">
+            <div class="card-columns">
+                <div *ngFor="let item of filteredItems">
+                    <quickfix-item-box *ngIf="!item.isHidden" [item]="item"></quickfix-item-box>
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>

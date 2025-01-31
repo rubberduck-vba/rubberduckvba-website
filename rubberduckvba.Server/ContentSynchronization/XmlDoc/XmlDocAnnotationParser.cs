@@ -1,17 +1,16 @@
 ﻿using rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
 using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Services;
 using System.Reflection;
 using System.Xml.Linq;
 
 namespace rubberduckvba.Server.ContentSynchronization.XmlDoc;
 
-public class XmlDocAnnotationParser
+public class XmlDocAnnotationParser(IMarkdownFormattingService markdownService)
 {
     public Annotation Parse(int assetId, int featureId, string name, XElement node, bool isPreRelease)
     {
-        var sourceObject = node.Attribute("name")!.Value[2..][(name.LastIndexOf('.') + 1)..];
-        //var sourceEditUrl = $"https://github.com/rubberduck-vba/Rubberduck/edit/next/{sourceObject}.cs";
-        //var sourceViewUrl = $"https://github.com/rubberduck-vba/Rubberduck/blob/{tagName}/{sourceObject}.cs";
+        var sourceObject = node.Attribute("name").Value[2..].Replace('.', '/').Replace("Rubberduck/Parsing/", "Rubberduck.Parsing/");
 
         var summary = node.Element(XmlDocSchema.Annotation.Summary.ElementName)?.Value.Trim() ?? string.Empty;
         var remarks = node.Element(XmlDocSchema.Annotation.Remarks.ElementName)?.Value.Trim() ?? string.Empty;
@@ -163,7 +162,7 @@ public class XmlDocAnnotationParser
             ModuleName = name,
             ModuleType = moduleType,
             Description = description,
-            HtmlContent = code.Trim().Replace("  ", " ")
+            HtmlContent = markdownService.FormatMarkdownDocument("<code>" + code.Trim().Replace("  ", " ") + "</code>", withSyntaxHighlighting: true)
         };
 
         return model;

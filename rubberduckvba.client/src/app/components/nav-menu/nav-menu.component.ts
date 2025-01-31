@@ -18,6 +18,7 @@ export class NavMenuComponent implements OnInit {
 
   public isHomePage: boolean = true;
   public isFeaturesPage: boolean = false;
+  public isAboutPage: boolean = false;
 
   public isExpanded: boolean = false;
   public canDownload: boolean = false;
@@ -33,14 +34,10 @@ export class NavMenuComponent implements OnInit {
         map(e => <NavigationEnd>e)
       )
       .subscribe(navEnd => {
-        if (navEnd.urlAfterRedirects.startsWith('/features')) {
-          this.isFeaturesPage = true;
-          this.isHomePage = false;
-        }
-        else {
-          this.isFeaturesPage = false;
-          this.isHomePage = true;
-        }
+        const url = navEnd.urlAfterRedirects;
+        this.isFeaturesPage = url.startsWith('/features');
+        this.isAboutPage = url.startsWith('/about');
+        this.isHomePage = !(this.isFeaturesPage || this.isAboutPage);
       });
   }
 

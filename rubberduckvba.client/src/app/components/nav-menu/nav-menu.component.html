@@ -4,7 +4,7 @@
         <a class="navbar-brand" [routerLink]="['/']">
             <span>
                 <img src="../../assets/vector-ducky-dark.svg" alt="Rubberduck logo" width="32" />
-                <img alt="Rubberduck" height="24" class="mx-2" src="../../assets/rubberduck.svg" />
+                <img alt="Rubberduck" height="24" class="mx-2" src="../../assets/rubberduck.png" />
             </span>
         </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-label="Toggle navigation" [attr.aria-expanded]="isExpanded" (click)="toggle()">
@@ -14,6 +14,9 @@
           <ul class="navbar-nav flex-grow">
               <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
                   <a class="nav-link text-dark" [class.fw-bold]="isHomePage" [routerLink]="['/']">Home</a>
+              </li>
+              <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
+                  <a class="nav-link text-dark" [class.fw-bold]="isAboutPage" href="/about">About</a>
               </li>
               <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
                   <a class="nav-link text-dark" [class.fw-bold]="isFeaturesPage" href="/features">Features</a>

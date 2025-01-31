@@ -10,11 +10,12 @@
   <div *ngIf="tag != null" class="card-body">
     {{text}}
     <div class="row justify-content-center">
-      <button *ngIf="canDownload" class="btn btn-dark btn-download btn-ducky rounded-pill mt-2" type="button" (click)="confirmDownload()">
+      <button *ngIf="canDownload" class="btn btn-primary rounded-pill mt-2" type="button" (click)="confirmDownload()">
         <span><fa-icon class="mx-2" [icon]="['fas', 'download']"></fa-icon>{{info?.name}}</span>
       </button>
-      <button *ngIf="!canDownload" class="btn btn-dark btn-download btn-ducky rounded-pill mt-2 disabled" type="button">
+      <button *ngIf="!canDownload" class="btn btn-primary rounded-pill mt-2 disabled" type="button">
         <span><fa-icon class="mx-2" [icon]="['fas', 'ban']"></fa-icon>download from a Windows desktop</span>
+        <p><small class="text-black-50">{{info?.name}}</small></p>
       </button>
     </div>
   </div>

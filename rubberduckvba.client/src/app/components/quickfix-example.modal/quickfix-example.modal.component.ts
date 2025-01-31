@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges, TemplateRef, ViewChild, inject } from '@angular/core';
-import { AnnotationFeatureItem, AnnotationInfo, FeatureItem, FeatureItemViewModel, InspectionInfo, QuickFixInfo, QuickFixViewModel } from '../../model/feature.model';
+import { QuickFixViewModel } from '../../model/feature.model';
 import { BehaviorSubject } from 'rxjs';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -11,7 +11,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class FeatureItemExampleComponent implements OnInit, OnChanges {
 
-  private readonly _quickfix: BehaviorSubject<FeatureItem> = new BehaviorSubject<FeatureItem>(null!);
+  private readonly _quickfix: BehaviorSubject<QuickFixViewModel> = new BehaviorSubject<QuickFixViewModel>(null!);
 
   constructor(private fa: FaIconLibrary) {
     fa.addIconPacks(fas);
@@ -29,13 +29,13 @@ export class FeatureItemExampleComponent implements OnInit, OnChanges {
 
 
   @Input()
-  public set quickFix(value: FeatureItem) {
+  public set quickFix(value: QuickFixViewModel) {
     if (value != null) {
       this._quickfix.next(value);
     }
   }
 
-  public get quickFix(): FeatureItem {
+  public get quickFix(): QuickFixViewModel {
     return this._quickfix.value!;
   }
 

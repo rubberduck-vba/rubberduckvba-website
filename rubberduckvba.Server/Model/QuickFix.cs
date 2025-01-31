@@ -84,6 +84,7 @@ public record class QuickFix() : IFeature
         hash.Add(CanFixProject);
         hash.Add(JsonSerializer.Serialize(Examples));
         hash.Add(string.Join(',', Inspections));
+        hash.Add(SourceUrl);
         return hash.ToHashCode();
     }
 }

@@ -1,5 +1,5 @@
-﻿using HtmlAgilityPack;
-using MarkdownSharp;
+﻿using HeyRed.MarkdownSharp;
+using HtmlAgilityPack;
 using RubberduckServices;
 
 namespace rubberduckvba.Server.Services;
@@ -9,7 +9,7 @@ public interface IMarkdownFormattingService
     string FormatMarkdownDocument(string content, bool withSyntaxHighlighting = false);
 }
 
-public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMarkdownFormattingService
+public class MarkdownFormattingService(ISyntaxHighlighterService syntaxHighlighterService) : IMarkdownFormattingService
 {
     private static readonly Markdown _service = new();
 
@@ -21,47 +21,38 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
         }
 
         var markdown = content.Replace("\n", "\r\n");
-        var html = string.Empty;
+        var isCodeOnly = content.StartsWith("<code>") && content.EndsWith("</code>");
 
-        if (withSyntaxHighlighting)
-        {
-            // HTML tags makes the markdown formatter silently fail,
-            // so we pull out any <code> blocks and format everything between them.
+        markdown = PreProcessMarkdownString(markdown);
+        var html = isCodeOnly ? markdown : _service.Transform(markdown);
 
-            markdown = PreProcessMarkdownString(markdown);
+        //var lastSectionStart = markdown.LastIndexOf("</code>");
+        //if (lastSectionStart > 0)
+        //{
+        //    var sectionStart = 0;
+        //    while (sectionStart < lastSectionStart)
+        //    {
+        //        var sectionEnd = markdown.IndexOf("<code", sectionStart) - 1;
+        //        if (sectionEnd < 0)
+        //        {
+        //            sectionEnd = markdown.Length - sectionStart - 1;
+        //        }
 
-            var lastSectionStart = markdown.LastIndexOf("</code>");
-            if (lastSectionStart > 0)
-            {
-                var sectionStart = 0;
-                while (sectionStart < lastSectionStart)
-                {
-                    var sectionEnd = markdown.IndexOf("<code", sectionStart) - 1;
-                    if (sectionEnd < 0)
-                    {
-                        sectionEnd = markdown.Length - sectionStart - 1;
-                    }
+        //        var sectionLength = sectionEnd - sectionStart + 1;
 
-                    var sectionLength = sectionEnd - sectionStart + 1;
+        //        var section = _service.Transform(markdown.Substring(sectionStart, sectionLength));
+        //        sectionStart = markdown.IndexOf("</code>", sectionEnd) > 0
+        //            ? markdown.IndexOf("</code>", sectionEnd) + 8
+        //            : lastSectionStart;
 
-                    var section = _service.Transform(markdown.Substring(sectionStart, sectionLength));
-                    sectionStart = markdown.IndexOf("</code>", sectionEnd) > 0
-                        ? markdown.IndexOf("</code>", sectionEnd) + 8
-                        : lastSectionStart;
-
-                    var block = markdown.Substring(sectionEnd, sectionStart - sectionEnd).Replace("<code", "<div").Replace("</code>", "</div>");
-                    html += section + block;
-                }
-            }
-            else
-            {
-                html = _service.Transform(markdown);
-            }
-        }
-        else
-        {
-            html = _service.Transform(markdown);
-        }
+        //        var block = markdown.Substring(sectionEnd, sectionStart - sectionEnd);
+        //        html += section + block;
+        //    }
+        //}
+        //else
+        //{
+        //    html = _service.Transform(markdown);
+        //}
 
         return PostProcessHtml(html);
     }
@@ -74,10 +65,10 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
         var codeNodes = document.DocumentNode.Descendants("code").ToList();
         foreach (var node in codeNodes)
         {
-            var code = service.Format(node.InnerText);
+            var code = syntaxHighlighterService.Format(node.InnerText);
 
-            //node.Name = "div";
-            //node.EndNode.Name = "div";
+            node.Name = "div";
+            node.EndNode.Name = "div";
             node.AddClass("vbe-mock-debugger");
             node.InnerHtml = string.Empty;
 
@@ -99,19 +90,19 @@ public class MarkdownFormattingService(ISyntaxHighlighterService service) : IMar
             node.AppendChild(codeAreaDiv);
         }
 
-        return document.DocumentNode.InnerHtml;
+        return document.DocumentNode.FirstChild.InnerHtml;
     }
 
     private string PostProcessHtml(string html)
     {
         var document = new HtmlDocument();
-        document.LoadHtml($"<div>{html}</div>");
+        document.LoadHtml(html);
 
         foreach (var node in document.DocumentNode.Descendants("img").ToList())
         {
             node.AddClass("document-img");
         }
 
-        return document.DocumentNode.FirstChild.InnerHtml;
+        return document.DocumentNode.InnerHtml;
     }
 }

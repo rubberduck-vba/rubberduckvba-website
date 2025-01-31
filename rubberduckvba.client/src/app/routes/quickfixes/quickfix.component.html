@@ -1,0 +1,30 @@
+<div *ngIf="info">
+    <p *ngIf="(info?.featureId) && info?.featureId != 0"><a href="/">Home</a>▸<a href="/features">Features</a>▸<a href="/features/codeinspections">CodeInspections</a>▸<a href="/features/quickfixes">QuickFixes</a>▸</p>
+    <h1>{{info.title}}</h1>
+    <div class="row">
+        <div class="p-2">
+            <p [innerHtml]="info.summary"></p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div *ngIf="info.remarks && info.remarks.length > 0" class="row">
+            <div class="alert alert-info bg-light-subtle mt-2 col-12">
+                <h5>Remarks</h5>
+                <p [innerHtml]="info.remarks"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div *ngFor="let example of info.examples">
+            <example-box [quickFixExample]="example"></example-box>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="small text-muted text-center">
+            <a href="{{info.getGitHubViewLink()}}">View</a> | <a href="{{info.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
+        </div>
+    </div>
+</div>
