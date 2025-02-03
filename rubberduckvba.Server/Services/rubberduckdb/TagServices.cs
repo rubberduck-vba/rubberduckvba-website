@@ -6,7 +6,6 @@ namespace rubberduckvba.Server.Services.rubberduckdb;
 
 public class TagServices(IRepository<TagEntity> tagsRepository, IRepository<TagAssetEntity> tagAssetsRepository)
 {
-    private IEnumerable<TagAssetEntity> _allAssets = [];
     private IEnumerable<TagEntity> _allTags = [];
     private IEnumerable<TagEntity> _latestTags = [];
     private TagGraph? _main;

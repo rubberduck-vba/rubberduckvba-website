@@ -157,8 +157,8 @@ public class Program
         services.AddSingleton<IRepository<InspectionEntity>, InspectionsRepository>();
         services.AddSingleton<IRepository<QuickFixEntity>, QuickFixRepository>();
         services.AddSingleton<IRepository<AnnotationEntity>, AnnotationsRepository>();
+        services.AddSingleton<HangfireJobStateRepository>();
 
-        //services.AddSingleton<ISynchronizationService, SynchronizationDbService>();
         services.AddSingleton<IGitHubClientService, GitHubClientService>();
         services.AddSingleton<IContentOrchestrator<TagSyncRequestParameters>, InstallerDownloadStatsOrchestrator>();
         services.AddSingleton<IContentOrchestrator<XmldocSyncRequestParameters>, XmldocContentOrchestrator>();
@@ -170,13 +170,8 @@ public class Program
         services.AddSingleton<XmlDocInspectionParser>();
 
         services.AddSingleton<IDistributedCache, MemoryDistributedCache>();
-        services.AddSingleton<ICacheService, CacheService>();
-        services.AddSingleton<IContentCacheService, ContentCacheService>(); // TODO deprecate
+        services.AddSingleton<CacheService>();
 
-        services.AddMemoryCache(cache =>
-        {
-            cache.ExpirationScanFrequency = TimeSpan.FromMinutes(20);
-        });
         services.AddSession(ConfigureSession);
     }
 

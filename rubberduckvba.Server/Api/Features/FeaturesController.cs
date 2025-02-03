@@ -5,25 +5,30 @@ using rubberduckvba.Server.Model;
 using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
 using rubberduckvba.Server.Services.rubberduckdb;
-using System.ComponentModel;
-using System.Reflection;
 
 namespace rubberduckvba.Server.Api.Features;
 
-public record class MarkdownFormattingRequestViewModel
-{
-    public string MarkdownContent { get; init; }
-    public bool WithVbeCodeBlocks { get; init; }
-}
 
-
-[ApiController]
 [AllowAnonymous]
-public class FeaturesController(IRubberduckDbService db, FeatureServices features,
-    IMarkdownFormattingService md, ICacheService cache,
-    IRepository<TagAssetEntity> assetsRepository,
-    IRepository<TagEntity> tagsRepository) : ControllerBase
+public class FeaturesController : RubberduckApiController
 {
+    private readonly CacheService cache;
+    private readonly IRubberduckDbService db;
+    private readonly FeatureServices features;
+    private readonly IRepository<TagAssetEntity> assetsRepository;
+    private readonly IRepository<TagEntity> tagsRepository;
+
+    public FeaturesController(CacheService cache, IRubberduckDbService db, FeatureServices features,
+        IRepository<TagAssetEntity> assetsRepository, IRepository<TagEntity> tagsRepository, ILogger<FeaturesController> logger)
+        : base(logger)
+    {
+        this.cache = cache;
+        this.db = db;
+        this.features = features;
+        this.assetsRepository = assetsRepository;
+        this.tagsRepository = tagsRepository;
+    }
+
     private static RepositoryOptionViewModel[] RepositoryOptions { get; } =
         Enum.GetValues<RepositoryId>().Select(e => new RepositoryOptionViewModel { Id = e, Name = e.ToString() }).ToArray();
 
@@ -31,115 +36,112 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
         await db.GetTopLevelFeatures(repositoryId)
             .ContinueWith(t => t.Result.Select(e => new FeatureOptionViewModel { Id = e.Id, Name = e.Name, Title = e.Title }).ToArray());
 
-    private bool TryGetCachedContent(out string key, out object cached)
-    {
-        key = HttpContext.Request.Path;
-        return cache.TryGet(key, out cached);
-    }
-
     [HttpGet("features")]
     [AllowAnonymous]
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        //if (TryGetCachedContent(out var key, out var cached))
-        //{
-        //    return Ok(cached);
-        //}
-
-        var features = await db.GetTopLevelFeatures(RepositoryId.Rubberduck);
-        if (!features.Any())
+        return GuardInternalAction(() =>
         {
-            return NoContent();
-        }
+            FeatureViewModel[]? result = [];
+            if (!cache.TryGetFeatures(out result))
+            {
+                var features = db.GetTopLevelFeatures(RepositoryId.Rubberduck).GetAwaiter().GetResult();
+                if (!features.Any())
+                {
+                    return NoContent();
+                }
 
-        var model = features.Select(e => new FeatureViewModel(e, summaryOnly: true));
-        //cache.Write(key, model);
+                result = features
+                    .Select(e => new FeatureViewModel(e, summaryOnly: true))
+                    .ToArray();
 
-        return Ok(model);
+                if (result.Length > 0)
+                {
+                    cache.Invalidate(result);
+                }
+            }
+
+            return result is not null && result.Length != 0 ? Ok(result) : NoContent();
+        });
     }
-
-    private static readonly IDictionary<string, string> _moduleTypeNames = typeof(ExampleModuleType).GetMembers().Where(e => e.GetCustomAttribute<DescriptionAttribute>() != null)
-        .ToDictionary(member => member.Name, member => member.GetCustomAttribute<DescriptionAttribute>()?.Description ?? member.Name);
 
     [HttpGet("features/{name}")]
     [AllowAnonymous]
-    public async Task<IActionResult> Info([FromRoute] string name)
+    public IActionResult Info([FromRoute] string name)
     {
-        //if (TryGetCachedContent(out var key, out var cached))
-        //{
-        //    return Ok(cached);
-        //}
-
-        var feature = features.Get(name);
-        if (feature is null)
+        return GuardInternalAction(() =>
         {
-            return NotFound();
-        }
-
-        var model = feature is not FeatureGraph graph ? new FeatureViewModel(feature) : feature.Name switch
-        {
-            "Inspections" => new InspectionsFeatureViewModel(graph,
-                graph.Inspections.Select(e => e.TagAssetId).Distinct()
-                     .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))))
-            ,
-            "QuickFixes" => new QuickFixesFeatureViewModel(graph,
-                graph.QuickFixes.Select(e => e.TagAssetId).Distinct()
-                     .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))),
-                features.Get("Inspections").Inspections.ToDictionary(inspection => inspection.Name))
-            ,
-            "Annotations" => new AnnotationsFeatureViewModel(graph,
-                graph.Annotations.Select(e => e.TagAssetId).Distinct()
-                     .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))))
-            ,
-            _ => new FeatureViewModel(feature)
-        };
-        //cache.Write(key, model);
-
-        return Ok(model);
+            return name.ToLowerInvariant() switch
+            {
+                "inspections" => Ok(GetInspections()),
+                "quickfixes" => Ok(GetQuickFixes()),
+                "annotations" => Ok(GetAnnotations()),
+                _ => Ok(GetFeature(name))
+            };
+        });
     }
 
     [HttpGet("inspections/{name}")]
     [AllowAnonymous]
-    public async Task<IActionResult> Inspection([FromRoute] string name)
+    public IActionResult Inspection([FromRoute] string name)
     {
-        var inspection = features.GetInspection(name);
-        var tagsByAssetId = new[] { inspection.TagAssetId }.ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId)));
-        var vm = new InspectionViewModel(inspection, tagsByAssetId);
+        return GuardInternalAction(() =>
+        {
+            InspectionViewModel? result;
+            if (!cache.TryGetInspection(name, out result))
+            {
+                _ = GetInspections(); // caches all inspections
+            }
 
-        return Ok(vm);
+            if (!cache.TryGetInspection(name, out result))
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
+        });
     }
 
     [HttpGet("annotations/{name}")]
     [AllowAnonymous]
-    public async Task<IActionResult> Annotation([FromRoute] string name)
+    public IActionResult Annotation([FromRoute] string name)
     {
-        var annotation = features.GetAnnotation(name);
-        var tagsByAssetId = new[] { annotation.TagAssetId }.ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId)));
-        var vm = new AnnotationViewModel(annotation, tagsByAssetId);
+        return GuardInternalAction(() =>
+        {
+            AnnotationViewModel? result;
+            if (!cache.TryGetAnnotation(name, out result))
+            {
+                _ = GetAnnotations(); // caches all annotations
+            }
 
-        return Ok(vm);
+            if (!cache.TryGetAnnotation(name, out result))
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
+        });
     }
 
     [HttpGet("quickfixes/{name}")]
     [AllowAnonymous]
-    public async Task<IActionResult> QuickFix([FromRoute] string name)
+    public IActionResult QuickFix([FromRoute] string name)
     {
-        var quickfix = features.GetQuickFix(name);
-        var inspectionsByName = features.Get("Inspections").Inspections.ToDictionary(inspection => inspection.Name);
+        return GuardInternalAction(() =>
+        {
+            QuickFixViewModel? result;
+            if (!cache.TryGetQuickFix(name, out result))
+            {
+                _ = GetAnnotations(); // caches all quickfixes
+            }
 
-        var tagsByAssetId = new[] { quickfix.TagAssetId }.ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId)));
-        var vm = new QuickFixViewModel(quickfix, tagsByAssetId, inspectionsByName);
+            if (!cache.TryGetQuickFix(name, out result))
+            {
+                return NotFound();
+            }
 
-        return Ok(vm);
-    }
-
-    [HttpGet("features/resolve")]
-    [AllowAnonymous]
-    public async Task<ActionResult> Resolve([FromQuery] RepositoryId repository, [FromQuery] string name)
-    {
-        var graph = await db.ResolveFeature(repository, name);
-        var markdown = md.FormatMarkdownDocument(graph.Description, withSyntaxHighlighting: true);
-        return Ok(graph with { Description = markdown });
+            return Ok(result);
+        });
     }
 
     [HttpGet("features/create")]
@@ -196,9 +198,70 @@ public class FeaturesController(IRubberduckDbService db, FeatureServices feature
         return new FeatureEditViewModel(result, features, RepositoryOptions);
     }
 
-    [HttpPost("features/markdown")]
-    public IActionResult FormatMarkdown([FromBody] MarkdownFormattingRequestViewModel model)
+    private InspectionsFeatureViewModel GetInspections()
     {
-        return Ok(md.FormatMarkdownDocument(model.MarkdownContent, model.WithVbeCodeBlocks));
+        InspectionsFeatureViewModel result;
+        if (!cache.TryGetInspections(out result!))
+        {
+            var feature = features.Get("Inspections") as FeatureGraph;
+            result = new InspectionsFeatureViewModel(feature,
+                feature.Inspections
+                    .Select(e => e.TagAssetId).Distinct()
+                    .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))));
+
+            cache.Invalidate(result);
+        }
+
+        return result;
     }
+
+    private QuickFixesFeatureViewModel GetQuickFixes()
+    {
+        QuickFixesFeatureViewModel result;
+        if (!cache.TryGetQuickFixes(out result!))
+        {
+            var feature = features.Get("QuickFixes") as FeatureGraph;
+            result = new QuickFixesFeatureViewModel(feature,
+                feature.QuickFixes
+                    .Select(e => e.TagAssetId).Distinct()
+                    .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))),
+                features.Get("Inspections").Inspections.ToDictionary(inspection => inspection.Name));
+
+            cache.Invalidate(result);
+        }
+
+        return result;
+    }
+
+    private AnnotationsFeatureViewModel GetAnnotations()
+    {
+        AnnotationsFeatureViewModel result;
+        if (!cache.TryGetAnnotations(out result!))
+        {
+            var feature = features.Get("Annotations") as FeatureGraph;
+            result = new AnnotationsFeatureViewModel(feature,
+                feature.Annotations
+                    .Select(e => e.TagAssetId).Distinct()
+                    .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))));
+
+            cache.Invalidate(result);
+        }
+
+        return result;
+    }
+
+    private FeatureViewModel GetFeature(string name)
+    {
+        FeatureViewModel result;
+        if (!cache.TryGetFeature(name, out result!))
+        {
+            var feature = features.Get(name);
+            result = new FeatureViewModel(feature);
+
+            cache.Invalidate(result);
+        }
+
+        return result;
+    }
+
 }
