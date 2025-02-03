@@ -26,8 +26,8 @@ jobs:
 
       - name: configure test front-end environment
         run: |
-            "export const environment = { production: false, apiBaseUrl: '${{ env.API_ROOT_URL }}' };" | (Set-Content "rubberduckvba.client\src\environments\environment.test.ts")
-            "export const environment = { production: false, apiBaseUrl: '${{ env.API_ROOT_URL }}' };" | (Set-Content "rubberduckvba.client\src\environments\environment.ts")
+            set-content "rubberduckvba.client\src\environments\environment.test.ts" -value "export const environment = { production: false, apiBaseUrl: '${{ env.API_ROOT_URL }}' };"
+            set-content "rubberduckvba.client\src\environments\environment.ts" -value "export const environment = { production: false, apiBaseUrl: '${{ env.API_ROOT_URL }}' };"
 
       - name: dotnet build
         run: dotnet build rubberduckvba.Server --configuration Release
