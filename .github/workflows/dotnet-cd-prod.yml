@@ -1,8 +1,6 @@
-name: dotnet-CD
+name: prod-deploy
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -46,10 +44,10 @@ jobs:
       
       - name: deploy iis site
         run: |
-            stop-webapppool -name "rubberduckvba"
-            stop-iissite -name api -confirm: $false
-            copy-item C:/pub/* C:/inetpub/wwwroot/test.rubberduckvba.com -Recurse -Force 
-            copy-item C:/inetpub/appsettings.test.json C:/inetpub/wwwroot/test.rubberduckvba.com/appsettings.json -Force
-            copy-item C:/inetpub/__Web.config C:/inetpub/wwwroot/test.rubberduckvba.com/wwwroot/browser/Web.config -Force
-            start-webapppool rubberduckvba
-            start-iissite api
+            stop-webapppool -name "api-prod"
+            stop-iissite -name api-prod -confirm: $false
+            copy-item C:/pub/* C:/inetpub/wwwroot/rubberduckvba.com -Recurse -Force 
+            copy-item C:/inetpub/appsettings.prod.json C:/inetpub/wwwroot/rubberduckvba.com/appsettings.json -Force
+            copy-item C:/inetpub/__Web.config C:/inetpub/wwwroot/rubberduckvba.com/wwwroot/browser/Web.config -Force
+            start-webapppool api-prod
+            start-iissite api-prod
