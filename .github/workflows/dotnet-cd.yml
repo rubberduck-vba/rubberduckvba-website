@@ -11,6 +11,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: AZ-Test
 
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +23,11 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
+
+      - name: configure test front-end environment
+        run: |
+            "export const environment = { production: false, apiBaseUrl: '${{ env.API_ROOT_URL }}' };" | (Set-Content "rubberduckvba.client\src\environments\environment.test.ts")
+            "export const environment = { production: false, apiBaseUrl: '${{ env.API_ROOT_URL }}' };" | (Set-Content "rubberduckvba.client\src\environments\environment.ts")
 
       - name: dotnet build
         run: dotnet build rubberduckvba.Server --configuration Release
@@ -43,12 +49,18 @@ jobs:
         uses: actions/download-artifact@v4.1.8
         with:
           name: pub
+          path: C:/pub/pub.zip
+
+      - name: unzip artifacts
+        run: |
+            remove-item C:/pub/webroot/* -Recurse -Force
+            expand-archive C:/pub/pub.zip -DestinationPath C:/pub/webroot
       
       - name: deploy iis site
         run: |
             stop-webapppool -name "rubberduckvba"
             stop-iissite -name api -confirm: $false
-            copy-item C:/pub/* C:/inetpub/wwwroot/test.rubberduckvba.com -Recurse -Force 
+            copy-item C:/pub/webroot/* C:/inetpub/wwwroot/test.rubberduckvba.com -Recurse -Force 
             copy-item C:/inetpub/appsettings.test.json C:/inetpub/wwwroot/test.rubberduckvba.com/appsettings.json -Force
             copy-item C:/inetpub/__Web.config C:/inetpub/wwwroot/test.rubberduckvba.com/wwwroot/browser/Web.config -Force
             start-webapppool rubberduckvba
