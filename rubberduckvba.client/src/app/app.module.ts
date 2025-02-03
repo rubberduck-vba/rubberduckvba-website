@@ -7,7 +7,7 @@ import { ApiClientService } from './services/api-client.service';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { BrowserModule } from '@angular/platform-browser';
-import { RouterModule } from '@angular/router';
+import { RouterModule, UrlSerializer } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { NavMenuComponent } from './components/nav-menu/nav-menu.component';
@@ -31,6 +31,22 @@ import { FeatureComponent } from './routes/feature/feature.component';
 import { InspectionComponent } from './routes/inspection/inspection.component';
 import { AnnotationComponent } from './routes/annotation/annotation.component';
 import { QuickFixComponent } from './routes/quickfixes/quickfix.component';
+
+import { DefaultUrlSerializer, UrlTree } from '@angular/router';
+
+/**
+ * https://stackoverflow.com/a/39560520
+ */
+export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
+  override parse(url: string): UrlTree {
+    // Optional Step: Do some stuff with the url if needed.
+
+    // If you lower it in the optional step 
+    // you don't need to use "toLowerCase" 
+    // when you pass it down to the next function
+    return super.parse(url.toLowerCase());
+  }
+}
 
 @NgModule({
   declarations: [
@@ -69,7 +85,7 @@ import { QuickFixComponent } from './routes/quickfixes/quickfix.component';
       { path: 'quickfixes/:name', component: QuickFixComponent },
       { path: 'about', component: AboutComponent},
       // legacy routes:
-      { path: 'inspections/Details/:name', redirectTo: 'inspections/:name' }
+      { path: 'inspections/details/:name', redirectTo: 'inspections/:name' },
     ]),
     FontAwesomeModule,
     NgbModule
@@ -78,7 +94,10 @@ import { QuickFixComponent } from './routes/quickfixes/quickfix.component';
     DataService,
     ApiClientService,
     provideHttpClient(withInterceptorsFromDi()),
-    //httpInterceptorProviders
+    {
+      provide: UrlSerializer,
+      useClass: LowerCaseUrlSerializer
+    }
   ]
 })
 export class AppModule { }

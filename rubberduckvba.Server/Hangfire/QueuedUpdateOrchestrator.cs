@@ -109,6 +109,7 @@ public static class QueuedUpdateOrchestrator
         services.AddSingleton<IRepository<InspectionEntity>, InspectionsRepository>();
         services.AddSingleton<IRepository<QuickFixEntity>, QuickFixRepository>();
         services.AddSingleton<IRepository<AnnotationEntity>, AnnotationsRepository>();
+        services.AddSingleton<HangfireJobStateRepository>();
 
         services.AddSingleton<IGitHubClientService, GitHubClientService>();
         services.AddSingleton<ISynchronizationPipelineFactory<SyncContext>, SynchronizationPipelineFactory>();

@@ -5,27 +5,43 @@ using rubberduckvba.Server.Services;
 namespace rubberduckvba.Server.Api.Tags;
 
 
-[ApiController]
 [AllowAnonymous]
-public class TagsController(IRubberduckDbService db) : ControllerBase
+public class TagsController : RubberduckApiController
 {
+    private readonly CacheService cache;
+    private readonly IRubberduckDbService db;
+
+    public TagsController(CacheService cache, IRubberduckDbService db, ILogger<TagsController> logger)
+        : base(logger)
+    {
+        this.cache = cache;
+        this.db = db;
+    }
+
     /// <summary>
     /// Gets information about the latest release tags.
     /// </summary>
     [HttpGet("tags/latest")]
     [AllowAnonymous]
-    public async Task<ActionResult<LatestTagsViewModel>> Latest()
+    public IActionResult Latest()
     {
-        var model = await db.GetLatestTagsAsync(RepositoryId.Rubberduck);
-        var main = model.SingleOrDefault(tag => !tag.IsPreRelease);
-        var next = model.SingleOrDefault(tag => tag.IsPreRelease);
-
-        if (main == default)
+        return GuardInternalAction(() =>
         {
-            return NoContent();
-        }
+            LatestTagsViewModel? result;
+            if (!cache.TryGetLatestTags(out result))
+            {
+                var model = db.GetLatestTagsAsync(RepositoryId.Rubberduck).GetAwaiter().GetResult();
+                var main = model.SingleOrDefault(tag => !tag.IsPreRelease);
+                var next = model.SingleOrDefault(tag => tag.IsPreRelease);
 
-        var tags = new LatestTagsViewModel(main, next);
-        return Ok(tags);
+                if (main != default)
+                {
+                    result = new LatestTagsViewModel(main, next);
+                    cache.Invalidate(result.Value);
+                }
+            }
+
+            return result is null ? NoContent() : Ok(result);
+        });
     }
 }

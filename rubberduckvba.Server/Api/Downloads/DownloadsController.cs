@@ -6,37 +6,54 @@ using System.Collections.Immutable;
 namespace rubberduckvba.Server.Api.Downloads;
 
 
-[ApiController]
 [AllowAnonymous]
-public class DownloadsController(IContentCacheService cache, IRubberduckDbService db) : Controller
+public class DownloadsController : RubberduckApiController
 {
-    [HttpGet("downloads")]
-    public async Task<ActionResult<IEnumerable<AvailableDownload>>> GetAvailableDownloadsAsync()
+    private readonly CacheService cache;
+    private readonly IRubberduckDbService db;
+
+    public DownloadsController(CacheService cache, IRubberduckDbService db, ILogger<DownloadsController> logger)
+        : base(logger)
     {
-        var cacheKey = $"{nameof(GetAvailableDownloadsAsync)}";
-        if (!cache.TryGetValue(cacheKey, out IEnumerable<AvailableDownload> downloads))
+        this.cache = cache;
+        this.db = db;
+    }
+
+    [HttpGet("downloads")]
+    public IActionResult GetAvailableDownloadsAsync()
+    {
+        return GuardInternalAction(() =>
         {
-            var tags = (await db.GetLatestTagsAsync(RepositoryId.Rubberduck)).ToImmutableArray();
-            var main = tags[0];
-            var next = tags[1];
-
-            var pdfStyleGuide = new AvailableDownload
+            AvailableDownload[] result = [];
+            if (!cache.TryGetAvailableDownloads(out var cached))
             {
-                Name = "Rubberduck Style Guide (PDF)",
-                Title = "Free (pay what you want) PDF download",
-                Kind = "pdf",
-                DownloadUrl = "https://ko-fi.com/s/d91bfd610c"
-            };
+                var tags = db.GetLatestTagsAsync(RepositoryId.Rubberduck).GetAwaiter().GetResult().ToImmutableArray();
+                var main = tags[0];
+                var next = tags[1];
 
-            downloads = [
-                AvailableDownload.FromTag(main),
-                AvailableDownload.FromTag(next),
-                pdfStyleGuide
-            ];
+                var pdfStyleGuide = new AvailableDownload
+                {
+                    Name = "Rubberduck Style Guide (PDF)",
+                    Title = "Free (pay what you want) PDF download",
+                    Kind = "pdf",
+                    DownloadUrl = "https://ko-fi.com/s/d91bfd610c"
+                };
 
-            cache.SetValue(cacheKey, downloads);
-        }
+                result =
+                [
+                    AvailableDownload.FromTag(main),
+                    AvailableDownload.FromTag(next),
+                    pdfStyleGuide
+                ];
 
-        return downloads.Any() ? Ok(downloads) : NoContent();
+                cache.Invalidate(result);
+            }
+            else
+            {
+                result = cached ?? [];
+            }
+
+            return result.Any() ? Ok(result) : NoContent();
+        });
     }
 }

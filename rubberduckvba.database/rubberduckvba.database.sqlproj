@@ -58,6 +58,7 @@
     <Folder Include="Properties" />
     <Folder Include="Tables" />
     <Folder Include="Schemas" />
+    <Folder Include="Views" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Features.sql" />
@@ -66,6 +67,7 @@
     <Build Include="Tables\Inspections.sql" />
     <Build Include="Tables\QuickFixes.sql" />
     <Build Include="Tables\Annotations.sql" />
+    <Build Include="Views\HangfireJobState.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\TagAssets.sql" />

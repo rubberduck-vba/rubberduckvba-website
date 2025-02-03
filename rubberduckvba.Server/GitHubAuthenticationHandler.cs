@@ -29,6 +29,6 @@ public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationS
         var principal = await _github.ValidateTokenAsync(token);
         return principal is ClaimsPrincipal
             ? AuthenticateResult.Success(new AuthenticationTicket(principal, "github"))
-            : AuthenticateResult.Fail("Could not validate token");
+            : AuthenticateResult.NoResult();
     }
 }

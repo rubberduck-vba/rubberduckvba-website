@@ -4,6 +4,18 @@
     <div class="text-start">
         <div class="row">
             <div>
+                <div *ngIf="info.isDiscontinued" title="This feature is no longer present in the latest pre-release build">
+                    <div class="btn-ducky bg-danger rounded-pill">Discontinued</div>
+                    <div class="small text-start mb-3">
+                        <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{info.tagName}}
+                    </div>
+                </div>
+                <div *ngIf="info.isNew" title="This feature is currently only available in pre-release builds">
+                    <div class="btn-ducky rounded-pill">&nbsp;New!&nbsp;</div>
+                    <div class="small text-start mb-3">
+                        <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{info.tagName}}
+                    </div>
+                </div>
                 <h6>
                     <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{info.inspectionType}}
                 </h6>

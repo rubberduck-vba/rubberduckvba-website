@@ -18,7 +18,8 @@
               <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
                   <a class="nav-link text-dark" [class.fw-bold]="isAboutPage" href="/about">About</a>
               </li>
-              <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
+              <li *ngIf="tagDownloads.length > 0" class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
+                  <!-- if API failed, features page will just hang -->
                   <a class="nav-link text-dark" [class.fw-bold]="isFeaturesPage" href="/features">Features</a>
               </li>
               <li *ngIf="tagDownloads.length > 0" class="nav-item">

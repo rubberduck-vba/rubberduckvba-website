@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
+using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Model;
 using rubberduckvba.Server.Services.rubberduckdb;
 
@@ -57,6 +58,8 @@ public enum RepositoryId
 
 public interface IRubberduckDbService
 {
+    Task<IEnumerable<HangfireJobState>> GetJobStateAsync();
+
     Task<IEnumerable<Tag>> GetLatestTagsAsync(RepositoryId repositoryId);
     Task<TagGraph> GetLatestTagAsync(RepositoryId repositoryId, bool includePreRelease);
     Task UpdateAsync(IEnumerable<Tag> tags);
@@ -73,15 +76,17 @@ public class RubberduckDbService : IRubberduckDbService
     private readonly string _connectionString;
     private readonly TagServices _tagServices;
     private readonly FeatureServices _featureServices;
+    private readonly HangfireJobStateRepository _hangfireJobState;
 
     public RubberduckDbService(IOptions<ConnectionSettings> settings, ILogger<ServiceLogger> logger,
-        TagServices tagServices, FeatureServices featureServices)
+        TagServices tagServices, FeatureServices featureServices, HangfireJobStateRepository hangfireJobState)
     {
         _connectionString = settings.Value.RubberduckDb ?? throw new InvalidOperationException("ConnectionString 'RubberduckDb' could not be retrieved.");
         Logger = logger;
 
         _tagServices = tagServices;
         _featureServices = featureServices;
+        _hangfireJobState = hangfireJobState;
     }
 
     private ILogger Logger { get; }
@@ -326,4 +331,7 @@ public class RubberduckDbService : IRubberduckDbService
 
     public async Task<int?> GetFeatureId(RepositoryId repositoryId, string name)
         => await Task.Run(() => _featureServices.GetId(name));
+
+    public async Task<IEnumerable<HangfireJobState>> GetJobStateAsync()
+        => await Task.Run(() => _hangfireJobState.GetAll());
 }
