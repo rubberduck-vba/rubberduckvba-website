@@ -73,6 +73,7 @@ VALUES (
 UPDATE [dbo].[QuickFixes]
 SET [DateTimeUpdated]=GETDATE(),
     [TagAssetId]=@tagAssetId,
+    [SourceUrl]=@sourceUrl,
     [Summary]=@summary,
     [Remarks]=@remarks,
     [CanFixMultiple]=@canFixMultiple,

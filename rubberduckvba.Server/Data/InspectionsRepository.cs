@@ -76,6 +76,7 @@ VALUES (
 UPDATE [dbo].[Inspections]
 SET [DateTimeUpdated]=GETDATE(),
     [TagAssetId]=@tagAssetId,
+    [SourceUrl]=@sourceUrl,
     [InspectionType]=@inspectionType,
     [DefaultSeverity]=@defaultSeverity,
     [Summary]=@summary,
