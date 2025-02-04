@@ -29,10 +29,10 @@ public class SynchronizeXmlDocSection : PipelineSection<SyncContext>
         XmlDocInspectionParser xmlInspectionParser)
         : base(parent, tokenSource, logger)
     {
-        Block = new JustFuckingDoEverything(this, tokenSource, logger, content, inspections, quickfixes, annotations, tagServices, github, mergeService, staging, xmlAnnotationParser, xmlQuickFixParser, xmlInspectionParser);
+        Block = new SynchronizeXmlDocBlock(this, tokenSource, logger, content, inspections, quickfixes, annotations, tagServices, github, mergeService, staging, xmlAnnotationParser, xmlQuickFixParser, xmlInspectionParser);
     }
 
-    public JustFuckingDoEverything Block { get; }
+    public SynchronizeXmlDocBlock Block { get; }
 
     protected override IReadOnlyDictionary<string, IDataflowBlock> Blocks => new Dictionary<string, IDataflowBlock>
     {
@@ -45,7 +45,7 @@ public class SynchronizeXmlDocSection : PipelineSection<SyncContext>
     }
 }
 
-public class JustFuckingDoEverything : ActionBlockBase<SyncRequestParameters, SyncContext>
+public class SynchronizeXmlDocBlock : ActionBlockBase<SyncRequestParameters, SyncContext>
 {
     private readonly IRubberduckDbService _content;
     private readonly IRepository<InspectionEntity> _inspections;
@@ -59,7 +59,7 @@ public class JustFuckingDoEverything : ActionBlockBase<SyncRequestParameters, Sy
     private readonly XmlDocQuickFixParser _xmlQuickFixParser;
     private readonly XmlDocInspectionParser _xmlInspectionParser;
 
-    public JustFuckingDoEverything(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger,
+    public SynchronizeXmlDocBlock(PipelineSection<SyncContext> parent, CancellationTokenSource tokenSource, ILogger logger,
         IRubberduckDbService content,
         IRepository<InspectionEntity> inspections,
         IRepository<QuickFixEntity> quickfixes,
@@ -334,11 +334,11 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         PrepareStaging = new PrepareStagingBlock(this, tokenSource, logger);
         SaveStaging = new BulkSaveStagingBlock(this, tokenSource, staging, logger);
         */
-        JustFuckingDoIt = new JustFuckingDoEverything(this, tokenSource, logger, content, inspections, quickfixes, annotations, tagServices, github, mergeService, staging, xmlAnnotationParser, xmlQuickFixParser, xmlInspectionParser);
+        SynchronizeXmlDoc = new SynchronizeXmlDocBlock(this, tokenSource, logger, content, inspections, quickfixes, annotations, tagServices, github, mergeService, staging, xmlAnnotationParser, xmlQuickFixParser, xmlInspectionParser);
     }
 
     #region blocks
-    private JustFuckingDoEverything JustFuckingDoIt { get; }
+    private SynchronizeXmlDocBlock SynchronizeXmlDoc { get; }
     /*
     private ReceiveRequestBlock ReceiveRequest { get; }
     private BroadcastParametersBlock BroadcastParameters { get; }
@@ -384,8 +384,8 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
     private PrepareStagingBlock PrepareStaging { get; }
     private BulkSaveStagingBlock SaveStaging { get; }
     */
-    public ITargetBlock<XmldocSyncRequestParameters> InputBlock => JustFuckingDoIt.Block;
-    public IDataflowBlock OutputBlock => JustFuckingDoIt.Block;
+    public ITargetBlock<XmldocSyncRequestParameters> InputBlock => SynchronizeXmlDoc.Block;
+    public IDataflowBlock OutputBlock => SynchronizeXmlDoc.Block;
 
     protected override IReadOnlyDictionary<string, IDataflowBlock> Blocks => new Dictionary<string, IDataflowBlock>
     {
@@ -435,7 +435,7 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         [nameof(PrepareStaging)] = PrepareStaging.Block,
         [nameof(SaveStaging)] = SaveStaging.Block,
         */
-        [nameof(JustFuckingDoIt)] = JustFuckingDoIt.Block,
+        [nameof(SynchronizeXmlDoc)] = SynchronizeXmlDoc.Block,
     };
     #endregion
 
@@ -487,6 +487,6 @@ public class SyncXmldocSection : PipelineSection<SyncContext>
         PrepareStaging.CreateBlock(JoinStagingSources);
         SaveStaging.CreateBlock(PrepareStaging);
         */
-        JustFuckingDoIt.CreateBlock();
+        SynchronizeXmlDoc.CreateBlock();
     }
 }

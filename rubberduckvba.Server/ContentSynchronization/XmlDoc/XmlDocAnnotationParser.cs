@@ -111,6 +111,9 @@ public class XmlDocAnnotationParser(IMarkdownFormattingService markdownService)
                     */
                     before = example.Elements(XmlDocSchema.Annotation.Example.Before.ElementName)
                         .Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Before.Module.ElementName)!, i, "(code pane)"));
+
+                    after = example.Elements(XmlDocSchema.Annotation.Example.After.ElementName)
+                        .Select((e, i) => ExtractCodeModule(e.Element(XmlDocSchema.Annotation.Example.Before.Module.ElementName)!, i, "(exported code)"));
                 }
 
                 if (before.Any() && (after?.Any() ?? false))
