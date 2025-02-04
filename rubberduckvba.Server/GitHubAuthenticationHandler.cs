@@ -75,7 +75,9 @@ public class WebhookAuthenticationHandler : AuthenticationHandler<Authentication
             }
 
             var signature = xHubSignature256.SingleOrDefault();
-            var payload = new StreamReader(Context.Request.Body).ReadToEnd();
+
+            using var reader = new StreamReader(Context.Request.Body);
+            var payload = reader.ReadToEndAsync().GetAwaiter().GetResult();
 
             if (!IsValidSignature(signature, payload))
             {
