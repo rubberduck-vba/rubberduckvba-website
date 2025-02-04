@@ -13,6 +13,9 @@ jobs:
     runs-on: windows-latest
     environment: AZ-Test
 
+    env:
+      ApiRootUrl: $API_ROOT_URL 
+
     steps:
       - uses: actions/checkout@v4
 
@@ -26,9 +29,9 @@ jobs:
 
       - name: configure test front-end environment
         run: |
-            set-content "rubberduckvba.client\src\environments\environment.test.ts" -value "export const environment = { production: false, apiBaseUrl: '${{ env.API_ROOT_URL }}' };"
-            set-content "rubberduckvba.client\src\environments\environment.prod.ts" -value "export const environment = { production: false, apiBaseUrl: '${{ env.API_ROOT_URL }}' };"
-            set-content "rubberduckvba.client\src\environments\environment.ts" -value "export const environment = { production: false, apiBaseUrl: '${{ env.API_ROOT_URL }}' };"
+            set-content "rubberduckvba.client\src\environments\environment.test.ts" -value "export const environment = { production: false, apiBaseUrl: '$ApiRootUrl' };"
+            set-content "rubberduckvba.client\src\environments\environment.prod.ts" -value "export const environment = { production: false, apiBaseUrl: '$ApiRootUrl' };"
+            set-content "rubberduckvba.client\src\environments\environment.ts" -value "export const environment = { production: false, apiBaseUrl: '$ApiRootUrl' };"
 
       - name: dotnet build
         run: dotnet build rubberduckvba.Server --configuration Release

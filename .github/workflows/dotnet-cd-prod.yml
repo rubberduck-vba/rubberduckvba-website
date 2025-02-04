@@ -11,6 +11,9 @@ jobs:
     runs-on: windows-latest
     environment: AZ-Prod
 
+    env:
+      ApiRootUrl: $API_ROOT_URL 
+
     steps:
       - uses: actions/checkout@v4
 
@@ -24,8 +27,8 @@ jobs:
 
       - name: configure production front-end environment
         run: |
-            set-content "rubberduckvba.client\src\environments\environment.prod.ts" -value "export const environment = { production: true, apiBaseUrl: '${{ env.API_ROOT_URL }}' };"
-            set-content "rubberduckvba.client\src\environments\environment.ts" -value "export const environment = { production: true, apiBaseUrl: '${{ env.API_ROOT_URL }}' };"
+            set-content "rubberduckvba.client\src\environments\environment.prod.ts" -value "export const environment = { production: true, apiBaseUrl: '$ApiRootUrl' };"
+            set-content "rubberduckvba.client\src\environments\environment.ts" -value "export const environment = { production: true, apiBaseUrl: '$ApiRootUrl' };"
 
       - name: dotnet build
         run: dotnet build rubberduckvba.Server --configuration Release
