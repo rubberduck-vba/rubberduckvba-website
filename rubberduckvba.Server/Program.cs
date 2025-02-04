@@ -21,6 +21,7 @@ using rubberduckvba.Server.Services;
 using rubberduckvba.Server.Services.rubberduckdb;
 using System.Diagnostics;
 using System.Reflection;
+using System.Security.Claims;
 
 namespace rubberduckvba.Server;
 
@@ -46,9 +47,16 @@ public class Program
         builder.Services.AddAuthentication(options =>
         {
             options.RequireAuthenticatedSignIn = false;
+            options.DefaultAuthenticateScheme = "github";
+            options.DefaultChallengeScheme = "github";
+
             options.AddScheme("github", builder =>
             {
                 builder.HandlerType = typeof(GitHubAuthenticationHandler);
+            });
+            options.AddScheme("webhook-signature", builder =>
+            {
+                builder.HandlerType = typeof(WebhookAuthenticationHandler);
             });
         });
         builder.Services.AddAuthorization(options =>
@@ -56,6 +64,13 @@ public class Program
             options.AddPolicy("github", builder =>
             {
                 builder.RequireAuthenticatedUser();
+            });
+            options.AddPolicy("webhook", builder =>
+            {
+                builder.RequireAuthenticatedUser()
+                    .RequireClaim(ClaimTypes.Authentication, "webhook-signature")
+                    .RequireClaim(ClaimTypes.Role, "rubberduck-webhook")
+                    .RequireClaim(ClaimTypes.Name, "rubberduck-vba-releasebot");
             });
         });
 
@@ -78,6 +93,7 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseRouting();
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
