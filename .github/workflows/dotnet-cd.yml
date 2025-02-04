@@ -59,10 +59,14 @@ jobs:
       
       - name: deploy iis site
         run: |
+            stop-webapppool -name "DefaultAppPool"
             stop-webapppool -name "rubberduckvba"
             stop-iissite -name api -confirm: $false
+            stop-iissite -name rubberduckvba -confirm: $false
             copy-item C:/pub/webroot/test.rubberduckvba.com/* C:/inetpub/wwwroot/test.rubberduckvba.com -Recurse -Force 
             copy-item C:/inetpub/appsettings.test.json C:/inetpub/wwwroot/test.rubberduckvba.com/appsettings.json -Force
             copy-item C:/inetpub/__Web.config C:/inetpub/wwwroot/test.rubberduckvba.com/wwwroot/browser/Web.config -Force
             start-webapppool rubberduckvba
             start-iissite api
+            start-webapppool DefaultAppPool
+            start-iissite rubberduckvba
