@@ -62,6 +62,7 @@ jobs:
             stop-webapppool -name "api-prod"
             stop-iissite -name api-prod -confirm: $false
             stop-iissite -name rubberduckvba-prod -confirm: $false
+            start-sleep -seconds 10
             copy-item C:/pub/webroot/rubberduckvba.com/* C:/inetpub/wwwroot/rubberduckvba.com -Recurse -Force 
             copy-item C:/inetpub/appsettings.prod.json C:/inetpub/wwwroot/rubberduckvba.com/appsettings.json -Force
             copy-item C:/inetpub/__Web.config C:/inetpub/wwwroot/rubberduckvba.com/wwwroot/browser/Web.config -Force
