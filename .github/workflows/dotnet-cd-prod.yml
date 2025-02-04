@@ -43,22 +43,23 @@ jobs:
     runs-on: self-hosted
     needs: build
     steps:
+      - name: prepare staging
+        run: remove-item C:/pub/webroot/rubberduckvba.com -Recurse -Force
+
       - name: download artifacts
         uses: actions/download-artifact@v4.1.8
         with:
           name: pub
-          path: C:/pub/pub.zip
+          path: C:/pub/pub-prod.zip
 
-      - name: unzip artifacts
-        run: |
-            remove-item C:/pub/webroot/* -Recurse -Force
-            expand-archive C:/pub/pub.zip -DestinationPath C:/pub/webroot
+      - name: staging
+        run: move-item C:/pub/pub-prod.zip C:/pub/webroot/rubberduckvba.com/* -force
       
       - name: deploy iis site
         run: |
             stop-webapppool -name "api-prod"
             stop-iissite -name api-prod -confirm: $false
-            copy-item C:/pub/webroot/* C:/inetpub/wwwroot/rubberduckvba.com -Recurse -Force 
+            copy-item C:/pub/webroot/rubberduckvba.com/* C:/inetpub/wwwroot/rubberduckvba.com -Recurse -Force 
             copy-item C:/inetpub/appsettings.prod.json C:/inetpub/wwwroot/rubberduckvba.com/appsettings.json -Force
             copy-item C:/inetpub/__Web.config C:/inetpub/wwwroot/rubberduckvba.com/wwwroot/browser/Web.config -Force
             start-webapppool api-prod
