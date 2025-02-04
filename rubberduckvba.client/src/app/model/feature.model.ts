@@ -130,6 +130,31 @@ export interface AnnotationsFeatureViewModel extends SubFeatureViewModel {
 
 export type XmlDocOrFeatureViewModel = SubFeatureViewModel | InspectionsFeatureViewModel | QuickFixesFeatureViewModel | AnnotationsFeatureViewModel;
 
+export interface QuickFixInspectionLinkViewModel {
+  name: string;
+  summary: string;
+  inspectionType: string;
+  defaultSeverity: string;
+}
+
+export class QuickFixInspectionLinkViewModelClass implements QuickFixInspectionLinkViewModel {
+    name: string;
+    summary: string;
+    inspectionType: string;
+    defaultSeverity: string;
+
+  constructor(model: QuickFixInspectionLinkViewModel) {
+    this.name = model.name;
+    this.summary = model.summary;
+    this.inspectionType = model.inspectionType;
+    this.defaultSeverity = model.defaultSeverity;
+  }
+
+  public get getSeverityIconClass(): string {
+    return `icon icon-severity-${this.defaultSeverity.toLowerCase()}`;
+  }
+}
+
 export interface QuickFixViewModel extends XmlDocViewModel {
   summary: string;
   remarks?: string;
@@ -139,7 +164,7 @@ export interface QuickFixViewModel extends XmlDocViewModel {
   canFixProject: boolean;
   canFixAll: boolean;
 
-  inspections: string[];
+  inspections: QuickFixInspectionLinkViewModel[];
   examples: QuickFixExample[];
 
   getGitHubViewLink(): string;
@@ -301,7 +326,7 @@ export class QuickFixViewModelClass extends SubFeatureViewModelClass implements 
   canFixModule: boolean;
   canFixProject: boolean;
   canFixAll: boolean;
-  inspections: string[];
+  inspections: QuickFixInspectionLinkViewModelClass[];
   examples: QuickFixExample[];
   tagAssetId: number;
   tagName: string;
@@ -323,7 +348,7 @@ export class QuickFixViewModelClass extends SubFeatureViewModelClass implements 
     this.remarks = model.remarks;
 
     this.examples = model.examples;
-    this.inspections = model.inspections;
+    this.inspections = model.inspections.map(e => new QuickFixInspectionLinkViewModelClass(e));
 
     this.tagAssetId = model.tagAssetId;
     this.tagName = model.tagName;

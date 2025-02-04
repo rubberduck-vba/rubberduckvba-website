@@ -85,6 +85,26 @@
                             <small class="text-black-50">This action can be applied simultaneously for all inspection results.</small>
                         </div>
                     </div>
+
+                    <div class="row">
+                        <div *ngIf="quickFixInfo.inspections.length > 0">
+                            <hr />
+                            <h6>
+                                <fa-icon [icon]="'wand-magic-sparkles'"></fa-icon>&nbsp;Inspections
+                            </h6>
+                            <p class="small">This action is offered as quickfix to the following inspections:</p>
+                            <ul class="list-unstyled ms-2">
+                                <li *ngFor="let inspection of this.quickFixInfo.inspections" class="my-1">
+                                    <a class="text-decoration-none" href="/inspections/{{inspection.name}}">
+                                        <div class="card-highlight rounded-4 p-2">
+                                            <h6><span [ngClass]="inspection.getSeverityIconClass"></span>&nbsp;{{inspection.name}}</h6>
+                                            <p class="text-black-50 small" [innerHTML]="inspection.summary"></p>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <div *ngIf="quickFixInfo.examples && quickFixInfo.examples.length > 0" class="row my-3">

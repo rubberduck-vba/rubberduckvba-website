@@ -3,7 +3,7 @@ import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { BehaviorSubject } from "rxjs";
-import { XmlDocItemViewModel, QuickFixViewModel } from "../../../model/feature.model";
+import { XmlDocItemViewModel, QuickFixViewModel, QuickFixViewModelClass } from "../../../model/feature.model";
 
 @Component({
   selector: 'quickfix-item-box',
@@ -12,7 +12,7 @@ import { XmlDocItemViewModel, QuickFixViewModel } from "../../../model/feature.m
 export class QuickFixItemBoxComponent implements OnInit, OnChanges {
 
   private readonly _info: BehaviorSubject<XmlDocItemViewModel> = new BehaviorSubject<XmlDocItemViewModel>(null!);
-  private readonly _quickFixInfo: BehaviorSubject<QuickFixViewModel> = new BehaviorSubject<QuickFixViewModel>(null!);
+  private readonly _quickFixInfo: BehaviorSubject<QuickFixViewModelClass> = new BehaviorSubject<QuickFixViewModelClass>(null!);
 
   @ViewChild('quickFixDetails', { read: TemplateRef }) QuickFixDetails: TemplateRef<any> | undefined;
 
@@ -34,7 +34,7 @@ export class QuickFixItemBoxComponent implements OnInit, OnChanges {
     if (value != null) {
       this._info.next(value);
 
-      this._quickFixInfo.next(value as QuickFixViewModel);
+      this._quickFixInfo.next(value as QuickFixViewModelClass);
     }
   }
 
@@ -47,7 +47,7 @@ export class QuickFixItemBoxComponent implements OnInit, OnChanges {
     this.modal.open(this.QuickFixDetails);
   }
 
-  public get quickFixInfo(): QuickFixViewModel {
+  public get quickFixInfo(): QuickFixViewModelClass {
     return this._quickFixInfo.value;
   }
 }

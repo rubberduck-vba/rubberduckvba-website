@@ -3,7 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { BehaviorSubject, switchMap } from "rxjs";
-import { QuickFixViewModel } from "../../model/feature.model";
+import { QuickFixViewModel, QuickFixViewModelClass } from "../../model/feature.model";
 import { ApiClientService } from "../../services/api-client.service";
 
 @Component({
@@ -12,12 +12,12 @@ import { ApiClientService } from "../../services/api-client.service";
 })
 export class QuickFixComponent implements OnInit {
 
-  private readonly _info: BehaviorSubject<QuickFixViewModel> = new BehaviorSubject<QuickFixViewModel>(null!);
+  private readonly _info: BehaviorSubject<QuickFixViewModelClass> = new BehaviorSubject<QuickFixViewModelClass>(null!);
 
-  public set info(value: QuickFixViewModel) {
+  public set info(value: QuickFixViewModelClass) {
     this._info.next(value);
   }
-  public get info(): QuickFixViewModel {
+  public get info(): QuickFixViewModelClass {
     return this._info.getValue();
   }
 
@@ -31,7 +31,7 @@ export class QuickFixComponent implements OnInit {
         const name = params.get('name')!;
         return this.api.getQuickFix(name);
       })).subscribe(e => {
-        this.info = <QuickFixViewModel>e;
+        this.info = <QuickFixViewModelClass>e;
         console.log(this.info);
       });
   }
