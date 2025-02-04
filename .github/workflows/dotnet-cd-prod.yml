@@ -53,7 +53,7 @@ jobs:
           path: C:/pub/pub-prod.zip
 
       - name: staging
-        run: move-item C:/pub/pub-prod.zip C:/pub/webroot/rubberduckvba.com/* -force
+        run: move-item C:/pub/pub-prod.zip C:/pub/webroot/rubberduckvba.com -force
       
       - name: deploy iis site
         run: |
