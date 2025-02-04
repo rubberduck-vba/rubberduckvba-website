@@ -6,68 +6,57 @@ namespace rubberduckvba.Server.Services.rubberduckdb;
 
 public class TagServices(IRepository<TagEntity> tagsRepository, IRepository<TagAssetEntity> tagAssetsRepository)
 {
-    private IEnumerable<TagEntity> _allTags = [];
-    private IEnumerable<TagEntity> _latestTags = [];
-    private TagGraph? _main;
-    private TagGraph? _next;
-    private bool _mustInvalidate = true;
+    public bool TryGetTag(string name, out Tag tag)
+    {
+        var entity = tagsRepository.GetAll().SingleOrDefault(tag => tag.Name == name);
+        if (entity is null)
+        {
+            tag = default!;
+            return false;
+        }
+
+        tag = new Tag(entity);
+        return true;
+    }
 
     public IEnumerable<Tag> GetAllTags()
     {
-        if (_mustInvalidate || !_allTags.Any())
-        {
-            _allTags = tagsRepository.GetAll().ToList();
-            _latestTags = _allTags
-                .GroupBy(tag => tag.IsPreRelease)
-                .Select(tags => tags.OrderByDescending(tag => tag.DateCreated))
-                .SelectMany(tags => tags.Take(1))
-                .ToList();
-            _mustInvalidate = false;
-        }
-
-        return _allTags.Select(e => new Tag(e));
+        return tagsRepository.GetAll().Select(e => new Tag(e));
     }
 
-    public IEnumerable<Tag> GetLatestTags()
-    {
-        if (_mustInvalidate || !_latestTags.Any())
-        {
-            _ = GetAllTags();
-        }
+    public IEnumerable<Tag> GetLatestTags() => GetLatestTags(tagsRepository.GetAll().Select(e => new Tag(e)));
 
-        return _latestTags.Select(e => new Tag(e));
-    }
+    public IEnumerable<Tag> GetLatestTags(IEnumerable<Tag> allTags) => allTags
+        .GroupBy(tag => tag.IsPreRelease)
+        .Select(tags => tags.OrderByDescending(tag => tag.DateCreated))
+        .SelectMany(tags => tags.Take(1))
+        .ToList();
 
     public TagGraph GetLatestTag(bool isPreRelease)
     {
-        var mustInvalidate = _mustInvalidate;
-        if (mustInvalidate || !_latestTags.Any())
+        var latestTags = GetLatestTags();
+
+        if (!isPreRelease)
         {
-            _ = GetAllTags(); // _mustInvalidate => false
+            var mainTag = latestTags.First(e => !e.IsPreRelease);
+            var mainAssets = tagAssetsRepository.GetAll(mainTag.Id);
+            return new TagGraph(mainTag.ToEntity(), mainAssets);
         }
-
-        if (!mustInvalidate && !isPreRelease && _main != null)
+        else
         {
-            return _main;
+            var nextTag = latestTags.First(e => e.IsPreRelease);
+            var nextAssets = tagAssetsRepository.GetAll(nextTag.Id);
+            return new TagGraph(nextTag.ToEntity(), nextAssets);
         }
-        if (!mustInvalidate && isPreRelease && _next != null)
-        {
-            return _next;
-        }
-
-        var mainTag = _latestTags.First(e => !e.IsPreRelease);
-        var mainAssets = tagAssetsRepository.GetAll(mainTag.Id);
-        _main = new TagGraph(mainTag, mainAssets);
-
-        var nextTag = _latestTags.First(e => e.IsPreRelease);
-        var nextAssets = tagAssetsRepository.GetAll(nextTag.Id);
-        _next = new TagGraph(nextTag, nextAssets);
-
-        return isPreRelease ? _next : _main;
     }
 
     public void Create(IEnumerable<TagGraph> tags)
     {
+        if (!tags.Any())
+        {
+            return;
+        }
+
         var tagEntities = tagsRepository.Insert(tags.Select(tag => tag.ToEntity()));
         var tagsByName = tagEntities.ToDictionary(
             tag => tag.Name,
@@ -81,12 +70,15 @@ public class TagServices(IRepository<TagEntity> tagsRepository, IRepository<TagA
         }
 
         _ = tagAssetsRepository.Insert(assets);
-        _mustInvalidate = true;
     }
 
     public void Update(IEnumerable<Tag> tags)
     {
+        if (!tags.Any())
+        {
+            return;
+        }
+
         tagsRepository.Update(tags.Select(tag => tag.ToEntity()));
-        _mustInvalidate = true;
     }
 }

@@ -15,6 +15,8 @@ public abstract class RubberduckApiController : ControllerBase
         _logger = logger;
     }
 
+    protected ILogger Logger => _logger;
+
 
     protected async Task<IActionResult> GuardInternalActionAsync(Func<Task<IActionResult>> method, [CallerMemberName] string name = default!)
     {

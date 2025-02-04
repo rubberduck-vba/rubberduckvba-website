@@ -24,5 +24,4 @@ public record class XmldocSyncRequestParameters : SyncRequestParameters
 
 public record class TagSyncRequestParameters : SyncRequestParameters
 {
-    public string? Tag { get; init; }
 }

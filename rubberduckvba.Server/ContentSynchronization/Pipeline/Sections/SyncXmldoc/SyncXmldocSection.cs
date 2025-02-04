@@ -90,6 +90,8 @@ public class SynchronizeXmlDocBlock : ActionBlockBase<SyncRequestParameters, Syn
     {
         Context.LoadParameters(input);
 
+        var githubTags = await _github.GetAllTagsAsync();
+
         // LoadInspectionDefaultConfig
         var config = await _github.GetCodeAnalysisDefaultsConfigAsync();
         Context.LoadInspectionDefaultConfig(config);
@@ -108,10 +110,44 @@ public class SynchronizeXmlDocBlock : ActionBlockBase<SyncRequestParameters, Syn
         ]);
 
         // AcquireDbTags
-        var dbMain = await _content.GetLatestTagAsync(RepositoryId.Rubberduck, includePreRelease: false);
-        Context.LoadRubberduckDbMain(dbMain);
+        var ghMain = githubTags.Where(tag => !tag.IsPreRelease).OrderByDescending(tag => tag.DateCreated).ThenByDescending(tag => tag.ReleaseId).Take(1).Single();
+        var ghNext = githubTags.Where(tag => tag.IsPreRelease).OrderByDescending(tag => tag.DateCreated).ThenByDescending(tag => tag.ReleaseId).Take(1).Single();
 
+        await Task.Delay(TimeSpan.FromSeconds(2)); // just in case the tags job was scheduled at/around the same time
+
+        var dbMain = await _content.GetLatestTagAsync(RepositoryId.Rubberduck, includePreRelease: false);
         var dbNext = await _content.GetLatestTagAsync(RepositoryId.Rubberduck, includePreRelease: true);
+
+        var dbTags = _tagServices.GetAllTags().ToDictionary(e => e.Name);
+        List<TagGraph> newTags = [];
+        if (ghMain.Name != dbMain.Name)
+        {
+            if (!dbTags.ContainsKey(ghMain.Name))
+            {
+                newTags.Add(ghMain);
+            }
+            else
+            {
+                // that's an old tag then; do not process
+                throw new InvalidOperationException($"Tag metadata mismatch, xmldoc update will not proceed; GitHub@main:{ghMain.Name} ({ghMain.DateCreated}) | rubberduckdb@main: {dbMain.Name} ({dbMain.DateCreated})");
+            }
+        }
+        if (ghNext.Name != dbNext.Name)
+        {
+            if (!dbTags.ContainsKey(ghMain.Name))
+            {
+                newTags.Add(ghMain);
+            }
+            else
+            {
+                // that's an old tag then; do not process
+                throw new InvalidOperationException($"Tag metadata mismatch, xmldoc update will not proceed; GitHub@main:{ghMain.Name} ({ghMain.DateCreated}) | rubberduckdb@main: {dbMain.Name} ({dbMain.DateCreated})");
+            }
+        }
+
+        _tagServices.Create(newTags);
+
+        Context.LoadRubberduckDbMain(dbMain);
         Context.LoadRubberduckDbNext(dbNext);
 
         Context.LoadDbTags([dbMain, dbNext]);
