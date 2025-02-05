@@ -63,11 +63,11 @@
   <ItemGroup>
     <Build Include="Tables\Features.sql" />
     <Build Include="Tables\Repositories.sql" />
-    <Build Include="Schemas\Hangfire.sql" />
+    <None Include="Schemas\Hangfire.sql" />
     <Build Include="Tables\Inspections.sql" />
     <Build Include="Tables\QuickFixes.sql" />
     <Build Include="Tables\Annotations.sql" />
-    <Build Include="Views\HangfireJobState.sql" />
+    <None Include="Views\HangfireJobState.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\TagAssets.sql" />
