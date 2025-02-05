@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 
 namespace rubberduckvba.Server.Api.Admin;
 
@@ -20,9 +19,9 @@ public class WebhookController : RubberduckApiController
         _hangfire = hangfire;
     }
 
-    [Authorize("webhook", AuthenticationSchemes = "webhook-signature")]
+    [Authorize("webhook")]
     [HttpPost("webhook/github")]
-    public IActionResult GitHub([FromBody] JToken payload)
+    public IActionResult GitHub([FromBody] PushWebhookPayload payload)
     {
         var eventType = _validator.Validate(payload, Request.Headers, out var content, out var gitref);
 
@@ -33,6 +32,11 @@ public class WebhookController : RubberduckApiController
 
             Logger.LogInformation(message);
             return Ok(message);
+        }
+        else if (eventType == WebhookPayloadType.Ping)
+        {
+            Logger.LogInformation("Webhook ping event was accepted; nothing to process.");
+            return Ok();
         }
         else if (eventType == WebhookPayloadType.Greeting)
         {

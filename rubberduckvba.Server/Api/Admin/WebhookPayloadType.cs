@@ -4,5 +4,6 @@ public enum WebhookPayloadType
 {
     Unsupported,
     Greeting,
+    Ping,
     Push
 }

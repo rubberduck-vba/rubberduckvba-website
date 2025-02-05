@@ -21,7 +21,6 @@ using rubberduckvba.Server.Services;
 using rubberduckvba.Server.Services.rubberduckdb;
 using System.Diagnostics;
 using System.Reflection;
-using System.Security.Claims;
 
 namespace rubberduckvba.Server;
 
@@ -43,12 +42,12 @@ public class Program
         builder.Services.Configure<ApiSettings>(options => builder.Configuration.GetSection("Api").Bind(options));
         builder.Services.Configure<HangfireSettings>(options => builder.Configuration.GetSection("Hangfire").Bind(options));
 
-
         builder.Services.AddAuthentication(options =>
         {
             options.RequireAuthenticatedSignIn = false;
+
             options.DefaultAuthenticateScheme = "github";
-            options.DefaultChallengeScheme = "github";
+            options.DefaultScheme = "anonymous";
 
             options.AddScheme("github", builder =>
             {
@@ -59,18 +58,16 @@ public class Program
                 builder.HandlerType = typeof(WebhookAuthenticationHandler);
             });
         });
+
         builder.Services.AddAuthorization(options =>
         {
             options.AddPolicy("github", builder =>
             {
-                builder.RequireAuthenticatedUser();
+                builder.RequireAuthenticatedUser().AddAuthenticationSchemes("github");
             });
             options.AddPolicy("webhook", builder =>
             {
-                builder.RequireAuthenticatedUser()
-                    .RequireClaim(ClaimTypes.Authentication, "webhook-signature")
-                    .RequireClaim(ClaimTypes.Role, "rubberduck-webhook")
-                    .RequireClaim(ClaimTypes.Name, "rubberduck-vba-releasebot");
+                builder.RequireAuthenticatedUser().AddAuthenticationSchemes("webhook-signature");
             });
         });
 
@@ -164,6 +161,8 @@ public class Program
         services.AddSingleton<IMarkdownFormattingService, MarkdownFormattingService>();
         services.AddSingleton<ISyntaxHighlighterService, SyntaxHighlighterService>();
         services.AddSingleton<WebhookSignatureValidationService>();
+        services.AddSingleton<WebhookPayloadValidationService>();
+        services.AddSingleton<HangfireLauncherService>();
 
         services.AddSingleton<IRubberduckDbService, RubberduckDbService>();
         services.AddSingleton<TagServices>();
