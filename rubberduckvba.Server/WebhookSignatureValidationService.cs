@@ -61,11 +61,13 @@ public class WebhookSignatureValidationService(ConfigurationOptions configuratio
         {
             return false;
         }
-        using var sha256 = SHA256.Create();
 
         var secret = configuration.GitHubOptions.Value.WebhookToken;
-        var bytes = Encoding.UTF8.GetBytes(secret + payload);
-        var check = $"sha256={Encoding.UTF8.GetString(sha256.ComputeHash(bytes))}";
+        var secretBytes = Encoding.UTF8.GetBytes(secret);
+        var payloadbytes = Encoding.UTF8.GetBytes(payload);
+
+        using var digest = new HMACSHA256(secretBytes);
+        var check = $"sha256={Encoding.UTF8.GetString(digest.ComputeHash(payloadbytes))}";
 
         return signature == check;
     }
