@@ -12,7 +12,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     /// Enqueues a job that updates xmldoc content from the latest release/pre-release tags.
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
-    [Authorize("github", AuthenticationSchemes = "github")]
+    [Authorize("github")]
     [HttpPost("admin/update/xmldoc")]
     public IActionResult UpdateXmldocContent()
     {
@@ -24,7 +24,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     /// Enqueues a job that gets the latest release/pre-release tags and their respective assets, and updates the installer download stats.
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
-    [Authorize("github", AuthenticationSchemes = "github")]
+    [Authorize("github")]
     [HttpPost("admin/update/tags")]
     public IActionResult UpdateTagMetadata()
     {

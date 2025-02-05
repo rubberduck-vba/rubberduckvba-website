@@ -1,39 +1,26 @@
-﻿using Newtonsoft.Json.Linq;
-
-namespace rubberduckvba.Server.Api.Admin;
+﻿namespace rubberduckvba.Server.Api.Admin;
 
 public class WebhookPayloadValidationService(ConfigurationOptions options)
 {
-    public WebhookPayloadType Validate(JToken payload, IHeaderDictionary headers, out string? content, out GitRef? gitref)
+    public WebhookPayloadType Validate(PushWebhookPayload payload, IHeaderDictionary headers, out string? content, out GitRef? gitref)
     {
         content = default;
-        gitref = default;
 
-        if (!IsValidHeaders(headers) || !IsValidSource(payload) || !IsValidEvent(payload))
+        gitref = new GitRef(payload.Ref);
+        if (headers["X-GitHub-Event"].FirstOrDefault() == "ping")
         {
-            return WebhookPayloadType.Unsupported;
+            if (!(payload.Created && gitref.Value.IsTag))
+            {
+                return WebhookPayloadType.Greeting;
+            }
+            return WebhookPayloadType.Ping;
         }
 
-        gitref = new GitRef(payload.Value<string>("ref"));
-        if (!(payload.Value<bool>("created") && gitref.HasValue && gitref.Value.IsTag))
+        if (headers["X-GitHub-Event"].FirstOrDefault() == "push")
         {
-            content = payload.Value<string>("zen");
-            return WebhookPayloadType.Greeting;
+            return WebhookPayloadType.Push;
         }
 
-        return WebhookPayloadType.Push;
-    }
-
-    private bool IsValidHeaders(IHeaderDictionary headers) =>
-        headers.TryGetValue("X-GitHub-Event", out Microsoft.Extensions.Primitives.StringValues values) && values.Contains("push");
-
-    private bool IsValidSource(JToken payload) =>
-        payload["repository"].Value<string>("name") == options.GitHubOptions.Value.Rubberduck &&
-        payload["owner"].Value<int>("id") == options.GitHubOptions.Value.RubberduckOrgId;
-
-    private bool IsValidEvent(JToken payload)
-    {
-        var ev = payload["hook"]?["events"]?.Values<string>() ?? [];
-        return ev.Contains("push");
+        return WebhookPayloadType.Unsupported;
     }
 }

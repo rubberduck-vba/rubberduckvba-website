@@ -24,7 +24,13 @@ public class WebhookSignatureValidationService(ConfigurationOptions configuratio
 
         if (!xGitHubEvent.Contains("push"))
         {
-            // only authenticate push events
+            if (xGitHubEvent.Contains("ping"))
+            {
+                // no harm just returning 200-OK on ping
+                return true;
+            }
+
+            // only authenticate ping and push events
             return false;
         }
 
