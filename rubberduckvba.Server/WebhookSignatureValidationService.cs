@@ -1,4 +1,5 @@
-﻿using rubberduckvba.Server.Api.Admin;
+﻿using Newtonsoft.Json;
+using rubberduckvba.Server.Api.Admin;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -64,11 +65,14 @@ public class WebhookSignatureValidationService(ConfigurationOptions configuratio
 
         var secret = configuration.GitHubOptions.Value.WebhookToken;
         var secretBytes = Encoding.UTF8.GetBytes(secret);
-        var payloadbytes = Encoding.UTF8.GetBytes(payload);
+
+        var payloadBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(payload)));
 
         using var digest = new HMACSHA256(secretBytes);
-        var check = $"sha256={Encoding.UTF8.GetString(digest.ComputeHash(payloadbytes))}";
+        var hash = digest.ComputeHash(payloadBytes);
 
-        return signature == check;
+        var check = $"sha256={Convert.ToHexString(hash).ToLowerInvariant()}";
+
+        return (signature == check);
     }
 }
