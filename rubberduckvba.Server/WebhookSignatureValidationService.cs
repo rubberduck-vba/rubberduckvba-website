@@ -5,7 +5,7 @@ using System.Text;
 
 namespace rubberduckvba.Server;
 
-public class WebhookSignatureValidationService(ConfigurationOptions configuration)
+public class WebhookSignatureValidationService(ConfigurationOptions configuration, ILogger<WebhookSignatureValidationService> logger)
 {
     public bool Validate(
         string payload,
@@ -64,8 +64,13 @@ public class WebhookSignatureValidationService(ConfigurationOptions configuratio
         }
 
         var secret = configuration.GitHubOptions.Value.WebhookToken;
-        var secretBytes = Encoding.UTF8.GetBytes(secret);
+        if (string.IsNullOrWhiteSpace(secret))
+        {
+            logger.LogWarning("Webhook secret was not found; signature will not be validated.");
+            return false;
+        }
 
+        var secretBytes = Encoding.UTF8.GetBytes(secret);
         var payloadBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(payload)));
 
         using var digest = new HMACSHA256(secretBytes);
