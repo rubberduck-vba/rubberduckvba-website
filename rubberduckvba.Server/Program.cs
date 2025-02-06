@@ -160,8 +160,9 @@ public class Program
         services.AddSingleton<ConfigurationOptions>();
         services.AddSingleton<IMarkdownFormattingService, MarkdownFormattingService>();
         services.AddSingleton<ISyntaxHighlighterService, SyntaxHighlighterService>();
-        services.AddSingleton<WebhookSignatureValidationService>();
+        services.AddSingleton<WebhookHeaderValidationService>();
         services.AddSingleton<WebhookPayloadValidationService>();
+        services.AddSingleton<WebhookSignatureValidationService>();
         services.AddSingleton<HangfireLauncherService>();
 
         services.AddSingleton<IRubberduckDbService, RubberduckDbService>();

@@ -2,7 +2,7 @@
 
 public enum WebhookPayloadType
 {
-    Unsupported,
+    BadRequest,
     Greeting,
     Ping,
     Push

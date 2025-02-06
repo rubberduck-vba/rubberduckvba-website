@@ -8,10 +8,10 @@ namespace rubberduckvba.Server;
 
 public class WebhookAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    private readonly WebhookSignatureValidationService _service;
+    private readonly WebhookHeaderValidationService _service;
 
     public WebhookAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder,
-        WebhookSignatureValidationService service)
+        WebhookHeaderValidationService service)
         : base(options, logger, encoder)
     {
         _service = service;
@@ -27,10 +27,7 @@ public class WebhookAuthenticationHandler : AuthenticationHandler<Authentication
             var xHubSignature = Context.Request.Headers["X-Hub-Signature"].OfType<string>().ToArray();
             var xHubSignature256 = Context.Request.Headers["X-Hub-Signature-256"].OfType<string>().ToArray();
 
-            using var reader = new StreamReader(Context.Request.Body);
-            var payload = reader.ReadToEndAsync().GetAwaiter().GetResult();
-
-            if (_service.Validate(payload, userAgent, xGitHubEvent, xGitHubDelivery, xHubSignature, xHubSignature256))
+            if (_service.Validate(userAgent, xGitHubEvent, xGitHubDelivery, xHubSignature, xHubSignature256))
             {
                 var principal = CreatePrincipal();
                 var ticket = new AuthenticationTicket(principal, "webhook-signature");
