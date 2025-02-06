@@ -22,10 +22,13 @@ public class WebhookController : RubberduckApiController
 
     [Authorize("webhook")]
     [HttpPost("webhook/github")]
-    public async Task<IActionResult> GitHub([FromBody] object body)
+    public async Task<IActionResult> GitHub()
     {
-        var json = body.ToString();
-        var payload = JsonSerializer.Deserialize<PushWebhookPayload>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var reader = new StreamReader(Request.Body);
+        var json = await reader.ReadToEndAsync();
+
+        var payload = JsonSerializer.Deserialize<PushWebhookPayload>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? throw new InvalidOperationException("Could not deserialize payload");
         var eventType = _validator.Validate(payload, json, Request.Headers, out var content, out var gitref);
 
         if (eventType == WebhookPayloadType.Push)
