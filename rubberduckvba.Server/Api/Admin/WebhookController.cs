@@ -22,7 +22,7 @@ public class WebhookController : RubberduckApiController
 
     [Authorize("webhook")]
     [HttpPost("webhook/github")]
-    public async Task<IActionResult> GitHub(dynamic body)
+    public async Task<IActionResult> GitHub([FromBody] dynamic body)
     {
         //var reader = new StreamReader(Request.Body);
         //var json = await reader.ReadToEndAsync();
