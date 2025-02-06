@@ -21,6 +21,7 @@ public class TagsController : RubberduckApiController
     /// <summary>
     /// Gets information about the latest release tags.
     /// </summary>
+    [HttpGet("api/v1/public/tags")] // legacy route
     [HttpGet("tags/latest")]
     [AllowAnonymous]
     public IActionResult Latest()
