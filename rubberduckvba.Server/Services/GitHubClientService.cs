@@ -44,11 +44,11 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
         var user = await client.User.Current();
         var identity = new ClaimsIdentity(new[]
         {
-            new Claim(ClaimTypes.Name, user.Name),
-            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Login),
             new Claim(ClaimTypes.Role, config.OwnerOrg),
+            new Claim(ClaimTypes.Authentication, token),
             new Claim("access_token", token)
-        });
+        }, "github");
         return new ClaimsPrincipal(identity);
     }
 

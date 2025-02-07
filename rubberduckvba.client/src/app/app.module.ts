@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 import { DataService } from './services/data.service';
-import { ApiClientService } from './services/api-client.service';
+import { AdminApiClientService, ApiClientService } from './services/api-client.service';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { BrowserModule } from '@angular/platform-browser';
@@ -33,6 +33,8 @@ import { AnnotationComponent } from './routes/annotation/annotation.component';
 import { QuickFixComponent } from './routes/quickfixes/quickfix.component';
 
 import { DefaultUrlSerializer, UrlTree } from '@angular/router';
+import { AuthMenuComponent } from './components/auth-menu/auth-menu.component';
+import { AuthComponent } from './routes/auth/auth.component';
 
 /**
  * https://stackoverflow.com/a/39560520
@@ -52,6 +54,7 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
   declarations: [
     AppComponent,
     HomeComponent,
+    AuthComponent,
     FeaturesComponent,
     FeatureComponent,
     TagDownloadComponent,
@@ -70,7 +73,8 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     InspectionComponent,
     AnnotationComponent,
     QuickFixComponent,
-    AboutComponent
+    AboutComponent,
+    AuthMenuComponent
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -83,7 +87,8 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
       { path: 'inspections/:name', component: InspectionComponent },
       { path: 'annotations/:name', component: AnnotationComponent },
       { path: 'quickfixes/:name', component: QuickFixComponent },
-      { path: 'about', component: AboutComponent},
+      { path: 'about', component: AboutComponent },
+      { path: 'auth/github', component: AuthComponent },
       // legacy routes:
       { path: 'inspections/details/:name', redirectTo: 'inspections/:name' },
     ]),
@@ -93,6 +98,7 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
   providers: [
     DataService,
     ApiClientService,
+    AdminApiClientService,
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide: UrlSerializer,

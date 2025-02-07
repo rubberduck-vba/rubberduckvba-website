@@ -1,0 +1,102 @@
+
+<div *ngIf="!user || !user.isAuthenticated">
+    <button type="button" role="button" class="nav-link text-dark btn-link" title="Sign in with GitHub" (click)="confirm()">
+        <fa-icon class="mx-1" [icon]="['fab', 'github']"></fa-icon> Sign in
+    </button>
+</div>
+
+<div *ngIf="user && user.isAuthenticated">
+    <div ngbDropdown>
+        <button ngbDropdownToggle class="nav-link" id="authMenu" title="Signed in with GitHub"><fa-icon class="mx-1" [icon]="['fab', 'github']"></fa-icon> {{user.name}}</button>
+        <div ngbDropdownMenu="authMenu">
+            <div ngbDropdownItem>
+                <button type="button" role="button" class="nav-link text-dark btn-link" title="Sign out" (click)="signout()">
+                    <fa-icon class="mx-1" [icon]="['fas', 'sign-out']"></fa-icon> Sign out
+                </button>
+            </div>
+            <div *ngIf="user.isAdmin">
+                <hr />
+                <div ngbDropdownItem>
+                    <button type="button" role="button" class="nav-link text-dark btn-link" title="" (click)="confirmUpdateTags()">
+                        Update tag metadata
+                    </button>
+                </div>
+                <div ngbDropdownItem>
+                    <button type="button" role="button" class="nav-link text-dark btn-link" title="" (click)="confirmUpdateXmldocs()">
+                        Update xmldoc metadata
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #confirmbox let-modal>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Sign in with GitHub</h5>
+            </div>
+            <div class="modal-body">
+                <div class="border-danger border-bottom border-top bg-light text-danger p-2 my-1">
+                    <h6><fa-icon class="mx-1" [icon]="['fas', 'exclamation-triangle']"></fa-icon>Restricted Area</h6>
+                    <p>Site administration is reserved to members of the <a class="link-danger" href="https://github.com/rubberduck-vba">rubberduck-vba</a> GitHub organization.</p>
+                </div>
+                <p class="mt-4">
+                    By clicking <span class="btn btn-danger disabled">Accept</span> you agree to authenticate with GitHub via OAuth2.
+                    You will be prompted to authorize the site's GitHub OAuth application, and will then be redirected to the home page.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-login" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('cancel')">Close</button>
+                <button id="accept-login" type="button" class="btn btn-danger" (click)="signin()">Accept</button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #confirmtagsbox let-modal>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Update Tag Metadata</h5>
+            </div>
+            <div class="modal-body">
+                <div class="border-primary border-bottom border-top bg-light text-primary p-2 my-1">
+                    <h6><fa-icon class="mx-1" [icon]="['fas', 'info-circle']"></fa-icon>Confirm</h6>
+                    <p>This will schedule a Hangfire Server job that will retrieve the latest [main] and [next] tags and update the installer download stats.</p>
+                </div>
+                <p class="mt-4">
+                    Scheduled jobs usually complete within a few seconds. Proceed?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-tags" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('cancel')">Close</button>
+                <button id="accept-tags" type="button" class="btn btn-primary" (click)="updateTags()">Proceed</button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #confirmxmldocsbox let-modal>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Update XML Documentation Metadata</h5>
+            </div>
+            <div class="modal-body">
+                <div class="border-primary border-bottom border-top bg-light text-primary p-2 my-1">
+                    <h6><fa-icon class="mx-1" [icon]="['fas', 'info-circle']"></fa-icon>Confirm</h6>
+                    <p>This will schedule a Hangfire Server job that will download the xmldoc assets of the latest [main] and [next] tags, extract the relevant documentation, and merge with the existing xmldoc metadata.</p>
+                </div>
+                <p class="mt-4">
+                    Scheduled jobs usually complete within a few seconds. Proceed?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-xmldoc" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('cancel')">Close</button>
+                <button id="accept-xmldoc" type="button" class="btn btn-primary" (click)="updateXmldocs()">Proceed</button>
+            </div>
+        </div>
+    </div>
+</ng-template>

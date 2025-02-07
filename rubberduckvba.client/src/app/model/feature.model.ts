@@ -424,3 +424,9 @@ export class AnnotationsFeatureViewModelClass extends SubFeatureViewModelClass i
     this.annotations = model.annotations.map(e => new AnnotationViewModelClass(e));
   }
 }
+
+export interface UserViewModel {
+  name: string;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+}

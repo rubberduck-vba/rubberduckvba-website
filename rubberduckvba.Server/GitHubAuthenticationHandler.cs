@@ -20,15 +20,28 @@ public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationS
 
     protected async override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var token = Context.Request.Headers["X-ACCESS-TOKEN"].SingleOrDefault();
-        if (token is null)
+        try
         {
+            var token = Context.Request.Headers["X-ACCESS-TOKEN"].SingleOrDefault();
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return AuthenticateResult.NoResult();
+            }
+
+            var principal = await _github.ValidateTokenAsync(token);
+            if (principal is ClaimsPrincipal)
+            {
+                Context.User = principal;
+                Thread.CurrentPrincipal = principal;
+                return AuthenticateResult.Success(new AuthenticationTicket(principal, "github"));
+            }
+
             return AuthenticateResult.NoResult();
         }
-
-        var principal = await _github.ValidateTokenAsync(token);
-        return principal is ClaimsPrincipal
-            ? AuthenticateResult.Success(new AuthenticationTicket(principal, "github"))
-            : AuthenticateResult.NoResult();
+        catch (InvalidOperationException e)
+        {
+            Logger.LogError(e, e.Message);
+            return AuthenticateResult.NoResult();
+        }
     }
 }

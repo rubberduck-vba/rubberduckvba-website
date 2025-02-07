@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, Query } from "@angular/core";
 import { map, timeout, catchError, throwError, Observable } from "rxjs";
-import { environment } from "../../environments/environment";
+import { ApiClientService } from "./api-client.service";
 
 @Injectable()
 export class DataService {
@@ -12,8 +12,14 @@ export class DataService {
   }
 
   public getAsync<TResult>(url: string): Observable<TResult> {
-    const headers = new HttpHeaders()
+    let headers = new HttpHeaders()
       .append('accept', 'application/json');
+
+    const token = sessionStorage.getItem('github:access_token');
+    if (token) {
+      headers = headers.append('X-ACCESS-TOKEN', token)
+        .append('Access-Control-Allow-Origin', '*');
+    }
 
     return this.http.get(url, { headers })
       .pipe(
@@ -27,9 +33,14 @@ export class DataService {
   }
 
   public postAsync<TContent, TResult>(url: string, content?: TContent): Observable<TResult> {
-    const headers = new HttpHeaders()
+    let headers = new HttpHeaders()
       .append('accept', 'application/json')
       .append('Content-Type', 'application/json; charset=utf-8');
+
+    const token = sessionStorage.getItem('github:access_token');
+    if (token) {
+      headers = headers.append('X-ACCESS-TOKEN', token);
+    }
 
     return (content
       ? this.http.post(url, content, { headers })
@@ -42,23 +53,19 @@ export class DataService {
   }
 }
 
-@Injectable({ providedIn: 'root' })
-export class AuthService {
-  constructor(private http: HttpClient) { }
+export class AuthViewModel {
+  state: string;
+  code?: string;
+  token?: string;
 
-  public signin(): Observable<any> {
-    const headers = new HttpHeaders()
-      .append('accept', 'application/json')
-      .append('Content-Type', 'application/json; charset=utf-8');
-
-    return this.http.post(`${environment.apiBaseUrl}auth/signin`, undefined, { headers });
+  constructor(state: string, code?: string, token?: string) {
+    this.state = state;
+    this.code = code;
+    this.token = token;
   }
 
-  public signout(): Observable<any> {
-    const headers = new HttpHeaders()
-      .append('accept', 'application/json')
-      .append('Content-Type', 'application/json; charset=utf-8');
-
-    return this.http.post(`${environment.apiBaseUrl}auth/signout`, undefined, { headers });
+  public static withRandomState() {
+    const state = crypto.randomUUID();
+    return new AuthViewModel(state);
   }
 }

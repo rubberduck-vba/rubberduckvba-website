@@ -14,4 +14,5 @@ import { AngularDeviceInformationService } from 'angular-device-information';
 })
 export class LoadingContentComponent {
   @Input() public show: boolean = true;
+  @Input() public label: string = 'loading...';
 }
