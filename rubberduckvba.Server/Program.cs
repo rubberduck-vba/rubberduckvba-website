@@ -45,9 +45,7 @@ public class Program
         builder.Services.AddAuthentication(options =>
         {
             options.RequireAuthenticatedSignIn = false;
-
             options.DefaultAuthenticateScheme = "github";
-            options.DefaultScheme = "anonymous";
 
             options.AddScheme("github", builder =>
             {
@@ -99,7 +97,11 @@ public class Program
 
         app.UseCors(policy =>
         {
-            policy.SetIsOriginAllowed(origin => true).AllowAnyHeader();
+            policy
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .SetIsOriginAllowed(origin => true);
         });
 
         StartHangfire(app);

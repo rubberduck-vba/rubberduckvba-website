@@ -1,23 +1,27 @@
 
 <div *ngIf="!user || !user.isAuthenticated">
     <button type="button" role="button" class="nav-link text-dark btn-link" title="Sign in with GitHub" (click)="confirm()">
-        <fa-icon class="mx-1" [icon]="['fab', 'github']"></fa-icon>Sign in
+        <fa-icon class="mx-1" [icon]="['fab', 'github']"></fa-icon> Sign in
     </button>
 </div>
 
 <div *ngIf="user && user.isAuthenticated">
     <div ngbDropdown>
-        <button ngbDropdownToggle class="nav-link" id="authMenu" title="Signed in with GitHub">{{user.name}}</button>
+        <button ngbDropdownToggle class="nav-link" id="authMenu" title="Signed in with GitHub"><fa-icon class="mx-1" [icon]="['fab', 'github']"></fa-icon> {{user.name}}</button>
         <div ngbDropdownMenu="authMenu">
             <div ngbDropdownItem>
                 <button type="button" role="button" class="nav-link text-dark btn-link" title="Sign out" (click)="signout()">
-                    <fa-icon class="mx-1" [icon]="['fab', 'github']"></fa-icon>Sign out
+                    <fa-icon class="mx-1" [icon]="['fas', 'sign-out']"></fa-icon> Sign out
                 </button>
-                <div *ngIf="user.isAdmin">
-                    <hr />
+            </div>
+            <div *ngIf="user.isAdmin">
+                <hr />
+                <div ngbDropdownItem>
                     <button type="button" role="button" class="nav-link text-dark btn-link" title="" (click)="confirmUpdateTags()">
                         Update tag metadata
                     </button>
+                </div>
+                <div ngbDropdownItem>
                     <button type="button" role="button" class="nav-link text-dark btn-link" title="" (click)="confirmUpdateXmldocs()">
                         Update xmldoc metadata
                     </button>
@@ -44,7 +48,7 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button id="cancel-login" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">Close</button>
+                <button id="cancel-login" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('cancel')">Close</button>
                 <button id="accept-login" type="button" class="btn btn-danger" (click)="signin()">Accept</button>
             </div>
         </div>
@@ -67,7 +71,7 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button id="cancel-tags" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">Close</button>
+                <button id="cancel-tags" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('cancel')">Close</button>
                 <button id="accept-tags" type="button" class="btn btn-primary" (click)="updateTags()">Proceed</button>
             </div>
         </div>
@@ -90,7 +94,7 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button id="cancel-xmldoc" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">Close</button>
+                <button id="cancel-xmldoc" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('cancel')">Close</button>
                 <button id="accept-xmldoc" type="button" class="btn btn-primary" (click)="updateXmldocs()">Proceed</button>
             </div>
         </div>

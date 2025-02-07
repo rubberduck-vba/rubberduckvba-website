@@ -61,19 +61,13 @@ export class AdminApiClientService {
   constructor(private data: DataService) {
   }
 
-  public updateTagMetadata(): void {
+  public updateTagMetadata(): Observable<number> {
     const url = `${environment.apiBaseUrl}admin/update/tags`;
-    const jwt = sessionStorage.getItem("jwt");
-    if (jwt) {
-      this.data.postWithAccessTokenAsync(jwt, url);
-    }
+    return this.data.postAsync(url);
   }
 
-  public updateXmldocMetadata(): void {
+  public updateXmldocMetadata(): Observable<number> {
     const url = `${environment.apiBaseUrl}admin/update/xmldoc`;
-    const jwt = sessionStorage.getItem("jwt");
-    if (jwt) {
-      this.data.postWithAccessTokenAsync(jwt, url);
-    }
+    return this.data.postAsync(url);
   }
 }

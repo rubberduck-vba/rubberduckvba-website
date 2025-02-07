@@ -12,43 +12,13 @@ export class DataService {
   }
 
   public getAsync<TResult>(url: string): Observable<TResult> {
-    const headers = new HttpHeaders()
-      .append('accept', 'application/json');
-
-    return this.http.get(url, { headers })
-      .pipe(
-        map(result => <TResult>result),
-        timeout(this.timeout),
-        catchError((err: Response) => {
-          console.log(err);
-          return throwError(() => err.text);
-        })
-      );
-  }
-
-  public postAsync<TContent, TResult>(url: string, content?: TContent): Observable<TResult> {
-    const headers = new HttpHeaders()
-      .append('accept', 'application/json')
-      .append('Content-Type', 'application/json; charset=utf-8');
-
-    return (content
-      ? this.http.post(url, content, { headers })
-      : this.http.post(url, { headers }))
-      .pipe(
-        map(result => <TResult>result),
-        timeout(this.timeout),
-        catchError((err: Response) => throwError(() => err.text))
-      );
-  }
-
-  
-  public getWithAccessTokenAsync<TResult>(url: string): Observable<TResult> {
-    const headers = new HttpHeaders()
+    let headers = new HttpHeaders()
       .append('accept', 'application/json');
 
     const token = sessionStorage.getItem('github:access_token');
     if (token) {
-      headers.append('X-ACCESS-TOKEN', token);
+      headers = headers.append('X-ACCESS-TOKEN', token)
+        .append('Access-Control-Allow-Origin', '*');
     }
 
     return this.http.get(url, { headers })
@@ -62,14 +32,14 @@ export class DataService {
       );
   }
 
-  public postWithAccessTokenAsync<TContent, TResult>(url: string, content?: TContent): Observable<TResult> {
-    const headers = new HttpHeaders()
+  public postAsync<TContent, TResult>(url: string, content?: TContent): Observable<TResult> {
+    let headers = new HttpHeaders()
       .append('accept', 'application/json')
       .append('Content-Type', 'application/json; charset=utf-8');
 
     const token = sessionStorage.getItem('github:access_token');
     if (token) {
-      headers.append('X-ACCESS-TOKEN', token);
+      headers = headers.append('X-ACCESS-TOKEN', token);
     }
 
     return (content

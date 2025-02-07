@@ -23,15 +23,20 @@ public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationS
         try
         {
             var token = Context.Request.Headers["X-ACCESS-TOKEN"].SingleOrDefault();
-            if (token is null)
+            if (string.IsNullOrWhiteSpace(token))
             {
                 return AuthenticateResult.NoResult();
             }
 
             var principal = await _github.ValidateTokenAsync(token);
-            return principal is ClaimsPrincipal
-                ? AuthenticateResult.Success(new AuthenticationTicket(principal, "github"))
-                : AuthenticateResult.NoResult();
+            if (principal is ClaimsPrincipal)
+            {
+                Context.User = principal;
+                Thread.CurrentPrincipal = principal;
+                return AuthenticateResult.Success(new AuthenticationTicket(principal, "github"));
+            }
+
+            return AuthenticateResult.NoResult();
         }
         catch (InvalidOperationException e)
         {

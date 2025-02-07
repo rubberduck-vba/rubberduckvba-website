@@ -1,3 +1,4 @@
+/// <reference path="../../app.module.ts" />
 import { Component, OnInit, TemplateRef, ViewChild, inject } from "@angular/core";
 import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
 import { BehaviorSubject } from "rxjs";
@@ -5,7 +6,7 @@ import { UserViewModel } from "../../model/feature.model";
 import { AuthService } from "src/app/services/auth.service";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { fab } from "@fortawesome/free-brands-svg-icons";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbModal, NgbToast } from "@ng-bootstrap/ng-bootstrap";
 import { AdminApiClientService, ApiClientService } from "../../services/api-client.service";
 
 @Component({
@@ -69,11 +70,11 @@ export class AuthMenuComponent implements OnInit {
 
   public updateTags(): void {
     this.modal.dismissAll();
-    this.api.updateTagMetadata();
+    this.api.updateTagMetadata().subscribe(jobId => console.log(`UpdateTagMetadata has scheduled job id ${jobId}`));
   }
 
   public updateXmldocs(): void {
     this.modal.dismissAll();
-    this.api.updateXmldocMetadata();
+    this.api.updateXmldocMetadata().subscribe(jobId => console.log(`UpdateXmldocMetadata has scheduled job id ${jobId}`));
   }
 }
