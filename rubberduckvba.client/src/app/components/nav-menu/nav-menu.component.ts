@@ -8,6 +8,7 @@ import { filter, map } from 'rxjs/operators';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { Router, NavigationEnd } from '@angular/router';
 import { AngularDeviceInformationService } from 'angular-device-information';
+import { AuthService } from "src/app/services/auth.service";
 
 @Component({
   selector: 'app-nav-menu',

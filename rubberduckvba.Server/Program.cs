@@ -90,6 +90,7 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseRouting();
+        app.UseSession();
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -98,9 +99,8 @@ public class Program
 
         app.UseCors(policy =>
         {
-            policy.SetIsOriginAllowed(origin => true);
+            policy.SetIsOriginAllowed(origin => true).AllowAnyHeader();
         });
-        app.UseSession();
 
         StartHangfire(app);
         app.Run();

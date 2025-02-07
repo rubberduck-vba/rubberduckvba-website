@@ -1,30 +1,32 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Octokit;
 using Octokit.Internal;
 using System.Security.Claims;
-using System.Text;
 
 namespace rubberduckvba.Server.Api.Auth;
 
 public record class UserViewModel
 {
-    public static UserViewModel Anonymous { get; } = new UserViewModel { Name = "(anonymous)", HasOrgRole = false };
+    public static UserViewModel Anonymous { get; } = new UserViewModel { Name = "(anonymous)", IsAuthenticated = false, IsAdmin = false };
 
     public string Name { get; init; } = default!;
-    public bool HasOrgRole { get; init; }
+    public bool IsAuthenticated { get; init; }
+    public bool IsAdmin { get; init; }
 }
 
-
+public record class SignInViewModel
+{
+    public string? State { get; init; }
+    public string? Code { get; init; }
+    public string? Token { get; init; }
+}
 
 [ApiController]
-[AllowAnonymous]
-public class AuthController(IOptions<GitHubSettings> configuration, IOptions<ApiSettings> api) : ControllerBase
+public class AuthController(IOptions<GitHubSettings> configuration, IOptions<ApiSettings> api, ILogger<AuthController> logger) : ControllerBase
 {
     [HttpGet("auth")]
-    [AllowAnonymous]
-    public ActionResult<UserViewModel> Index()
+    public IActionResult Index()
     {
         var claims = HttpContext.User.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
         var hasName = claims.TryGetValue(ClaimTypes.Name, out var name);
@@ -37,10 +39,12 @@ public class AuthController(IOptions<GitHubSettings> configuration, IOptions<Api
                 return BadRequest();
             }
 
+            var isAuthenticated = HttpContext.User.Identity?.IsAuthenticated ?? false;
             var model = new UserViewModel
             {
                 Name = name,
-                HasOrgRole = (HttpContext.User.Identity?.IsAuthenticated ?? false) && role == configuration.Value.OwnerOrg
+                IsAuthenticated = isAuthenticated,
+                IsAdmin = isAuthenticated && role == configuration.Value.OwnerOrg
             };
 
             return Ok(model);
@@ -52,12 +56,13 @@ public class AuthController(IOptions<GitHubSettings> configuration, IOptions<Api
     }
 
     [HttpPost("auth/signin")]
-    [AllowAnonymous]
-    public async Task<ActionResult> SignIn()
+    public IActionResult SessionSignIn(SignInViewModel vm)
     {
-        var xsrf = Guid.NewGuid().ToString();
-        HttpContext.Session.SetString("xsrf:state", xsrf);
-        await HttpContext.Session.CommitAsync();
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            logger.LogInformation("Signin was requested, but user is already authenticated. Redirecting to home page...");
+            return Redirect("/");
+        }
 
         var clientId = configuration.Value.ClientId;
         var agent = configuration.Value.UserAgent;
@@ -67,53 +72,45 @@ public class AuthController(IOptions<GitHubSettings> configuration, IOptions<Api
         {
             AllowSignup = false,
             Scopes = { "read:user", "read:org" },
-            State = xsrf
+            State = vm.State
         };
 
+        logger.LogInformation("Requesting OAuth app GitHub login url...");
         var url = github.Oauth.GetGitHubLoginUrl(request);
         if (url is null)
         {
+            logger.LogInformation("OAuth login was cancelled by the user or did not return a url.");
             return Forbid();
         }
 
-        // TODO log url
-        //return Redirect(url.ToString());
-        return RedirectToAction("Index", "Home");
+        logger.LogInformation("Returning the login url for the client to redirect. State: {xsrf}", vm.State);
+        return Ok(url.ToString());
     }
 
-    [HttpGet("auth/github")]
-    [AllowAnonymous]
-    public async Task<ActionResult> GitHubCallback(string code, string state)
+    [HttpPost("auth/github")]
+    public async Task<IActionResult> OnGitHubCallback(SignInViewModel vm)
     {
-        if (string.IsNullOrWhiteSpace(code))
-        {
-            return BadRequest();
-        }
-
-        var expected = HttpContext.Session.GetString("xsrf:state");
-        HttpContext.Session.Clear();
-        await HttpContext.Session.CommitAsync();
-
-        if (state != expected)
-        {
-            return BadRequest();
-        }
-
+        logger.LogInformation("OAuth token was received. State: {state}", vm.State);
         var clientId = configuration.Value.ClientId;
         var clientSecret = configuration.Value.ClientSecret;
         var agent = configuration.Value.UserAgent;
 
         var github = new GitHubClient(new ProductHeaderValue(agent));
 
-        var request = new OauthTokenRequest(clientId, clientSecret, code);
+        var request = new OauthTokenRequest(clientId, clientSecret, vm.Code);
         var token = await github.Oauth.CreateAccessToken(request);
+        if (token is null)
+        {
+            logger.LogWarning("OAuth access token was not created.");
+            return Unauthorized();
+        }
 
-        await AuthorizeAsync(token.AccessToken);
-
-        return Ok();
+        logger.LogInformation("OAuth access token was created. Authorizing...");
+        var authorizedToken = await AuthorizeAsync(token.AccessToken);
+        return authorizedToken is null ? Unauthorized() : Ok(vm with { Token = authorizedToken });
     }
 
-    private async Task AuthorizeAsync(string token)
+    private async Task<string?> AuthorizeAsync(string token)
     {
         try
         {
@@ -122,42 +119,44 @@ public class AuthController(IOptions<GitHubSettings> configuration, IOptions<Api
             var githubUser = await github.User.Current();
             if (githubUser.Suspended)
             {
-                throw new InvalidOperationException("User is suspended");
+                logger.LogWarning("User {name} with login '{login}' ({url}) is a suspended GitHub account and will not be authorized.", githubUser.Name, githubUser.Login, githubUser.Url);
+                return default;
             }
 
-            var emailClaim = new Claim(ClaimTypes.Email, githubUser.Email);
-
             var identity = new ClaimsIdentity("github", ClaimTypes.Name, ClaimTypes.Role);
-            if (identity != null)
+            identity.AddClaim(new Claim(ClaimTypes.Name, githubUser.Login));
+            logger.LogInformation("Creating claims identity for GitHub login '{login}'...", githubUser.Login);
+
+            var orgs = await github.Organization.GetAllForUser(githubUser.Login);
+            var rdOrg = orgs.SingleOrDefault(org => org.Id == configuration.Value.RubberduckOrgId);
+
+            if (rdOrg != null)
             {
-                identity.AddClaim(new Claim(ClaimTypes.Name, githubUser.Login));
+                identity.AddClaim(new Claim(ClaimTypes.Role, configuration.Value.OwnerOrg));
+                identity.AddClaim(new Claim(ClaimTypes.Authentication, token));
+                identity.AddClaim(new Claim("access_token", token));
+                logger.LogDebug("GitHub Organization claims were granted. Creating claims principal...");
 
-                var orgs = await github.Organization.GetAllForUser(githubUser.Login);
-                var rdOrg = orgs.SingleOrDefault(org => org.Id == configuration.Value.RubberduckOrgId);
+                var principal = new ClaimsPrincipal(identity);
+                var roles = string.Join(",", identity.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value));
 
-                if (rdOrg != null)
-                {
-                    identity.AddClaim(new Claim(ClaimTypes.Role, configuration.Value.OwnerOrg));
-                    identity.AddClaim(new Claim(ClaimTypes.Authentication, token));
-                    identity.AddClaim(new Claim("access_token", token));
+                HttpContext.User = principal;
+                Thread.CurrentPrincipal = HttpContext.User;
 
-                    var principal = new ClaimsPrincipal(identity);
-
-                    var issued = DateTime.UtcNow;
-                    var expires = issued.Add(TimeSpan.FromMinutes(50));
-                    var roles = string.Join(",", identity.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value));
-
-                    HttpContext.User = principal;
-                    Thread.CurrentPrincipal = HttpContext.User;
-
-                    var jwt = principal.AsJWT(api.Value.SymetricKey, configuration.Value.JwtIssuer, configuration.Value.JwtAudience);
-                    HttpContext.Session.SetString("jwt", jwt);
-                }
+                logger.LogInformation("GitHub user with login {login} has signed in with role authorizations '{role}'.", githubUser.Login, configuration.Value.OwnerOrg);
+                return token;
+            }
+            else
+            {
+                logger.LogWarning("User {name} ({email}) with login '{login}' is not a member of organization ID {org} and will not be authorized.", githubUser.Name, githubUser.Email, githubUser.Login, configuration.Value.RubberduckOrgId);
+                return default;
             }
         }
         catch (Exception)
         {
             // just ignore: configuration needs the org (prod) client app id to avoid throwing this exception
+            logger.LogWarning("An exception was thrown. Verify GitHub:ClientId and GitHub:ClientSecret configuration; authorization fails.");
+            return default;
         }
     }
 }

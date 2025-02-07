@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { LatestTags, Tag } from "../model/tags.model";
-import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, XmlDocOrFeatureViewModel } from "../model/feature.model";
+import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, UserViewModel, XmlDocOrFeatureViewModel } from "../model/feature.model";
 import { DownloadInfo } from "../model/downloads.model";
 import { DataService } from "./data.service";
 import { environment } from "../../environments/environment.prod";
@@ -52,5 +52,28 @@ export class ApiClientService {
   public getQuickFix(name: string): Observable<QuickFixViewModel> {
     const url = `${environment.apiBaseUrl}quickfixes/${name}`
     return this.data.getAsync<QuickFixViewModel>(url).pipe(map(e => new QuickFixViewModelClass(e)));
+  }
+}
+
+@Injectable()
+export class AdminApiClientService {
+
+  constructor(private data: DataService) {
+  }
+
+  public updateTagMetadata(): void {
+    const url = `${environment.apiBaseUrl}admin/update/tags`;
+    const jwt = sessionStorage.getItem("jwt");
+    if (jwt) {
+      this.data.postWithAccessTokenAsync(jwt, url);
+    }
+  }
+
+  public updateXmldocMetadata(): void {
+    const url = `${environment.apiBaseUrl}admin/update/xmldoc`;
+    const jwt = sessionStorage.getItem("jwt");
+    if (jwt) {
+      this.data.postWithAccessTokenAsync(jwt, url);
+    }
   }
 }
