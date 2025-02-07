@@ -43,7 +43,7 @@ public class AuthController(IOptions<GitHubSettings> configuration, IOptions<Api
             var model = new UserViewModel
             {
                 Name = name,
-                IsAuthenticated = true,
+                IsAuthenticated = isAuthenticated,
                 IsAdmin = role == configuration.Value.OwnerOrg
             };
 
