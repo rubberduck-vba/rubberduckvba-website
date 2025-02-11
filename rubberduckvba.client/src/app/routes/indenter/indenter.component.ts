@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
 import { fas } from "@fortawesome/free-solid-svg-icons";
-import { IndenterViewModel } from "../../model/indenter.model";
+import { IndenterViewModel, IndenterViewModelClass } from "../../model/indenter.model";
 import { ApiClientService } from "../../services/api-client.service";
 
 @Component({
@@ -29,7 +29,7 @@ export class IndenterComponent implements OnInit {
   public isAlignmentOptionsExpanded: boolean = false;
   public isCommentOptionsExpanded: boolean = false;
   public isVerticalOptionsExpanded: boolean = false;
-  public isApiAboutBoxExpanded: boolean = true;
+  public isApiAboutBoxExpanded: boolean = false;
 
   public isIndenterBusy: boolean = false;
 
@@ -38,7 +38,9 @@ export class IndenterComponent implements OnInit {
   }
 
   public get asJson(): string {
-    return JSON.stringify(this._model);
+    const copy = new IndenterViewModelClass(this._model);
+    copy.indentedCode = '';
+    return JSON.stringify(copy);
   }
 
   public indent(): void {
