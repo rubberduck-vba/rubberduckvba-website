@@ -36,7 +36,7 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
   private load(): void {
     const localModel = localStorage.getItem('indenter.model');
     const localOptionGroups = localStorage.getItem('indenter.options');
-    this.isLocalStorageOK = localModel != null && localOptionGroups != null;
+    this.isLocalStorageOK = localModel != null || localOptionGroups != null;
 
     if (!this.isLocalStorageOK) {
       this.getDefaults();
