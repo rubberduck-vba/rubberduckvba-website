@@ -50,46 +50,26 @@ public class Program
                 policy
                     .SetIsOriginAllowed(origin => true)
                     .AllowAnyHeader()
-                    .AllowAnyMethod()
+                    .WithMethods("OPTIONS", "GET", "POST")
                     .AllowCredentials()
                     .Build();
             });
-            /*
-                        var guestPolicy = new CorsPolicyBuilder()
-                            .SetIsOriginAllowed(origin => true)
-                            .WithHeaders("Content-Type", "Accept")
-                            .WithExposedHeaders("X-ACCESS-TOKEN")
-                            .WithMethods("GET", "POST", "OPTIONS")
-                            .DisallowCredentials()
-                            .SetPreflightMaxAge(TimeSpan.FromHours(48))
-                            .Build();
-                        //builder.AddDefaultPolicy(guestPolicy);
-                        //builder.DefaultPolicyName = nameof(guestPolicy);
-                        builder.AddPolicy(nameof(guestPolicy), guestPolicy);
 
-                        var webhookPolicy = new CorsPolicyBuilder()
-            #if DEBUG
-                            .SetIsOriginAllowed(origin => true)
-            #else
-                            .SetIsOriginAllowedToAllowWildcardSubdomains()
-                            .WithOrigins("*.github.com")
-            #endif
-                            .WithHeaders("Content-Type", "X-GitHub-Event", "X-GitHub-Delivery", "X-GitHub-Hook-ID", "X-Hub-Signature", "X-Hub-Signature256")
-                            .WithMethods("POST")
-                            .DisallowCredentials()
-                            .SetPreflightMaxAge(TimeSpan.FromHours(48))
-                            .Build();
-                        builder.AddPolicy(nameof(webhookPolicy), webhookPolicy);
-
-                        var adminPolicy = new CorsPolicyBuilder()
-                            .SetIsOriginAllowed(origin => true)
-                            .WithHeaders("Content-Type", "Authorization")
-                            .WithExposedHeaders("X-ACCESS-TOKEN")
-                            .WithMethods("GET", "POST")
-                            .SetPreflightMaxAge(TimeSpan.FromHours(48))
-                            .Build();
-                        builder.AddPolicy(nameof(adminPolicy), adminPolicy);
-            */
+            builder.AddPolicy("webhookPolicy", policy =>
+            {
+                policy
+#if DEBUG
+                    .SetIsOriginAllowed(origin => true)
+#else
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .WithOrigins("*.github.com")
+#endif
+                    .WithHeaders("Content-Type", "X-GitHub-Event", "X-GitHub-Delivery", "X-GitHub-Hook-ID", "X-Hub-Signature", "X-Hub-Signature256")
+                    .WithMethods("POST")
+                    .DisallowCredentials()
+                    .SetPreflightMaxAge(TimeSpan.FromHours(48))
+                    .Build();
+            });
         });
 
         builder.Services.AddAuthentication(options =>

@@ -111,4 +111,5 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     }
   ]
 })
+
 export class AppModule { }

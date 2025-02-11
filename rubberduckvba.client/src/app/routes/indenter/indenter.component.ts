@@ -10,6 +10,8 @@ import { ApiClientService } from "../../services/api-client.service";
 })
 export class IndenterComponent implements OnInit {
   private _model!: IndenterViewModel;
+  public wasCopied: boolean = false;
+
 
   constructor(fa: FaIconLibrary, private service: ApiClientService) {
     fa.addIconPacks(fas);
@@ -22,10 +24,21 @@ export class IndenterComponent implements OnInit {
   }
 
   public isExpanded: boolean = false;
+  public isIndentOptionsExpanded: boolean = true;
+  public isOutdentOptionsExpanded: boolean = false;
+  public isAlignmentOptionsExpanded: boolean = false;
+  public isCommentOptionsExpanded: boolean = false;
+  public isVerticalOptionsExpanded: boolean = false;
+  public isApiAboutBoxExpanded: boolean = true;
+
   public isIndenterBusy: boolean = false;
 
   public get model(): IndenterViewModel {
     return this._model;
+  }
+
+  public get asJson(): string {
+    return JSON.stringify(this._model);
   }
 
   public indent(): void {
@@ -41,7 +54,12 @@ export class IndenterComponent implements OnInit {
     this.model.code = '';
   }
 
+  public copy(): void {
+    navigator.clipboard.writeText(this.model.code).then(e => this.wasCopied = true);
+  }
+
   public onModelChanged(code: string): void {
     this.model.code = code;
+    this.wasCopied = false;
   }
 }

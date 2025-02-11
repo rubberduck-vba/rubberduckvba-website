@@ -13,44 +13,44 @@ export enum IndenterEndOfLineCommentStyle {
 
 
 export interface IndenterViewModel {
-    indenterVersion: string;
-    code: string;
-    indentedCode: string;
+  indenterVersion: string;
+  code: string;
+  indentedCode: string;
 
-    // indent
-    indentSpaces: number;
-    emptyLineHandlingMethod: IndenterEmptyLineHandling;
-    indentEntireProcedureBody: boolean;
-    indentFirstDeclarationBlock: boolean;
-    indentFirstCommentBlock: boolean;
-    ignoreEmptyLinesInFirstBlock: boolean;
-    indentEnumTypeAsProcedure: boolean;
-    indentCase: boolean;
+  // indent
+  indentSpaces: number;
+  emptyLineHandlingMethod: IndenterEmptyLineHandling;
+  indentEntireProcedureBody: boolean;
+  indentFirstDeclarationBlock: boolean;
+  indentFirstCommentBlock: boolean;
+  ignoreEmptyLinesInFirstBlock: boolean;
+  indentEnumTypeAsProcedure: boolean;
+  indentCase: boolean;
 
-    // outdent
-    indentCompilerDirectives: boolean;
-    forceCompilerDirectivesInColumn1: boolean;
-    forceDebugPrintInColumn1: boolean;
-    forceStopInColumn1: boolean;
-    forceDebugAssertInColumn1: boolean;
-    forceDebugStatementsInColumn1: boolean;
+  // outdent
+  //indentCompilerDirectives: boolean;
+  forceCompilerDirectivesInColumn1: boolean;
+  forceDebugPrintInColumn1: boolean;
+  forceDebugAssertInColumn1: boolean;
+  forceDebugStatementsInColumn1: boolean;
+  forceStopInColumn1: boolean;
 
-    // alignment
-    alignContinuations: boolean;
-    ignoreOperatorsInContinuations: boolean;
-    alignDims: boolean;
-    alignDimColumn: number;
+  // alignment
+  alignContinuations: boolean;
+  ignoreOperatorsInContinuations: boolean;
+  alignDims: boolean;
+  alignDimColumn: number;
 
 
-    // comments
-    alignCommentsWithCode: boolean;
-    endOfLineCommentStyle: IndenterEndOfLineCommentStyle;
-    endOfLineCommentColumnSpaceAlignment: number;
+  // comments
+  alignCommentsWithCode: boolean;
+  endOfLineCommentStyle: IndenterEndOfLineCommentStyle;
+  endOfLineCommentColumnSpaceAlignment: number;
 
-    // vertical spacing
-    groupRelatedProperties: boolean;
-    verticallySpaceProcedures: boolean;
-    linesBetweenProcedures: number;
+  // vertical spacing
+  groupRelatedProperties: boolean;
+  verticallySpaceProcedures: boolean;
+  linesBetweenProcedures: number;
 }
 
 export class IndenterVersionViewModelClass {
@@ -72,7 +72,7 @@ export class IndenterViewModelClass implements IndenterViewModel {
   ignoreEmptyLinesInFirstBlock: boolean;
   indentEnumTypeAsProcedure: boolean;
   indentCase: boolean;
-  indentCompilerDirectives: boolean;
+  //indentCompilerDirectives: boolean;
   forceCompilerDirectivesInColumn1: boolean;
   forceStopInColumn1: boolean;
   forceDebugPrintInColumn1: boolean;
@@ -92,7 +92,7 @@ export class IndenterViewModelClass implements IndenterViewModel {
   constructor(model: IndenterViewModel) {
     this.indenterVersion = model.indenterVersion;
     this.code = model.code;
-    this.indentedCode = model.indentedCode;
+    this.indentedCode = model.indentedCode ?? model.code;
 
     this.indentSpaces = model.indentSpaces;
     this.emptyLineHandlingMethod = model.emptyLineHandlingMethod;
@@ -102,7 +102,7 @@ export class IndenterViewModelClass implements IndenterViewModel {
     this.ignoreEmptyLinesInFirstBlock = model.ignoreEmptyLinesInFirstBlock;
     this.indentEnumTypeAsProcedure = model.indentEnumTypeAsProcedure;
     this.indentCase = model.indentCase;
-    this.indentCompilerDirectives = model.indentCompilerDirectives;
+    //this.indentCompilerDirectives = model.indentCompilerDirectives;
     this.forceCompilerDirectivesInColumn1 = model.forceCompilerDirectivesInColumn1;
     this.forceStopInColumn1 = model.forceStopInColumn1;
     this.forceDebugPrintInColumn1 = model.forceDebugPrintInColumn1;
