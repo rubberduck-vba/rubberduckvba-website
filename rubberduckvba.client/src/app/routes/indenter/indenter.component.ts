@@ -30,12 +30,23 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
   }
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  private load(): void {
     const localModel = localStorage.getItem('indenter.model');
+    const localOptionGroups = localStorage.getItem('indenter.options');
+    this.isLocalStorageOK = localModel != null && localOptionGroups != null;
+
+    if (!this.isLocalStorageOK) {
+      this.getDefaults();
+      return;
+    }
+
     if (localModel) {
       this.model = <IndenterViewModel>JSON.parse(localModel);
     }
 
-    const localOptionGroups = localStorage.getItem('indenter.options');
     if (localOptionGroups) {
       const optionGroups = <IndenterOptionGroups>JSON.parse(localOptionGroups);
       this.isExpanded = optionGroups.isExpanded;
@@ -46,12 +57,12 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
       this.isVerticalOptionsExpanded = optionGroups.isVerticalOptionsExpanded;
       this.isApiAboutBoxExpanded = optionGroups.isApiAboutBoxExpanded;
     }
-
-    this.isLocalStorageOK = localModel != null || localOptionGroups != null;
-    if (!this.isLocalStorageOK) {
-      this.getDefaults();
-    }
   }
+
+  private clearStorage(): void {
+    localStorage.removeItem('indenter.model');
+    localStorage.removeItem('indenter.options');
+   }
 
   public getDefaults(): void {
     this.service.getIndenterDefaults().subscribe(model => {
@@ -68,7 +79,17 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
   private _isApiAboutBoxExpanded: boolean = false;
 
   public isIndenterBusy: boolean = false;
-  public isLocalStorageOK: boolean = false;
+
+  private _isLocalStorageOK: boolean = false;
+  public get isLocalStorageOK(): boolean {
+    return this._isLocalStorageOK;
+  }
+  public set isLocalStorageOK(value: boolean) {
+    this._isLocalStorageOK = value;
+    if (!value) {
+      this.clearStorage();
+    }
+  }
 
   public get model(): IndenterViewModel {
     return this._model;
@@ -77,9 +98,7 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
   private set model(value: IndenterViewModel) {
     this._model = value;
     this.invalidateClipboard();
-    if (this.isLocalStorageOK) {
-      localStorage.setItem('indenter.model', JSON.stringify(this.model))
-    };
+    this.saveModel();
   }
 
   public get asJson(): string {
@@ -98,7 +117,6 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
   public get isIndentOptionsExpanded(): boolean {
     return this._isIndentOptionsExpanded;
   }
-
   public set isIndentOptionsExpanded(value: boolean) {
     this._isIndentOptionsExpanded = value;
     this.saveOptions();
@@ -117,7 +135,6 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
     this._isVerticalOptionsExpanded = value;
     this.saveOptions();
   }
-
   public get isApiAboutBoxExpanded(): boolean {
     return this._isApiAboutBoxExpanded;
   }
@@ -125,7 +142,6 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
     this._isApiAboutBoxExpanded = value;
     this.saveOptions();
   }
-
   public get isOutdentOptionsExpanded(): boolean {
     return this._isOutdentOptionsExpanded;
   }
@@ -159,7 +175,9 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
     }
   }
   private saveOptions(): void {
-    localStorage.setItem('indenter.options', JSON.stringify(this.asOptionGroups));
+    if (this.isLocalStorageOK) {
+      localStorage.setItem('indenter.options', JSON.stringify(this.asOptionGroups));
+    }
   }
 
   public indent(): void {
