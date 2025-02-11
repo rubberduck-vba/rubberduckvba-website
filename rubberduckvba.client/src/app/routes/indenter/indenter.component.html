@@ -419,8 +419,9 @@
                 </div>
 
                 <div class="card-footer">
-                    <button id="copy-template" class="btn btn-secondary mx-1" type="button">
+                    <button id="copy-template" class="btn mx-1" [ngClass]="wasCopied ? 'btn-success' : 'btn-secondary'" type="button">
                         <span><i class="fa fa-clipboard"></i>&nbsp;Copy</span>
+                        <span><fa-icon [icon]="wasTemplateCopied ? 'check' : 'clipboard'"></fa-icon>&nbsp;{{wasTemplateCopied ? 'Copied!' : 'Copy'}}</span>
                     </button>
                 </div>
             </div>
@@ -444,7 +445,7 @@
                     <span id="indent-button-text">Indent</span>
                 </button>
                 <button id="copy-code" class="btn mx-1" [ngClass]="wasCopied ? 'btn-success' : 'btn-secondary'" type="button" [disabled]="model.code.length == 0" (click)="copy()">
-                    <span><fa-icon [icon]="'clipboard'"></fa-icon>&nbsp;{{wasCopied ? 'Copied!' : 'Copy'}}</span>
+                    <span><fa-icon [icon]="wasCopied ? 'check' : 'clipboard'"></fa-icon>&nbsp;{{wasCopied ? 'Copied!' : 'Copy'}}</span>
                 </button>
             </div>
         </div>

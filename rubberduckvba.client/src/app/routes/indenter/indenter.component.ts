@@ -11,6 +11,7 @@ import { ApiClientService } from "../../services/api-client.service";
 export class IndenterComponent implements OnInit {
   private _model!: IndenterViewModel;
   public wasCopied: boolean = false;
+  public wasTemplateCopied: boolean = false;
 
 
   constructor(fa: FaIconLibrary, private service: ApiClientService) {
@@ -49,15 +50,22 @@ export class IndenterComponent implements OnInit {
       this.model.indentedCode = vm.indentedCode;
       this.model.code = vm.indentedCode;
       this.isIndenterBusy = false;
+      this.wasCopied = false;
+      this.wasTemplateCopied = false;
     });
   }
 
   public clear(): void {
     this.model.code = '';
+    this.wasCopied = false;
+    this.wasTemplateCopied = false;
   }
 
   public copy(): void {
     navigator.clipboard.writeText(this.model.code).then(e => this.wasCopied = true);
+  }
+  public copyTemplate(): void {
+    navigator.clipboard.writeText(this.asJson).then(e => this.wasTemplateCopied = true);
   }
 
   public onModelChanged(code: string): void {
