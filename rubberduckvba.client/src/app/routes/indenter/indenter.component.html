@@ -1,4 +1,3 @@
-
 <section *ngIf="model" class="row text-center my-3">
     <div>
         <h1>Online Indenter</h1>
@@ -14,7 +13,7 @@
 </section>
 
 <section *ngIf="model" class="row my-3">
-    <div class="col-lg-6 accordion">
+    <div class="col-lg-6 my-1 accordion">
 
         <!-- Indent Options -->
         <div class="card my-2">
@@ -411,16 +410,16 @@
                 <div class="card-body">
                     Try the API:
                     <ol>
-                        <li>Request (GET) <code>api.rubberduckvba.com/indenter/defaults</code> to get a JSON object for the model (or copy it from below);</li>
+                        <li>Request (GET) <code>{{apiBaseUrl}}indenter/defaults</code> to get a JSON object for the model (or copy it from below);</li>
                         <li>Provide the code to be indented in the 'Code' property; use <code>\n</code> for newline characters;</li>
-                        <li>Post (POST) the JSON object to <code>api.rubberduckvba.com/indenter/indent</code> to get the indented code back as an array of strings.</li>
+                        <li>Post (POST) the JSON object to <code>{{apiBaseUrl}}indenter/indent</code> to get the indented code back as an array of strings.</li>
                     </ol>
                     <textarea id="template-json" class="code-area form-control font-monospace" rows="15" readonly [innerHTML]="asJson"></textarea>
                 </div>
 
                 <div class="card-footer">
-                    <button id="copy-template" class="btn btn-secondary mx-1" type="button">
-                        <span><i class="fa fa-clipboard"></i>&nbsp;Copy</span>
+                    <button id="copy-template" class="btn mx-1" [ngClass]="wasTemplateCopied ? 'btn-success' : 'btn-secondary'" type="button" (click)="copyTemplate()">
+                        <span><fa-icon [icon]="wasTemplateCopied ? 'check' : 'clipboard'"></fa-icon>&nbsp;{{wasTemplateCopied ? 'Copied!' : 'Copy'}}</span>
                     </button>
                 </div>
             </div>
@@ -428,7 +427,7 @@
 
     </div>
 
-    <div class="col-lg-6">
+    <div class="col-lg-6 my-1">
         <div class="card">
             <div class="card-header">
                 <h4>Try it right here!</h4>
@@ -444,20 +443,30 @@
                     <span id="indent-button-text">Indent</span>
                 </button>
                 <button id="copy-code" class="btn mx-1" [ngClass]="wasCopied ? 'btn-success' : 'btn-secondary'" type="button" [disabled]="model.code.length == 0" (click)="copy()">
-                    <span><fa-icon [icon]="'clipboard'"></fa-icon>&nbsp;{{wasCopied ? 'Copied!' : 'Copy'}}</span>
+                    <span><fa-icon [icon]="wasCopied ? 'check' : 'clipboard'"></fa-icon>&nbsp;{{wasCopied ? 'Copied!' : 'Copy'}}</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- <div class="row"> -->
-    <!--     <div class="col-12"> -->
-    <!--         <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" /> -->
-    <!--     </div> -->
-    <!-- </div> -->
-
+    <hr />
     <div class="row">
-        <!-- TODO  -->
+        <div class="form-group col-6">
+            <div role="button" class="btn btn-primary" (click)="getDefaults()"><fa-icon [icon]="'rotate-left'"></fa-icon>&nbsp;Reset to defaults</div>
+        </div>
+        <div class="form-group col-6">
+            <div class="form-check">
+                <label class="form-check-label" for="vspaceBox">
+                    <input id="localstorageBox" type="checkbox" [(ngModel)]="isLocalStorageOK" />
+                    Remember configuration
+                </label>
+            </div>
+        </div>
     </div>
+</section>
 
+<section class="row my-3 text-center">
+    <div class="col-12">
+        <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+    </div>
 </section>
