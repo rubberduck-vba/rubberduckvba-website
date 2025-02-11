@@ -38,13 +38,11 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
     const localOptionGroups = localStorage.getItem('indenter.options');
     this.isLocalStorageOK = localModel != null || localOptionGroups != null;
 
-    if (!this.isLocalStorageOK) {
-      this.getDefaults();
-      return;
-    }
-
     if (localModel) {
       this.model = <IndenterViewModel>JSON.parse(localModel);
+    }
+    else {
+      this.getDefaults();
     }
 
     if (localOptionGroups) {
@@ -88,6 +86,10 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
     this._isLocalStorageOK = value;
     if (!value) {
       this.clearStorage();
+    }
+    else {
+      this.saveModel();
+      this.saveOptions();
     }
   }
 
