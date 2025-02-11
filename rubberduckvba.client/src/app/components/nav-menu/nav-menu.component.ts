@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApiClientService } from '../../services/api-client.service';
 import { DownloadInfo } from '../../model/downloads.model';
 import { fab } from '@fortawesome/free-brands-svg-icons';
@@ -8,7 +8,6 @@ import { filter, map } from 'rxjs/operators';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { Router, NavigationEnd } from '@angular/router';
 import { AngularDeviceInformationService } from 'angular-device-information';
-import { AuthService } from "src/app/services/auth.service";
 
 @Component({
   selector: 'app-nav-menu',
@@ -20,6 +19,7 @@ export class NavMenuComponent implements OnInit {
   public isHomePage: boolean = true;
   public isFeaturesPage: boolean = false;
   public isAboutPage: boolean = false;
+  public isIndenterPage: boolean = false;
 
   public isExpanded: boolean = false;
   public canDownload: boolean = false;
@@ -38,7 +38,8 @@ export class NavMenuComponent implements OnInit {
         const url = navEnd.urlAfterRedirects;
         this.isFeaturesPage = url.startsWith('/features');
         this.isAboutPage = url.startsWith('/about');
-        this.isHomePage = !(this.isFeaturesPage || this.isAboutPage);
+        this.isIndenterPage = url.startsWith('/indenter');
+        this.isHomePage = !(this.isFeaturesPage || this.isAboutPage || this.isIndenterPage);
       });
   }
 

@@ -1,11 +1,17 @@
 <body>
-    <app-nav-menu></app-nav-menu>
-    <main class="container">
-        <router-outlet></router-outlet>
-    </main>
-    <hr />
     <section>
-        <div class="row text-muted text-center mb-3">
+        <app-nav-menu></app-nav-menu>
+    </section>
+
+    <section>
+        <main class="container">
+            <router-outlet></router-outlet>
+        </main>
+    </section>
+
+    <section>
+        <div class="text-muted text-center mb-3">
+            <hr />
             <div class="float-start">&copy; 2014-{{currentYear}} Rubberduck Project Contributors</div>
         </div>
     </section>

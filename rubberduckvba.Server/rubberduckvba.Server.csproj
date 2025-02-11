@@ -41,4 +41,10 @@
     </ProjectReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Rubberduck.SmartIndenter">
+      <HintPath>..\RubberduckServices\Libs\Rubberduck.SmartIndenter.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

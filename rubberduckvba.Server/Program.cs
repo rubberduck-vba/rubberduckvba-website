@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using NLog.Config;
 using NLog.Extensions.Logging;
 using NLog.Targets;
+using Rubberduck.SmartIndenter;
 using RubberduckServices;
 using rubberduckvba.Server.Api.Admin;
 using rubberduckvba.Server.ContentSynchronization;
@@ -41,6 +42,35 @@ public class Program
         builder.Services.Configure<GitHubSettings>(options => builder.Configuration.GetSection("GitHub").Bind(options));
         builder.Services.Configure<ApiSettings>(options => builder.Configuration.GetSection("Api").Bind(options));
         builder.Services.Configure<HangfireSettings>(options => builder.Configuration.GetSection("Hangfire").Bind(options));
+
+        builder.Services.AddCors(builder =>
+        {
+            builder.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .SetIsOriginAllowed(origin => true)
+                    .AllowAnyHeader()
+                    .WithMethods("OPTIONS", "GET", "POST")
+                    .AllowCredentials()
+                    .Build();
+            });
+
+            builder.AddPolicy("webhookPolicy", policy =>
+            {
+                policy
+#if DEBUG
+                    .SetIsOriginAllowed(origin => true)
+#else
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .WithOrigins("*.github.com")
+#endif
+                    .WithHeaders("Content-Type", "X-GitHub-Event", "X-GitHub-Delivery", "X-GitHub-Hook-ID", "X-Hub-Signature", "X-Hub-Signature256")
+                    .WithMethods("POST")
+                    .DisallowCredentials()
+                    .SetPreflightMaxAge(TimeSpan.FromHours(48))
+                    .Build();
+            });
+        });
 
         builder.Services.AddAuthentication(options =>
         {
@@ -88,21 +118,13 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseRouting();
-        app.UseSession();
+        app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseSession();
 
         app.MapControllers();
         app.MapFallbackToFile("/index.html");
-
-        app.UseCors(policy =>
-        {
-            policy
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()
-                .SetIsOriginAllowed(origin => true);
-        });
 
         StartHangfire(app);
         app.Run();
@@ -162,6 +184,8 @@ public class Program
         services.AddSingleton<ConfigurationOptions>();
         services.AddSingleton<IMarkdownFormattingService, MarkdownFormattingService>();
         services.AddSingleton<ISyntaxHighlighterService, SyntaxHighlighterService>();
+        services.AddSingleton<IIndenterService, IndenterService>();
+        services.AddSingleton<ISimpleIndenter, SimpleIndenter>();
         services.AddSingleton<WebhookHeaderValidationService>();
         services.AddSingleton<WebhookPayloadValidationService>();
         services.AddSingleton<WebhookSignatureValidationService>();
