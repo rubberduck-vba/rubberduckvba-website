@@ -1,0 +1,47 @@
+import { Component, OnInit } from "@angular/core";
+import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
+import { fas } from "@fortawesome/free-solid-svg-icons";
+import { IndenterViewModel } from "../../model/indenter.model";
+import { ApiClientService } from "../../services/api-client.service";
+
+@Component({
+  selector: 'app-indenter',
+  templateUrl: './indenter.component.html',
+})
+export class IndenterComponent implements OnInit {
+  private _model!: IndenterViewModel;
+
+  constructor(fa: FaIconLibrary, private service: ApiClientService) {
+    fa.addIconPacks(fas);
+  }
+
+  ngOnInit(): void {
+    this.service.getIndenterDefaults().subscribe(model => {
+      this._model = model;
+    });
+  }
+
+  public isExpanded: boolean = false;
+  public isIndenterBusy: boolean = false;
+
+  public get model(): IndenterViewModel {
+    return this._model;
+  }
+
+  public indent(): void {
+    this.isIndenterBusy = true;
+    this.service.indent(this.model).subscribe(vm => {
+      this.model.indentedCode = vm.indentedCode;
+      this.model.code = vm.indentedCode;
+      this.isIndenterBusy = false;
+    });
+  }
+
+  public clear(): void {
+    this.model.code = '';
+  }
+
+  public onModelChanged(code: string): void {
+    this.model.code = code;
+  }
+}

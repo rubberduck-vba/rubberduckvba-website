@@ -1,16 +1,19 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
-import { DataService } from './services/data.service';
-import { AdminApiClientService, ApiClientService } from './services/api-client.service';
+import { FormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, UrlSerializer } from '@angular/router';
 
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+
+import { DataService } from './services/data.service';
+import { ApiClientService } from './services/api-client.service';
+
 import { AppComponent } from './app.component';
 import { NavMenuComponent } from './components/nav-menu/nav-menu.component';
+import { LoadingContentComponent } from './components/loading-content/loading-content.component';
 import { TagDownloadComponent } from './components/tag-download/tag-download.component';
 import { DownloadItemComponent } from './components/download-item/download-item.component';
 import { FeatureBoxComponent } from './components/feature-box/feature-box.component';
@@ -18,7 +21,6 @@ import { FeatureInfoComponent } from './components/feature-info/feature-info.com
 import { FeatureItemBoxComponent } from './components/feature-item-box/feature-item-box.component';
 import { ExampleBoxComponent } from './components/example-box/example-box.component';
 import { FeatureItemExampleComponent } from './components/quickfix-example.modal/quickfix-example.modal.component';
-import { LoadingContentComponent } from './components/loading-content/loading-content.component';
 import { InspectionItemBoxComponent } from './components/feature-item-box/inspection-item-box/inspection-item-box.component';
 import { AnnotationItemBoxComponent } from './components/feature-item-box/annotation-item-box/annotation-item-box.component';
 import { BlogLinkBoxComponent } from './components/blog-link-box/blog-link-box.component';
@@ -31,10 +33,11 @@ import { FeatureComponent } from './routes/feature/feature.component';
 import { InspectionComponent } from './routes/inspection/inspection.component';
 import { AnnotationComponent } from './routes/annotation/annotation.component';
 import { QuickFixComponent } from './routes/quickfixes/quickfix.component';
+import { IndenterComponent } from './routes/indenter/indenter.component';
 
 import { DefaultUrlSerializer, UrlTree } from '@angular/router';
-import { AuthMenuComponent } from './components/auth-menu/auth-menu.component';
 import { AuthComponent } from './routes/auth/auth.component';
+import { AuthMenuComponent } from './components/auth-menu/auth-menu.component';
 
 /**
  * https://stackoverflow.com/a/39560520
@@ -55,6 +58,8 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     AppComponent,
     HomeComponent,
     AuthComponent,
+    AuthMenuComponent,
+    IndenterComponent,
     FeaturesComponent,
     FeatureComponent,
     TagDownloadComponent,
@@ -73,13 +78,13 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     InspectionComponent,
     AnnotationComponent,
     QuickFixComponent,
-    AboutComponent,
-    AuthMenuComponent
+    AboutComponent
   ],
   bootstrap: [AppComponent],
   imports: [
-    BrowserModule,
     CommonModule,
+    BrowserModule,
+    FormsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'features', component: FeaturesComponent },
@@ -89,6 +94,7 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
       { path: 'quickfixes/:name', component: QuickFixComponent },
       { path: 'about', component: AboutComponent },
       { path: 'auth/github', component: AuthComponent },
+      { path: 'indenter', component: IndenterComponent },
       // legacy routes:
       { path: 'inspections/details/:name', redirectTo: 'inspections/:name' },
     ]),
@@ -98,7 +104,6 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
   providers: [
     DataService,
     ApiClientService,
-    AdminApiClientService,
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide: UrlSerializer,

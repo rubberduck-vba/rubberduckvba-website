@@ -1,0 +1,109 @@
+
+<section *ngIf="model" class="row text-center my-3">
+    <div>
+        <h1>Online Indenter</h1>
+        <p>
+            Consistent identation is one of the most fundemntal qualities of code that is clean and clear.
+            Rubberduck makes indenting a procedure, module, or even an entire project, quick and simple.
+        </p>
+        <p>
+            With all the functionalities of the legendary 32-bit <strong><a href="/about#attributions">Smart Indenter</a></strong> add-in, and then some,
+            Rubberduck lets you configure <em>many</em> indenting options: feel free to use this page to experiment with them.
+        </p>
+    </div>
+</section>
+
+<section *ngIf="model" class="row my-3">
+    <button class="navbar-toggler show" type="button" data-bs-toggle="collapse" data-target=".navbar-collapse" aria-label="Toggle indenter settings" [attr.aria-expanded]="isExpanded" (click)="isExpanded = !isExpanded">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="col-lg-6">
+        <div id="indenterOptions" class="collapse collapse-horizontal show">
+            <div class="card">
+                <div class="card-header">
+                    <h3><a class="btn btn-link" data-bs-toggle="collapse" href="#group_IdentationOptions" role="button" aria-expanded="false" aria-controls="group_IndentationOptions">Indentation Options</a></h3>
+                </div>
+                <div id="group_IdentationOptions" class="collapse card-body">
+                    something
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><a role="button" href="#group_OutdentingOptions" data-bs-toggle="collapse" data-bs-target="#group_OutdentingOptions" aria-expanded="false" aria-controls="group_OutdentingOptions">Outdenting Options</a></h3>
+                </div>
+                <div id="group_OutdentingOptions" class="collapse">
+                    <div class="card-body">
+                        something
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><a role="button" href="#group_AlignmentOptions" data-bs-toggle="collapse" data-bs-target="#group_AlignmentOptions" aria-expanded="false" aria-controls="group_AlignmentOptions">Alignment Options</a></h3>
+                </div>
+                <div id="group_AlignmentOptions" class="collapse">
+                    <div class="card-body">
+                        something
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><a role="button" href="#group_CommentOptions" data-bs-toggle="collapse" data-bs-target="#group_CommentOptions" aria-expanded="false" aria-controls="group_CommentOptions">Comment Options</a></h3>
+                </div>
+                <div id="group_CommentOptions" class="collapse">
+                    <div class="card-body">
+                        something
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><a role="button" href="#group_VerticalSpacingOptions" data-bs-toggle="collapse" data-bs-target="#group_VerticalSpacingOptions" aria-expanded="false" aria-controls="group_VerticalSpacingOptions">Vertical Spacing Options</a></h3>
+                </div>
+                <div id="group_VerticalSpacingOptions" class="collapse">
+                    <div class="card-body">
+                        something
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Try it right here!</h4>
+                <small class="card-text text-muted">Rubberduck.SmartIndenter.dll version: {{model.indenterVersion}}</small>
+            </div>
+            <div class="card-body">
+                <label class="form-text" for="indent-code">Paste code to indent here:</label>
+                <textarea [(ngModel)]="model.code" (ngModelChange)="onModelChanged($event)" id="indentCode" class="code-area form-control font-monospace text-nowrap mt-2" rows="20" contenteditable="true"></textarea>
+            </div>
+            <div class="card-footer">
+                <button type="button" id="indent-button" class="btn btn-primary mx-1" (click)="indent()">
+                    <span [hidden]="!isIndenterBusy" id="indent-busy-indicator" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span id="indent-button-text">Indent</span>
+                </button>
+                <button id="copy-code" class="btn btn-secondary mx-1" type="button">
+                    <span><fa-icon [icon]="'clipboard'"></fa-icon>&nbsp;Copy</span>
+                </button>
+                <button id="clear-code" class="btn btn-danger mx-1 align-self-end" type="button" (click)="clear()" [disabled]="model.code.length == 0">
+                    <span><fa-icon [icon]="'eraser'"></fa-icon>&nbsp;Clear</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="row"> -->
+    <!--     <div class="col-12"> -->
+    <!--         <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" /> -->
+    <!--     </div> -->
+    <!-- </div> -->
+
+    <div class="row">
+        <!-- TODO  -->
+    </div>
+
+</section>

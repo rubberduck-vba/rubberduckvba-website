@@ -1,4 +1,3 @@
-/// <reference path="../../app.module.ts" />
 import { Component, OnInit, TemplateRef, ViewChild, inject } from "@angular/core";
 import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
 import { BehaviorSubject } from "rxjs";
@@ -6,8 +5,8 @@ import { UserViewModel } from "../../model/feature.model";
 import { AuthService } from "src/app/services/auth.service";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { fab } from "@fortawesome/free-brands-svg-icons";
-import { NgbModal, NgbToast } from "@ng-bootstrap/ng-bootstrap";
-import { AdminApiClientService, ApiClientService } from "../../services/api-client.service";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { ApiClientService } from "../../services/api-client.service";
 
 @Component({
   selector: 'auth-menu',
@@ -29,7 +28,7 @@ export class AuthMenuComponent implements OnInit {
   @ViewChild('confirmxmldocsbox', { read: TemplateRef }) confirmxmldocsbox: TemplateRef<any> | undefined;
   public modal = inject(NgbModal);
 
-  constructor(private auth: AuthService, private api: AdminApiClientService, private fa: FaIconLibrary) {
+  constructor(private auth: AuthService, private api: ApiClientService, private fa: FaIconLibrary) {
     fa.addIconPacks(fas);
     fa.addIconPacks(fab);
   }

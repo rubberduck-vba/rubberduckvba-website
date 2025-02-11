@@ -5,6 +5,7 @@ import { DownloadInfo } from "../model/downloads.model";
 import { DataService } from "./data.service";
 import { environment } from "../../environments/environment.prod";
 import { Observable, map } from "rxjs";
+import { IndenterVersionViewModelClass, IndenterViewModel, IndenterViewModelClass } from "../model/indenter.model";
 
 @Injectable()
 export class ApiClientService {
@@ -53,13 +54,6 @@ export class ApiClientService {
     const url = `${environment.apiBaseUrl}quickfixes/${name}`
     return this.data.getAsync<QuickFixViewModel>(url).pipe(map(e => new QuickFixViewModelClass(e)));
   }
-}
-
-@Injectable()
-export class AdminApiClientService {
-
-  constructor(private data: DataService) {
-  }
 
   public updateTagMetadata(): Observable<number> {
     const url = `${environment.apiBaseUrl}admin/update/tags`;
@@ -69,5 +63,18 @@ export class AdminApiClientService {
   public updateXmldocMetadata(): Observable<number> {
     const url = `${environment.apiBaseUrl}admin/update/xmldoc`;
     return this.data.postAsync(url);
+  }
+
+  public getIndenterDefaults(): Observable<IndenterViewModel> {
+    const url = `${environment.apiBaseUrl}indenter/defaults`;
+    return this.data.getAsync<IndenterViewModel>(url).pipe(map(model => new IndenterViewModelClass(model)));
+  }
+
+  public indent(model: IndenterViewModel): Observable<IndenterViewModel> {
+    const url = `${environment.apiBaseUrl}indenter/indent`;
+    return this.data.postAsync<IndenterViewModel, string[]>(url, model).pipe(map(lines => {
+      model.indentedCode = lines.join('\n');
+      return model;
+    }));
   }
 }
