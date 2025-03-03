@@ -45,29 +45,13 @@ public class Program
 
         builder.Services.AddCors(builder =>
         {
-            builder.AddDefaultPolicy(policy =>
+            builder.AddPolicy("CorsPolicy", policy =>
             {
                 policy
                     .SetIsOriginAllowed(origin => true)
                     .AllowAnyHeader()
                     .WithMethods("OPTIONS", "GET", "POST")
                     .AllowCredentials()
-                    .Build();
-            });
-
-            builder.AddPolicy("webhookPolicy", policy =>
-            {
-                policy
-#if DEBUG
-                    .SetIsOriginAllowed(origin => true)
-#else
-                    .SetIsOriginAllowedToAllowWildcardSubdomains()
-                    .WithOrigins("*.github.com")
-#endif
-                    .WithHeaders("Content-Type", "X-GitHub-Event", "X-GitHub-Delivery", "X-GitHub-Hook-ID", "X-Hub-Signature", "X-Hub-Signature256")
-                    .WithMethods("POST")
-                    .DisallowCredentials()
-                    .SetPreflightMaxAge(TimeSpan.FromHours(48))
                     .Build();
             });
         });

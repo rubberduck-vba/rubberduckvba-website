@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -21,6 +22,7 @@ public class WebhookController : RubberduckApiController
     }
 
     [Authorize("webhook")]
+    [EnableCors("webhookPolicy")]
     [HttpPost("webhook/github")]
     public async Task<IActionResult> GitHub([FromBody] dynamic body) =>
         GuardInternalAction(() =>

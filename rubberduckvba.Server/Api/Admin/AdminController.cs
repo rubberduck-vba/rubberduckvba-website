@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -13,6 +14,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
     [Authorize("github")]
+    [EnableCors("CorsPolicy")]
     [HttpPost("admin/update/xmldoc")]
     public IActionResult UpdateXmldocContent()
     {
@@ -25,6 +27,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
     [Authorize("github")]
+    [EnableCors("CorsPolicy")]
     [HttpPost("admin/update/tags")]
     public IActionResult UpdateTagMetadata()
     {
