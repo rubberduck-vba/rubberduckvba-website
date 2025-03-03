@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Octokit;
@@ -70,6 +71,7 @@ public class AuthController : RubberduckApiController
     }
 
     [HttpPost("auth/signin")]
+    [EnableCors("CorsPolicy")]
     [AllowAnonymous]
     public IActionResult SessionSignIn(SignInViewModel vm)
     {
@@ -106,6 +108,7 @@ public class AuthController : RubberduckApiController
     }
 
     [HttpPost("auth/github")]
+    [EnableCors("CorsPolicy")]
     [AllowAnonymous]
     public IActionResult OnGitHubCallback(SignInViewModel vm)
     {
