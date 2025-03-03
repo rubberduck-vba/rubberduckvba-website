@@ -6,6 +6,7 @@ using rubberduckvba.Server.ContentSynchronization;
 using rubberduckvba.Server.ContentSynchronization.XmlDoc.Schema;
 using rubberduckvba.Server.Model;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using System.Text;
 using System.Web;
@@ -16,13 +17,20 @@ namespace rubberduckvba.Server.Services;
 public interface IGitHubClientService
 {
     Task<ClaimsPrincipal?> ValidateTokenAsync(string token);
-    Task<IEnumerable<TagGraph>> GetAllTagsAsync();
+    Task<IEnumerable<TagGraph>> GetAllTagsAsync(string? dbMainTagName);
     Task<TagGraph> GetTagAsync(string? token, string name);
     Task<IEnumerable<InspectionDefaultConfig>> GetCodeAnalysisDefaultsConfigAsync();
 }
 
 public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger<ServiceLogger> logger) : IGitHubClientService
 {
+    private class ReleaseComparer : IEqualityComparer<Release>
+    {
+        public bool Equals(Release? x, Release? y) => x?.Name == y?.Name;
+
+        public int GetHashCode([DisallowNull] Release obj) => HashCode.Combine(obj.Name);
+    }
+
     public async Task<ClaimsPrincipal?> ValidateTokenAsync(string? token)
     {
         if (token is null)
@@ -52,13 +60,18 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
         return new ClaimsPrincipal(identity);
     }
 
-    public async Task<IEnumerable<TagGraph>> GetAllTagsAsync()
+    public async Task<IEnumerable<TagGraph>> GetAllTagsAsync(string? dbMainTagName)
     {
         var config = configuration.Value;
         var credentials = new Credentials(config.OrgToken);
         var client = new GitHubClient(new ProductHeaderValue(config.UserAgent), new InMemoryCredentialStore(credentials));
 
-        var releases = await client.Repository.Release.GetAll(config.OwnerOrg, config.Rubberduck, new ApiOptions { PageCount = 1, PageSize = 10 });
+
+        var getReleases = client.Repository.Release.GetAll(config.OwnerOrg, config.Rubberduck, new ApiOptions { PageCount = 1, PageSize = 10 });
+        var getKnownMain = client.Repository.Release.Get(config.OwnerOrg, config.Rubberduck, dbMainTagName);
+        await Task.WhenAll(getReleases, getKnownMain);
+
+        var releases = (await getReleases).Append(await getKnownMain).ToHashSet(new ReleaseComparer());
 
         return (from release in releases
                 let installer = release.Assets.SingleOrDefault(asset => asset.Name.EndsWith(".exe") && asset.Name.StartsWith("Rubberduck.Setup"))
