@@ -91,8 +91,9 @@ public class SynchronizeXmlDocBlock : ActionBlockBase<SyncRequestParameters, Syn
         Context.LoadParameters(input);
 
         var dbMain = await _content.GetLatestTagAsync(RepositoryId.Rubberduck, includePreRelease: false);
-        var githubTags = await _github.GetAllTagsAsync(dbMain.Name);
+        Context.LoadRubberduckDbMain(dbMain);
 
+        var githubTags = await _github.GetAllTagsAsync(dbMain.Name);
         // LoadInspectionDefaultConfig
         var config = await _github.GetCodeAnalysisDefaultsConfigAsync();
         Context.LoadInspectionDefaultConfig(config);
