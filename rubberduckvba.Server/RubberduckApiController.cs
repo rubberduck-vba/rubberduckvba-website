@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using rubberduckvba.Server;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -6,6 +7,7 @@ using System.Runtime.CompilerServices;
 namespace rubberduckvba.Server;
 
 [ApiController]
+[EnableCors("CorsPolicy")]
 public abstract class RubberduckApiController : ControllerBase
 {
     private readonly ILogger _logger;

@@ -4,7 +4,7 @@ using rubberduckvba.Server.Services;
 
 namespace rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.SyncTags;
 
-public class LoadGitHubTagsBlock : TransformBlockBase<SyncRequestParameters, SyncContext, SyncContext>
+public class LoadGitHubTagsBlock : TransformBlockBase<SyncContext, SyncContext, SyncContext>
 {
     private readonly IGitHubClientService _github;
 
@@ -14,7 +14,7 @@ public class LoadGitHubTagsBlock : TransformBlockBase<SyncRequestParameters, Syn
         _github = github;
     }
 
-    public override async Task<SyncContext> TransformAsync(SyncRequestParameters input)
+    public override async Task<SyncContext> TransformAsync(SyncContext input)
     {
         var githubTags = await _github.GetAllTagsAsync(Context.RubberduckDbMain.Name);
         var (gitHubMain, gitHubNext, gitHubOthers) = githubTags.GetLatestTags();
