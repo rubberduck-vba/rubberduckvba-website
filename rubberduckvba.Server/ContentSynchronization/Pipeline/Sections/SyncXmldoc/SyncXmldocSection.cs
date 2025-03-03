@@ -90,7 +90,8 @@ public class SynchronizeXmlDocBlock : ActionBlockBase<SyncRequestParameters, Syn
     {
         Context.LoadParameters(input);
 
-        var githubTags = await _github.GetAllTagsAsync();
+        var dbMain = await _content.GetLatestTagAsync(RepositoryId.Rubberduck, includePreRelease: false);
+        var githubTags = await _github.GetAllTagsAsync(dbMain.Name);
 
         // LoadInspectionDefaultConfig
         var config = await _github.GetCodeAnalysisDefaultsConfigAsync();
@@ -115,7 +116,6 @@ public class SynchronizeXmlDocBlock : ActionBlockBase<SyncRequestParameters, Syn
 
         await Task.Delay(TimeSpan.FromSeconds(2)); // just in case the tags job was scheduled at/around the same time
 
-        var dbMain = await _content.GetLatestTagAsync(RepositoryId.Rubberduck, includePreRelease: false);
         var dbNext = await _content.GetLatestTagAsync(RepositoryId.Rubberduck, includePreRelease: true);
 
         var dbTags = _tagServices.GetAllTags().ToDictionary(e => e.Name);
