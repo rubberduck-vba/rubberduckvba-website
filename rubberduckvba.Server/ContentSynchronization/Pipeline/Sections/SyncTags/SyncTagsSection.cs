@@ -73,7 +73,7 @@ public class SyncTagsSection : PipelineSection<SyncContext>
         AcquireDbNextTag.CreateBlock(BroadcastParameters);
         JoinDbTags.CreateBlock(AcquireDbMainTag, AcquireDbNextTag);
         LoadDbTags.CreateBlock(JoinDbTags);
-        LoadGitHubTags.CreateBlock(BroadcastParameters);
+        LoadGitHubTags.CreateBlock(LoadDbTags);
         JoinTags.CreateBlock(LoadDbTags, LoadGitHubTags);
         BroadcastTags.CreateBlock(JoinTags);
         StreamGitHubTags.CreateBlock(BroadcastTags);
