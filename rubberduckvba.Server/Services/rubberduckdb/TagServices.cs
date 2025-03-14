@@ -32,9 +32,13 @@ public class TagServices(IRepository<TagEntity> tagsRepository, IRepository<TagA
         .SelectMany(tags => tags.Take(1))
         .ToList();
 
-    public TagGraph GetLatestTag(bool isPreRelease)
+    public TagGraph? GetLatestTag(bool isPreRelease)
     {
         var latestTags = GetLatestTags();
+        if (!latestTags.Any())
+        {
+            return null;
+        }
 
         if (!isPreRelease)
         {

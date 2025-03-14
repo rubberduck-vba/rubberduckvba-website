@@ -17,7 +17,7 @@ namespace rubberduckvba.Server.Services;
 public interface IGitHubClientService
 {
     Task<ClaimsPrincipal?> ValidateTokenAsync(string token);
-    Task<IEnumerable<TagGraph>> GetAllTagsAsync(string? dbMainTagName);
+    Task<IEnumerable<TagGraph>> GetAllTagsAsync();
     Task<TagGraph> GetTagAsync(string? token, string name);
     Task<IEnumerable<InspectionDefaultConfig>> GetCodeAnalysisDefaultsConfigAsync();
 }
@@ -60,7 +60,7 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
         return new ClaimsPrincipal(identity);
     }
 
-    public async Task<IEnumerable<TagGraph>> GetAllTagsAsync(string? dbMainTagName)
+    public async Task<IEnumerable<TagGraph>> GetAllTagsAsync()
     {
         var config = configuration.Value;
         var credentials = new Credentials(config.OrgToken);
@@ -68,10 +68,10 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
 
 
         var getReleases = client.Repository.Release.GetAll(config.OwnerOrg, config.Rubberduck, new ApiOptions { PageCount = 1, PageSize = 10 });
-        var getKnownMain = client.Repository.Release.Get(config.OwnerOrg, config.Rubberduck, dbMainTagName);
-        await Task.WhenAll(getReleases, getKnownMain);
+        var getLatest = client.Repository.Release.GetLatest(config.OwnerOrg, config.Rubberduck);
+        await Task.WhenAll(getReleases, getLatest);
 
-        var releases = (await getReleases).Append(await getKnownMain).ToHashSet(new ReleaseComparer());
+        var releases = (await getReleases).Append(await getLatest).ToHashSet(new ReleaseComparer());
 
         return (from release in releases
                 let installer = release.Assets.SingleOrDefault(asset => asset.Name.EndsWith(".exe") && asset.Name.StartsWith("Rubberduck.Setup"))
