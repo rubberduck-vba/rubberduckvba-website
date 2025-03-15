@@ -16,7 +16,7 @@ public class LoadGitHubTagsBlock : TransformBlockBase<SyncContext, SyncContext, 
 
     public override async Task<SyncContext> TransformAsync(SyncContext input)
     {
-        var githubTags = await _github.GetAllTagsAsync(Context.RubberduckDbMain.Name);
+        var githubTags = await _github.GetAllTagsAsync();
         var (gitHubMain, gitHubNext, gitHubOthers) = githubTags.GetLatestTags();
 
         Context.LoadGitHubTags(gitHubMain, gitHubNext, gitHubOthers);

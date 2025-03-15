@@ -54,7 +54,7 @@ public class SynchronizationPipelineFactory : ISynchronizationPipelineFactory<Sy
         return parameters switch
         {
             XmldocSyncRequestParameters => new SynchronizeXmlPipeline(parameters, _logger, _content, _github, _merge, _staging, _markdown, tokenSource, _inspections, _quickfixes, _annotations, _annotationParser, _quickFixParser, _inspectionParser, _tagServices),
-            TagSyncRequestParameters => new SynchronizeTagsPipeline(parameters, _logger, _content, _github, _merge, _staging, tokenSource),
+            TagSyncRequestParameters => new SynchronizeTagsPipeline(parameters, _logger, _content, _tagServices, _github, _merge, _staging, tokenSource),
             _ => throw new NotSupportedException(),
         };
     }
