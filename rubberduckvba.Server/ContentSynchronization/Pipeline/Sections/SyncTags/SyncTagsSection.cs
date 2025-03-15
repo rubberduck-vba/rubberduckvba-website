@@ -112,8 +112,8 @@ public class SynchronizeTagsBlock : ActionBlockBase<TagSyncRequestParameters, Sy
         var githubTags = await getGithubTags;
         var (gitHubMain, gitHubNext, _) = githubTags.GetLatestTags();
 
-        var mergedMain = (dbMain ?? gitHubMain with { InstallerDownloads = gitHubMain.InstallerDownloads })!;
-        var mergedNext = (dbNext ?? gitHubNext with { InstallerDownloads = gitHubNext.InstallerDownloads })!;
+        var mergedMain = (dbMain ?? gitHubMain) with { InstallerDownloads = gitHubMain.InstallerDownloads };
+        var mergedNext = (dbNext ?? gitHubNext) with { InstallerDownloads = gitHubNext.InstallerDownloads };
 
         var inserts = new List<TagGraph>();
         var updates = new List<TagGraph>();
