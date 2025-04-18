@@ -129,8 +129,8 @@ public class SynchronizeXmlDocBlock : ActionBlockBase<SyncRequestParameters, Syn
             }
             else
             {
-                // that's an old tag then; do not process
-                throw new InvalidOperationException($"Tag metadata mismatch, xmldoc update will not proceed; GitHub@main:{ghMain.Name} ({ghMain.DateCreated}) | rubberduckdb@main: {dbMain.Name} ({dbMain.DateCreated})");
+                // could be an old tag, ...or the db is just out of date
+                Logger.LogWarning($"Tag metadata mismatch, xmldoc update will not proceed; GitHub@main:{ghMain.Name} ({ghMain.DateCreated}) | rubberduckdb@main: {dbMain.Name} ({dbMain.DateCreated})");
             }
         }
         if (ghNext.Name != dbNext.Name)
@@ -141,8 +141,8 @@ public class SynchronizeXmlDocBlock : ActionBlockBase<SyncRequestParameters, Syn
             }
             else
             {
-                // that's an old tag then; do not process
-                throw new InvalidOperationException($"Tag metadata mismatch, xmldoc update will not proceed; GitHub@main:{ghMain.Name} ({ghMain.DateCreated}) | rubberduckdb@main: {dbMain.Name} ({dbMain.DateCreated})");
+                // could be an old tag, ...or the db is just out of date
+                Logger.LogWarning($"Tag metadata mismatch, xmldoc update will not proceed; GitHub@main:{ghNext.Name} ({ghNext.DateCreated}) | rubberduckdb@main: {dbNext.Name} ({dbNext.DateCreated})");
             }
         }
 
