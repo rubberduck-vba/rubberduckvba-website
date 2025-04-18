@@ -47,6 +47,9 @@ public record class GitHubSettings
 
 public record class HangfireSettings
 {
+    public int MaxInitializationAttempts { get; set; } = 5;
+    public int InitializationRetryDelaySeconds { get; set; } = 10;
+
     public int ServerCheckIntervalMinutes { get; set; } = 15;
     public int QueuePollIntervalSeconds { get; set; } = 30;
     public int SchedulePollIntervalSeconds { get; set; } = 30;
