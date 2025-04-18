@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using rubberduckvba.Server.Services;
 
 namespace rubberduckvba.Server.Api.Admin;
 
 
 [ApiController]
-public class AdminController(ConfigurationOptions options, HangfireLauncherService hangfire) : ControllerBase
+public class AdminController(ConfigurationOptions options, HangfireLauncherService hangfire, CacheService cache) : ControllerBase
 {
     /// <summary>
     /// Enqueues a job that updates xmldoc content from the latest release/pre-release tags.
@@ -33,6 +34,15 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     {
         var jobId = hangfire.UpdateTagMetadata();
         return Ok(jobId);
+    }
+
+    [Authorize("github")]
+    [EnableCors("CorsPolicy")]
+    [HttpPost("admin/cache/clear")]
+    public IActionResult ClearCache()
+    {
+        cache.Clear();
+        return Ok();
     }
 
 #if DEBUG
