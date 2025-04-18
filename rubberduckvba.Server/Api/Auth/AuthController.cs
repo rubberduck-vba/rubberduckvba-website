@@ -37,6 +37,7 @@ public class AuthController : RubberduckApiController
     }
 
     [HttpGet("auth")]
+    [EnableCors("CorsPolicy")]
     [AllowAnonymous]
     public IActionResult Index()
     {

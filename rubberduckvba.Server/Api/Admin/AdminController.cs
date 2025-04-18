@@ -46,6 +46,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     }
 
 #if DEBUG
+    [EnableCors("CorsPolicy")]
     [HttpGet("admin/config/current")]
     public IActionResult Config()
     {
