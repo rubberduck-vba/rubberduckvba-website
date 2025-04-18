@@ -51,6 +51,7 @@ public class Program
             {
                 policy
                     .SetIsOriginAllowed(origin => true)
+                    .AllowAnyOrigin()
                     .AllowAnyHeader()
                     .WithMethods("OPTIONS", "GET", "POST")
                     .AllowCredentials()
