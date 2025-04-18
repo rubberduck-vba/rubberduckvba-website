@@ -65,6 +65,11 @@ export class ApiClientService {
     return this.data.postAsync(url);
   }
 
+  public clearCache(): Observable<any> {
+    const url = `${environment.apiBaseUrl}admin/cache/clear`;
+    return this.data.postAsync(url);
+  }
+
   public getIndenterDefaults(): Observable<IndenterViewModel> {
     const url = `${environment.apiBaseUrl}indenter/defaults`;
     return this.data.getAsync<IndenterViewModel>(url).pipe(map(model => new IndenterViewModelClass(model)));

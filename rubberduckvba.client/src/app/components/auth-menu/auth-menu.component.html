@@ -26,6 +26,12 @@
                         Update xmldoc metadata
                     </button>
                 </div>
+                <hr />
+                <div ngbDropdownItem>
+                    <button type="button" role="button" class="nav-link text-dark btn-link" title="" (click)="confirmClearCache()">
+                        Clear cache
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -96,6 +102,29 @@
             <div class="modal-footer">
                 <button id="cancel-xmldoc" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('cancel')">Close</button>
                 <button id="accept-xmldoc" type="button" class="btn btn-primary" (click)="updateXmldocs()">Proceed</button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #confirmclearcachebox let-modal>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Clear Cache</h5>
+            </div>
+            <div class="modal-body">
+                <div class="border-primary border-bottom border-top bg-light text-primary p-2 my-1">
+                    <h6><fa-icon class="mx-1" [icon]="['fas', 'info-circle']"></fa-icon>Confirm</h6>
+                    <p>This will clear the memory cache, forcing the next request to fetch from the backend database.</p>
+                </div>
+                <p class="mt-4">
+                    Proceed?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-xmldoc" type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('cancel')">Close</button>
+                <button id="accept-xmldoc" type="button" class="btn btn-primary" (click)="clearCache()">Proceed</button>
             </div>
         </div>
     </div>

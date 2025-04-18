@@ -150,6 +150,12 @@ public class CacheService
         }
     }
 
+    public void Clear()
+    {
+        _cache.Clear();
+        _logger.LogInformation("Cache was cleared.");
+    }
+
     private bool IsTagsCacheValid() => IsCacheValid(TagsJobState, () => TagsJobState);
 
     private bool IsXmldocCacheValid() => IsCacheValid(XmldocJobState, () => XmldocJobState);

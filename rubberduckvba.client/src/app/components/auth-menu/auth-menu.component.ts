@@ -26,6 +26,7 @@ export class AuthMenuComponent implements OnInit {
   @ViewChild('confirmbox', { read: TemplateRef }) confirmbox: TemplateRef<any> | undefined;
   @ViewChild('confirmtagsbox', { read: TemplateRef }) confirmtagsbox: TemplateRef<any> | undefined;
   @ViewChild('confirmxmldocsbox', { read: TemplateRef }) confirmxmldocsbox: TemplateRef<any> | undefined;
+  @ViewChild('confirmclearcachebox', { read: TemplateRef }) confirmclearcachebox: TemplateRef<any> | undefined;
   public modal = inject(NgbModal);
 
   constructor(private auth: AuthService, private api: ApiClientService, private fa: FaIconLibrary) {
@@ -57,6 +58,10 @@ export class AuthMenuComponent implements OnInit {
     this.modal.open(this.confirmxmldocsbox);
   }
 
+  public confirmClearCache(): void {
+    this.modal.open(this.confirmclearcachebox);
+  }
+
   public signin(): void {
     this.auth.signin();
     this.getUserInfo();
@@ -75,5 +80,10 @@ export class AuthMenuComponent implements OnInit {
   public updateXmldocs(): void {
     this.modal.dismissAll();
     this.api.updateXmldocMetadata().subscribe(jobId => console.log(`UpdateXmldocMetadata has scheduled job id ${jobId}`));
+  }
+
+  public clearCache(): void {
+    this.modal.dismissAll();
+    this.api.clearCache().subscribe(() => console.log(`Cache has been cleared`));
   }
 }
