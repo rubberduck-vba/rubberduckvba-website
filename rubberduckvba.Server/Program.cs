@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 using NLog.Config;
 using NLog.Extensions.Logging;
 using NLog.Targets;
+using Polly;
+using Polly.Retry;
 using Rubberduck.SmartIndenter;
 using RubberduckServices;
 using rubberduckvba.Server.Api.Admin;
@@ -110,7 +112,25 @@ public class Program
         app.MapControllers();
         app.MapFallbackToFile("/index.html");
 
-        StartHangfire(app);
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("App configuration completed. Starting hangfire...");
+
+        var hangfireOptions = app.Services.GetService<IOptions<HangfireSettings>>()?.Value ?? new();
+        new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
+        {
+            Delay = TimeSpan.FromSeconds(10),
+            MaxRetryAttempts = hangfireOptions.MaxInitializationAttempts,
+            OnRetry = (context) =>
+            {
+                var retryCount = context.AttemptNumber;
+                var delay = context.RetryDelay;
+
+                logger.LogError(context.Outcome.Exception, $"Hangfire failed to start | Retrying storage connection in {delay.TotalSeconds} seconds. Attempt {retryCount} of {hangfireOptions.MaxInitializationAttempts}");
+                return ValueTask.CompletedTask;
+            }
+        }).Build().Execute(() => StartHangfire(app));
+
+        logger.LogInformation("Hangfire initialization completed. Starting application...");
         app.Run();
     }
 
