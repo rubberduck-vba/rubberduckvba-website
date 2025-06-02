@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using RubberduckServices;
 
 namespace rubberduckvba.Server.Api.Indenter;
 
 [AllowAnonymous]
+[EnableCors(CorsPolicies.AllowAll)]
 public class IndenterController : RubberduckApiController
 {
     private readonly IIndenterService service;

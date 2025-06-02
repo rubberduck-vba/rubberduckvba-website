@@ -55,7 +55,7 @@ public class FeatureViewModel
 
 public class InspectionViewModel
 {
-    public InspectionViewModel(Inspection model, IDictionary<int, Tag> tagsByAssetId)
+    public InspectionViewModel(Inspection model, IEnumerable<QuickFixViewModel> quickFixes, IDictionary<int, Tag> tagsByAssetId)
     {
         Id = model.Id;
         DateTimeInserted = model.DateTimeInserted;
@@ -78,7 +78,7 @@ public class InspectionViewModel
 
         InspectionType = model.InspectionType;
         DefaultSeverity = model.DefaultSeverity;
-        QuickFixes = model.QuickFixes;
+        QuickFixes = quickFixes.Where(e => model.QuickFixes.Any(name => string.Equals(e.Name, name, StringComparison.InvariantCultureIgnoreCase))).ToArray();
 
         Reasoning = model.Reasoning;
         HostApp = model.HostApp;
@@ -110,7 +110,7 @@ public class InspectionViewModel
     public string? Remarks { get; init; }
     public string? HostApp { get; init; }
     public string[] References { get; init; } = [];
-    public string[] QuickFixes { get; init; } = [];
+    public QuickFixViewModel[] QuickFixes { get; init; } = [];
     public InspectionExample[] Examples { get; init; } = [];
 }
 
@@ -239,11 +239,11 @@ public record class QuickFixInspectionLinkViewModel
 
 public class InspectionsFeatureViewModel : FeatureViewModel
 {
-    public InspectionsFeatureViewModel(FeatureGraph model, IDictionary<int, Tag> tagsByAssetId, bool summaryOnly = false)
+    public InspectionsFeatureViewModel(FeatureGraph model, IEnumerable<QuickFixViewModel> quickFixes, IDictionary<int, Tag> tagsByAssetId, bool summaryOnly = false)
         : base(model, summaryOnly)
     {
 
-        Inspections = model.Inspections.OrderBy(e => e.Name).Select(e => new InspectionViewModel(e, tagsByAssetId)).ToArray();
+        Inspections = model.Inspections.OrderBy(e => e.Name).Select(e => new InspectionViewModel(e, quickFixes, tagsByAssetId)).ToArray();
     }
 
     public InspectionViewModel[] Inspections { get; init; } = [];

@@ -37,7 +37,7 @@ public class AuthController : RubberduckApiController
     }
 
     [HttpGet("auth")]
-    [EnableCors("CorsPolicy")]
+    [EnableCors(CorsPolicies.AllowAll)]
     [AllowAnonymous]
     public IActionResult Index()
     {
@@ -72,7 +72,7 @@ public class AuthController : RubberduckApiController
     }
 
     [HttpPost("auth/signin")]
-    [EnableCors("CorsPolicy")]
+    [EnableCors(CorsPolicies.AllowAll)]
     [AllowAnonymous]
     public IActionResult SessionSignIn(SignInViewModel vm)
     {
@@ -109,7 +109,7 @@ public class AuthController : RubberduckApiController
     }
 
     [HttpPost("auth/github")]
-    [EnableCors("CorsPolicy")]
+    [EnableCors(CorsPolicies.AllowAll)]
     [AllowAnonymous]
     public IActionResult OnGitHubCallback(SignInViewModel vm)
     {

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, map } from "rxjs";
 import { environment } from "../../environments/environment";
 import { UserViewModel } from "../model/feature.model";
 import { AuthViewModel, DataService } from "./data.service";
@@ -12,6 +12,11 @@ export class AuthService {
 
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private redirect(url: string = '/'): void {
+    console.log(`redirecting: ${url}`);
+    window.location.href = url;
   }
 
   private writeStorage(key: string, value: string): void {
@@ -32,7 +37,7 @@ export class AuthService {
 
     const url = `${environment.apiBaseUrl}auth/signin`;
     this.data.postAsync<AuthViewModel, string>(url, vm)
-      .subscribe(redirectUrl => location.href = redirectUrl);
+      .subscribe((result: string) => this.redirect(result));
   }
 
   public signout(): void {
@@ -52,17 +57,17 @@ export class AuthService {
         this.data.postAsync<AuthViewModel, AuthViewModel>(url, vm)
           .subscribe(result => {
             this.writeStorage('github:access_token', result.token!);
-            location.href = '/';
+            this.redirect();
           });
       }
       catch (error) {
         console.log(error);
-        location.href = '/';
+        this.redirect();
       }
     }
     else {
       console.log('xsrf:state mismatched!');
-      location.href = '/';
+      this.redirect();
     }
   }
 }

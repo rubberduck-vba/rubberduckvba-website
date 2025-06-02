@@ -63,17 +63,6 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
     return (this.feature as FeatureViewModel)?.features ?? [];
   }
 
-  @Input()
-  public set quickFixes(value: QuickFixViewModel[]) {
-    if (value != null) {
-      this._quickfixes.next(value);
-    }
-  }
-
-  public get quickFixes(): QuickFixViewModel[] {
-    return this._quickfixes.value;
-  }
-
   public get links(): BlogLink[] {
     let feature = <FeatureViewModel>this.feature;
     return feature?.links ?? [];

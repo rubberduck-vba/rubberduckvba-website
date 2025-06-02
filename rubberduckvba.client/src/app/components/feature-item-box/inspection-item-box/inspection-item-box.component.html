@@ -91,10 +91,10 @@
                         <p class="small">This inspection offers the following fixes:</p>
                         <ul class="list-unstyled ms-2">
                             <li *ngFor="let fix of this.inspectionInfo.quickFixes" class="my-1">
-                                <a class="text-decoration-none" href="/quickfixes/{{fix}}">
+                                <a class="text-decoration-none" href="/quickfixes/{{fix.name}}">
                                     <div class="card-highlight rounded-4 p-2">
-                                        <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.replace('QuickFix','')}}</h6>
-                                        <p class="text-black-50 small" [innerHTML]="getQuickFixSummary(fix)"></p>
+                                        <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.name}}</h6>
+                                        <p class="text-black-50 small" [innerHTML]="fix.summary"></p>
                                     </div>
                                 </a>
                             </li>

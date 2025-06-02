@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Model;
@@ -37,6 +38,7 @@ public class FeaturesController : RubberduckApiController
             .ContinueWith(t => t.Result.Select(e => new FeatureOptionViewModel { Id = e.Id, Name = e.Name, Title = e.Title }).ToArray());
 
     [HttpGet("features")]
+    [EnableCors(CorsPolicies.AllowAll)]
     [AllowAnonymous]
     public IActionResult Index()
     {
@@ -66,6 +68,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("features/{name}")]
+    [EnableCors(CorsPolicies.AllowAll)]
     [AllowAnonymous]
     public IActionResult Info([FromRoute] string name)
     {
@@ -82,6 +85,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("inspections/{name}")]
+    [EnableCors(CorsPolicies.AllowAll)]
     [AllowAnonymous]
     public IActionResult Inspection([FromRoute] string name)
     {
@@ -103,6 +107,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("annotations/{name}")]
+    [EnableCors(CorsPolicies.AllowAll)]
     [AllowAnonymous]
     public IActionResult Annotation([FromRoute] string name)
     {
@@ -124,6 +129,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("quickfixes/{name}")]
+    [EnableCors(CorsPolicies.AllowAll)]
     [AllowAnonymous]
     public IActionResult QuickFix([FromRoute] string name)
     {
@@ -145,6 +151,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("features/create")]
+    [EnableCors(CorsPolicies.AllowAuthenticated)]
     [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromQuery] RepositoryId repository = RepositoryId.Rubberduck, [FromQuery] int? parentId = default)
     {
@@ -156,6 +163,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpPost("create")]
+    [EnableCors(CorsPolicies.AllowAuthenticated)]
     [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromBody] FeatureEditViewModel model)
     {
@@ -178,6 +186,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpPost("features/update")]
+    [EnableCors(CorsPolicies.AllowAuthenticated)]
     [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Update([FromBody] FeatureEditViewModel model)
     {
@@ -203,8 +212,10 @@ public class FeaturesController : RubberduckApiController
         InspectionsFeatureViewModel result;
         if (!cache.TryGetInspections(out result!))
         {
+            var quickfixesModel = GetQuickFixes();
+
             var feature = features.Get("Inspections") as FeatureGraph;
-            result = new InspectionsFeatureViewModel(feature,
+            result = new InspectionsFeatureViewModel(feature, quickfixesModel.QuickFixes,
                 feature.Inspections
                     .Select(e => e.TagAssetId).Distinct()
                     .ToDictionary(id => id, id => new Tag(tagsRepository.GetById(assetsRepository.GetById(id).TagId))));

@@ -36,6 +36,7 @@ export class DataService {
       .append('Access-Control-Allow-Origin', '*')
       .append('accept', 'application/json')
       .append('Content-Type', 'application/json; charset=utf-8');
+
     const token = sessionStorage.getItem('github:access_token');
     let withCreds = false;
     if (token) {
@@ -44,8 +45,8 @@ export class DataService {
     }
 
     return (content
-      ? this.http.post(url, content, { headers, withCredentials:withCreds })
-      : this.http.post(url, { headers, withCredentials: withCreds }))
+      ? this.http.post(url, content, { headers, withCredentials: withCreds })
+      : this.http.post(url, null, { headers, withCredentials: withCreds }))
       .pipe(
         map(result => <TResult>result),
         timeout(this.timeout),

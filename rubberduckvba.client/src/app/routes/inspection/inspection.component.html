@@ -1,6 +1,7 @@
 <p *ngIf="(info?.featureId) && info?.featureId != 0"><a href="/">Home</a>▸<a href="/features">Features</a>▸<a href="/features/codeinspections">CodeInspections</a>▸<a href="/features/inspections">Inspections</a>▸</p>
-<h1>{{info.title}}</h1>
-<div class="row">
+<h1 *ngIf="info">{{info.title}}</h1>
+<p *ngIf="info" class="fw-medium" [innerHtml]="info.summary"></p>
+<div *ngIf="info" class="row">
     <div class="text-start">
         <div class="row">
             <div>
@@ -29,8 +30,8 @@
             </div>
         </div>
         <div class="row">
+            <hr />
             <div class="col-11 ms-2">
-                <p class="fw-medium" [innerHtml]="info.summary"></p>
                 <p [innerHtml]="info.reasoning"></p>
             </div>
         </div>
@@ -67,10 +68,10 @@
                 <p class="small">This inspection offers the following fixes:</p>
                 <ul class="list-unstyled ms-2">
                     <li *ngFor="let fix of this.info.quickFixes" class="my-1">
-                        <a class="text-decoration-none" href="/quickfixes/{{fix}}">
+                        <a class="text-decoration-none" href="/quickfixes/{{fix.name}}">
                             <div class="card-highlight rounded-4 p-2">
-                                <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.replace('QuickFix','')}}</h6>
-                                <!-- <p class="text-black-50 small" [innerHTML]="getQuickFixSummary(fix)"></p> -->
+                                <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.name}}</h6>
+                                <p class="text-black-50 small mx-2">{{fix.summary}}</p>
                             </div>
                         </a>
                     </li>

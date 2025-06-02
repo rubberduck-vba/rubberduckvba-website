@@ -86,17 +86,18 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     BrowserModule,
     FormsModule,
     RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' },
+      // legacy routes:
+      { path: 'inspections/details/:name', redirectTo: 'inspections/:name' },
+      // actual routes:
+      { path: 'auth/github', component: AuthComponent },
       { path: 'features', component: FeaturesComponent },
       { path: 'features/:name', component: FeatureComponent },
       { path: 'inspections/:name', component: InspectionComponent },
       { path: 'annotations/:name', component: AnnotationComponent },
       { path: 'quickfixes/:name', component: QuickFixComponent },
       { path: 'about', component: AboutComponent },
-      { path: 'auth/github', component: AuthComponent },
       { path: 'indenter', component: IndenterComponent },
-      // legacy routes:
-      { path: 'inspections/details/:name', redirectTo: 'inspections/:name' },
+      { path: '', component: HomeComponent, pathMatch: 'full' },
     ]),
     FontAwesomeModule,
     NgbModule
