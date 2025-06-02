@@ -104,7 +104,7 @@ public class CacheService
     public void Invalidate(InspectionsFeatureViewModel newContent)
     {
         GetCurrentJobState();
-        if (XmldocJobState?.StateName == JobStateSucceeded)
+        if (!TryReadXmldocCache<InspectionsFeatureViewModel>("inspections", out _) || XmldocJobState?.StateName == JobStateSucceeded)
         {
             Write("inspections", newContent);
             foreach (var item in newContent.Inspections)
@@ -171,10 +171,10 @@ public class CacheService
         GetCurrentJobState();
         var current = getCurrent.Invoke();
 
-        return current != null // no job state -> no valid cache
-            && current.StateName == JobStateSucceeded // last executed job must have succeeded
+        return current is null
+            || (current.StateName == JobStateSucceeded // last executed job must have succeeded
             && current.LastJobId == initial?.LastJobId // last executed job must be the same job ID we know about
-            && current.StateTimestamp == initial?.StateTimestamp; // same execution -> cache was not invalidated
+            && current.StateTimestamp == initial?.StateTimestamp); // same execution -> cache was not invalidated
     }
 
     private void Write<T>(string key, T value)
@@ -185,7 +185,7 @@ public class CacheService
 
     private bool TryReadFromTagsCache<T>(string key, out T? cached)
     {
-        var result = _cache.TryGetValue(key, out cached) && IsTagsCacheValid();
+        var result = _cache.TryGetValue(key, out cached);
         _logger.LogDebug("TagsCache hit: '{key}' (valid: {result})", key, result);
 
         return result;
@@ -193,7 +193,7 @@ public class CacheService
 
     private bool TryReadXmldocCache<T>(string key, out T? cached)
     {
-        var result = _cache.TryGetValue(key, out cached) && IsXmldocCacheValid();
+        var result = _cache.TryGetValue(key, out cached);
         _logger.LogDebug("XmldocCache hit: '{key}' (valid: {result})", key, result);
 
         return result;

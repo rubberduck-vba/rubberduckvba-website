@@ -108,7 +108,7 @@ export interface InspectionViewModel extends XmlDocViewModel {
   hostApp?: string;
 
   references: string[];
-  quickFixes: string[];
+  quickFixes: QuickFixViewModel[];
 
   examples: InspectionExample[];
 
@@ -280,7 +280,7 @@ export class InspectionViewModelClass extends SubFeatureViewModelClass implement
   remarks?: string | undefined;
   hostApp?: string | undefined;
   references: string[];
-  quickFixes: string[];
+  quickFixes: QuickFixViewModel[];
   examples: InspectionExample[];
   tagAssetId: number;
   tagName: string;

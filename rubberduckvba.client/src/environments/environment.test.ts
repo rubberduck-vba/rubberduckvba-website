@@ -1,4 +1,4 @@
 export const environment = {
-  production: true,
-  apiBaseUrl: 'https://test.api.rubberduckvba.com/'
+  production: false,
+  apiBaseUrl: 'https://localhost:44314/'
 };

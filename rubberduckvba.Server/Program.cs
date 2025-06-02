@@ -32,6 +32,12 @@ public class HangfireAuthenticationFilter : IDashboardAuthorizationFilter
     public bool Authorize([NotNull] DashboardContext context) => Debugger.IsAttached || context.Request.RemoteIpAddress == "20.220.30.154";
 }
 
+public static class CorsPolicies
+{
+    public const string AllowAll = "AllowAll";
+    public const string AllowAuthenticated = "AllowAuthenticated";
+}
+
 public class Program
 {
     public static void Main(string[] args)
@@ -47,11 +53,19 @@ public class Program
 
         builder.Services.AddCors(builder =>
         {
-            builder.AddPolicy("CorsPolicy", policy =>
+            builder.AddPolicy(CorsPolicies.AllowAll, policy =>
             {
                 policy
                     .SetIsOriginAllowed(origin => true)
                     .AllowAnyHeader()
+                    .WithMethods("OPTIONS", "GET", "POST")
+                    .Build();
+            });
+            builder.AddPolicy(CorsPolicies.AllowAuthenticated, policy =>
+            {
+                policy
+                    .SetIsOriginAllowed(origin => true)
+                    .WithHeaders("X-ACCESS-TOKEN")
                     .WithMethods("OPTIONS", "GET", "POST")
                     .AllowCredentials()
                     .Build();
@@ -105,6 +119,7 @@ public class Program
 
         app.UseRouting();
         app.UseCors();
+
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseSession();
@@ -118,7 +133,7 @@ public class Program
         var hangfireOptions = app.Services.GetService<IOptions<HangfireSettings>>()?.Value ?? new();
         new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
         {
-            Delay = TimeSpan.FromSeconds(10),
+            Delay = TimeSpan.FromSeconds(30),
             MaxRetryAttempts = hangfireOptions.MaxInitializationAttempts,
             OnRetry = (context) =>
             {

@@ -10,7 +10,7 @@
             <!-- subfeatures -->
             <div *ngIf="feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0">
                 <div *ngFor="let subFeature of subfeatures">
-                    <feature-box *ngIf="!feature.isHidden && (subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [quickFixes]="quickFixes" [hasOwnDetailsPage]="true"></feature-box>
+                    <feature-box *ngIf="!feature.isHidden && (subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [hasOwnDetailsPage]="true"></feature-box>
                 </div>
             </div>
 
@@ -35,7 +35,7 @@
     <!-- subfeatures -->
     <div *ngIf="feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0" class="col-12">
         <div *ngFor="let subFeature of subfeatures">
-            <feature-box *ngIf="!feature.isHidden && !(subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [quickFixes]="quickFixes" [hasOwnDetailsPage]="false"></feature-box>
+            <feature-box *ngIf="!feature.isHidden && !(subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [hasOwnDetailsPage]="false"></feature-box>
         </div>
     </div>
 
@@ -84,7 +84,7 @@
         <div *ngIf="feature?.name == 'Inspections'" class="row">
             <div class="card-columns">
                 <div *ngFor="let item of filteredItems">
-                    <inspection-item-box *ngIf="!item.isHidden" [item]="item" [quickFixes]="quickFixes"></inspection-item-box>
+                    <inspection-item-box *ngIf="!item.isHidden" [item]="item"></inspection-item-box>
                 </div>
             </div>
         </div>

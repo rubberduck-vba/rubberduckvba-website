@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using rubberduckvba.Server.Services;
 
@@ -6,6 +7,7 @@ namespace rubberduckvba.Server.Api.Tags;
 
 
 [AllowAnonymous]
+[EnableCors(CorsPolicies.AllowAll)]
 public class TagsController : RubberduckApiController
 {
     private readonly CacheService cache;
@@ -23,7 +25,6 @@ public class TagsController : RubberduckApiController
     /// </summary>
     [HttpGet("api/v1/public/tags")] // legacy route
     [HttpGet("tags/latest")]
-    [AllowAnonymous]
     public IActionResult Latest()
     {
         return GuardInternalAction(() =>

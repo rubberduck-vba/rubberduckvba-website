@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { InspectionViewModel } from "../../model/feature.model";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { BehaviorSubject, switchMap } from "rxjs";
@@ -21,7 +21,7 @@ export class InspectionComponent implements OnInit {
     return this._info.getValue();
   }
 
-  constructor(private api: ApiClientService, private fa: FaIconLibrary, private route: ActivatedRoute) {
+  constructor(private api: ApiClientService, private fa: FaIconLibrary, private route: ActivatedRoute, private router: Router) {
     fa.addIconPacks(fas);
   }
 
@@ -31,6 +31,7 @@ export class InspectionComponent implements OnInit {
         const name = params.get('name')!;
         return this.api.getInspection(name);
       })).subscribe(e => {
+        console.log(e);
         this.info = <InspectionViewModel>e;
       });
   }

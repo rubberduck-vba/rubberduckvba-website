@@ -25,7 +25,7 @@ public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationS
             var token = Context.Request.Headers["X-ACCESS-TOKEN"].SingleOrDefault();
             if (string.IsNullOrWhiteSpace(token))
             {
-                return AuthenticateResult.NoResult();
+                return AuthenticateResult.Fail("Access token was not provided");
             }
 
             var principal = await _github.ValidateTokenAsync(token);
@@ -36,7 +36,7 @@ public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationS
                 return AuthenticateResult.Success(new AuthenticationTicket(principal, "github"));
             }
 
-            return AuthenticateResult.NoResult();
+            return AuthenticateResult.Fail("An invalid access token was provided");
         }
         catch (InvalidOperationException e)
         {

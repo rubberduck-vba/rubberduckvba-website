@@ -22,7 +22,7 @@ public class WebhookController : RubberduckApiController
     }
 
     [Authorize("webhook")]
-    [EnableCors("webhookPolicy")]
+    [EnableCors(CorsPolicies.AllowAll)]
     [HttpPost("webhook/github")]
     public async Task<IActionResult> GitHub([FromBody] dynamic body) =>
         GuardInternalAction(() =>

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using rubberduckvba.Server.Services;
 using System.Collections.Immutable;
@@ -7,6 +8,7 @@ namespace rubberduckvba.Server.Api.Downloads;
 
 
 [AllowAnonymous]
+[EnableCors(CorsPolicies.AllowAll)]
 public class DownloadsController : RubberduckApiController
 {
     private readonly CacheService cache;

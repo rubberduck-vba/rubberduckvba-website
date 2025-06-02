@@ -64,7 +64,6 @@ export class AuthMenuComponent implements OnInit {
 
   public signin(): void {
     this.auth.signin();
-    this.getUserInfo();
   }
 
   public signout(): void {

@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ApiClientService } from '../../../services/api-client.service';
 
 @Component({
   selector: 'inspection-item-box',
@@ -14,10 +15,9 @@ export class InspectionItemBoxComponent implements OnInit, OnChanges {
   private readonly _info: BehaviorSubject<XmlDocItemViewModel> = new BehaviorSubject<XmlDocItemViewModel>(null!);
   private readonly _inspectionInfo: BehaviorSubject<InspectionViewModel> = new BehaviorSubject<InspectionViewModel>(null!);
 
-  private readonly _quickfixes: BehaviorSubject<QuickFixViewModel[]> = new BehaviorSubject<QuickFixViewModel[]>(null!);
-  private _quickfixMap: Map<string, QuickFixViewModel> = null!;
+  private quickFixVM: QuickFixViewModel = null!;
 
-  constructor(private fa: FaIconLibrary) {
+  constructor(private fa: FaIconLibrary, private api: ApiClientService) {
     fa.addIconPacks(fas);
   }
 
@@ -31,32 +31,11 @@ export class InspectionItemBoxComponent implements OnInit, OnChanges {
 
   @ViewChild('content', { read: TemplateRef }) content: TemplateRef<any> | undefined;
   public modal = inject(NgbModal);
-  public quickFixVM: QuickFixViewModel = null!;
-
-
-  @Input()
-  public set quickFixes(value: any[]) {
-    if (value != null) {
-      this._quickfixes.next(value);
-      this._quickfixMap = new Map(this._quickfixes.value.map(e => [e.name, this.getQuickFixItem(e)]));
-    }
-  }
-
-  private getQuickFixItem(item: QuickFixViewModel): QuickFixViewModel {
-    item.title = item.name.replace('QuickFix', '');
-    
-    return item;
-  }
-
-  public get quickFixes(): QuickFixViewModel[] {
-    return this._quickfixes.value;
-  }
 
   @Input()
   public set item(value: XmlDocItemViewModel) {
     if (value != null) {
       this._info.next(value);
-
       this._inspectionInfo.next(value as InspectionViewModel);
     }
   }
@@ -65,25 +44,16 @@ export class InspectionItemBoxComponent implements OnInit, OnChanges {
     return this._info.value;
   }
 
-  public getQuickFix(name: string): QuickFixViewModel {
-    if (this._quickfixMap) {
-      return this._quickfixMap.get(name)!;
-    }
-    return null!;
-  }
-
   public showDetailsModal(): void {
-    console.log(`Showing details for inspection: ${this.inspectionInfo.name}`);
-    this.modal.open(this.inspectionDetails);
+      this.api.getInspection(this.inspectionInfo.name).subscribe((inspection: InspectionViewModel) => {
+        this._inspectionInfo.next(inspection);
+        this.modal.open(this.inspectionDetails);
+      });
   }
 
   public showQuickFixModal(name: string): void {
-    this.quickFixVM = this.getQuickFix(name);
+    this.quickFixVM = this.inspectionInfo.quickFixes.find(e => e.title == name)!;
     this.modal.open(this.content)
-  }
-
-  public getQuickFixSummary(name: string): string {
-    return this.getQuickFix(name).summary;
   }
 
   isInspectionInfo: boolean = false;

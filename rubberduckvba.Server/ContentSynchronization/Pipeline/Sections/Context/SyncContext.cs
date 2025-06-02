@@ -21,7 +21,6 @@ public class SyncContext : IPipelineContext
     IRequestParameters IPipelineContext.Parameters => Parameters;
     public void LoadParameters(SyncRequestParameters parameters)
     {
-        InvalidContextParameterException.ThrowIfNull(nameof(parameters), parameters);
         _parameters = parameters;
         _staging = new StagingContext(parameters);
     }
