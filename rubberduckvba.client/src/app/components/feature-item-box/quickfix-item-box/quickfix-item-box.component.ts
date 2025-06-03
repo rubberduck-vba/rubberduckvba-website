@@ -44,7 +44,7 @@ export class QuickFixItemBoxComponent implements OnInit, OnChanges {
 
   public showDetailsModal(): void {
     console.log(`Showing details for QuickFix: ${this.quickFixInfo.name}`);
-    this.modal.open(this.QuickFixDetails);
+    this.modal.open(this.QuickFixDetails, { modalDialogClass: 'modal-xl' });
   }
 
   public get quickFixInfo(): QuickFixViewModelClass {

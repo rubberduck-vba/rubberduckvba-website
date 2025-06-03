@@ -47,7 +47,7 @@ export class InspectionItemBoxComponent implements OnInit, OnChanges {
   public showDetailsModal(): void {
       this.api.getInspection(this.inspectionInfo.name).subscribe((inspection: InspectionViewModel) => {
         this._inspectionInfo.next(inspection);
-        this.modal.open(this.inspectionDetails);
+        this.modal.open(this.inspectionDetails, { modalDialogClass: 'modal-xl'});
       });
   }
 

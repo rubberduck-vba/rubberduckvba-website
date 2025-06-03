@@ -44,7 +44,7 @@ export class AnnotationItemBoxComponent implements OnInit, OnChanges {
 
   public showDetailsModal(): void {
     console.log(`Showing details for annotation: ${this.annotationInfo.name}`);
-    this.modal.open(this.annotationDetails);
+    this.modal.open(this.annotationDetails, { modalDialogClass: this.annotationInfo.parameters.length > 0 || this.annotationInfo.examples.length > 0 ? 'modal-xl' : 'modal-l' });
   }
 
   public get annotationInfo(): AnnotationViewModel {
