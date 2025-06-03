@@ -120,7 +120,7 @@ public class CacheService
     public void Invalidate(QuickFixesFeatureViewModel newContent)
     {
         GetCurrentJobState();
-        if (XmldocJobState?.StateName == JobStateSucceeded)
+        if (!TryReadXmldocCache<QuickFixesFeatureViewModel>("quickfixes", out _) || XmldocJobState?.StateName == JobStateSucceeded)
         {
             Write("quickfixes", newContent);
             foreach (var item in newContent.QuickFixes)
@@ -136,7 +136,7 @@ public class CacheService
     public void Invalidate(AnnotationsFeatureViewModel newContent)
     {
         GetCurrentJobState();
-        if (XmldocJobState?.StateName == JobStateSucceeded)
+        if (!TryReadXmldocCache<AnnotationsFeatureViewModel>("annotations", out _) || XmldocJobState?.StateName == JobStateSucceeded)
         {
             Write("annotations", newContent);
             foreach (var item in newContent.Annotations)
@@ -154,27 +154,6 @@ public class CacheService
     {
         _cache.Clear();
         _logger.LogInformation("Cache was cleared.");
-    }
-
-    private bool IsTagsCacheValid() => IsCacheValid(TagsJobState, () => TagsJobState);
-
-    private bool IsXmldocCacheValid() => IsCacheValid(XmldocJobState, () => XmldocJobState);
-
-    /// <summary>
-    /// Side-effecting: 
-    /// </summary>
-    /// <param name="initial">The initial state before the check</param>
-    /// <param name="getCurrent">The current state after the check</param>
-    /// <returns></returns>
-    private bool IsCacheValid(HangfireJobState? initial, Func<HangfireJobState?> getCurrent)
-    {
-        GetCurrentJobState();
-        var current = getCurrent.Invoke();
-
-        return current is null
-            || (current.StateName == JobStateSucceeded // last executed job must have succeeded
-            && current.LastJobId == initial?.LastJobId // last executed job must be the same job ID we know about
-            && current.StateTimestamp == initial?.StateTimestamp); // same execution -> cache was not invalidated
     }
 
     private void Write<T>(string key, T value)

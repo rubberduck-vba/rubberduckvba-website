@@ -28,35 +28,35 @@
         </div>
  </div>
 
-<ng-template #inspectionDetails let-modal class="modal-xl">
+<ng-template #inspectionDetails let-modal>
     <div class="modal-header align-content-center">
         <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{inspectionInfo.title}}</h4>
         <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
     </div>
-    <div class="modal-body">
-        <div class="row">
-            <div class="text-start">
-                <div class="row">
-                    <div>
-                        <h6>
-                            <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{inspectionInfo.inspectionType}}
-                        </h6>
-                        <p class="small text-black-50">{{inspectionTypeTitle}}</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div>
-                        Default Severity: <strong>{{inspectionInfo.defaultSeverity}}</strong>&nbsp;<span ngClass="{{severityIconClass}}"></span>
-                        <p class="small text-black-50">{{severityTitle}}</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-11 ms-2">
-                        <div class="bg-light rounded-4 px-3 pt-2 pb-1">
-                            <p class="fw-medium" [innerHtml]="inspectionInfo.summary"></p>
-                        </div>
+    <div class="modal-body my-2 mx-4">
+        <div class="row text-start">
+                <div class="col-6">
+                    <div class="">
+                        <strong class="fw-medium" [innerHtml]="inspectionInfo.summary"></strong>
+                        <h6>Reasoning</h6>
                         <p [innerHtml]="inspectionInfo.reasoning"></p>
                     </div>
+                </div>
+                <div class="col-6">
+                    <div>
+                        <h6>Inspection Type</h6>
+                        <strong>
+                            <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{inspectionInfo.inspectionType}}
+                        </strong>
+                        <p class="small text-black-50">{{inspectionTypeTitle}}</p>
+                    </div>
+                    <hr />
+                    <div>
+                        <h6>Default Severity</h6>
+                        <span ngClass="{{severityIconClass}}"></span>&nbsp;<strong>{{inspectionInfo.defaultSeverity}}</strong>
+                        <p class="small text-black-50">{{severityTitle}}</p>
+                    </div>
+                    <hr />
                 </div>
                 <div *ngIf="(inspectionInfo.hostApp?.length ?? 0) > 0" class="row">
                     <div>
@@ -101,7 +101,6 @@
                         </ul>
                     </div>
                 </div>
-            </div>
         </div>
 
         <div *ngIf="inspectionInfo.examples && inspectionInfo.examples.length > 0"
@@ -134,6 +133,6 @@
         <div class="small text-muted text-center">
             <a href="{{inspectionInfo.getGitHubViewLink()}}">View</a> | <a href="{{inspectionInfo.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
         </div>
-        <a href="/inspections/{{inspectionInfo.name}}" class="btn btn-expand" title="Expand to page"><fa-icon [icon]="['fas', 'expand']"></fa-icon></a>
+        <a href="/inspections/{{inspectionInfo.name}}" class="btn btn-expand" title="Expand to page"><fa-icon [icon]="['fas', 'expand']"></fa-icon>&nbsp;View page</a>
     </div>
 </ng-template>
