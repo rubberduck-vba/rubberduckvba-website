@@ -7,6 +7,7 @@ using rubberduckvba.Server.Services;
 namespace rubberduckvba.Server.Api.Admin;
 
 [ApiController]
+[EnableCors(CorsPolicies.AllowAll)]
 public class AdminController(ConfigurationOptions options, HangfireLauncherService hangfire, CacheService cache) : ControllerBase
 {
     /// <summary>
@@ -14,7 +15,6 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
     [Authorize("github")]
-    [EnableCors(CorsPolicies.AllowAuthenticated)]
     [HttpPost("admin/update/xmldoc")]
     public IActionResult UpdateXmldocContent()
     {
@@ -27,7 +27,6 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
     [Authorize("github")]
-    [EnableCors(CorsPolicies.AllowAuthenticated)]
     [HttpPost("admin/update/tags")]
     public IActionResult UpdateTagMetadata()
     {
@@ -36,7 +35,6 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     }
 
     [Authorize("github")]
-    [EnableCors(CorsPolicies.AllowAuthenticated)]
     [HttpPost("admin/cache/clear")]
     public IActionResult ClearCache()
     {
@@ -46,7 +44,6 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
 
 #if DEBUG
     [AllowAnonymous]
-    [EnableCors(CorsPolicies.AllowAll)]
     [HttpGet("admin/config/current")]
     public IActionResult Config()
     {

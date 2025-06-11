@@ -10,6 +10,10 @@ export interface ViewModel {
   isDetailsCollapsed: boolean;
 }
 
+export interface MarkdownContent {
+  content: string;
+}
+
 export interface SubFeatureViewModel extends ViewModel {
   featureId?: number;
   featureName?: string;
@@ -270,6 +274,18 @@ export class SubFeatureViewModelClass extends ViewModelBase implements SubFeatur
     this.featureId = model.featureId;
     this.featureName = model.featureName;
   }
+}
+
+export class EditSubFeatureViewModelClass extends SubFeatureViewModelClass {
+  constructor(model: SubFeatureViewModel) {
+    super(model);
+    this.isDetailsCollapsed = false;
+    this.descriptionPreview = model.description;
+    this.shortDescription = (model as FeatureViewModel)?.shortDescription;
+  }
+
+  public descriptionPreview: string;
+  public shortDescription?: string;
 }
 
 export class InspectionViewModelClass extends SubFeatureViewModelClass implements InspectionViewModel {

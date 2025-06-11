@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApiClientService } from "../../services/api-client.service";
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -9,7 +9,7 @@ import { FeatureViewModel, QuickFixViewModel } from '../../model/feature.model';
   selector: 'app-features',
   templateUrl: './features.component.html',
 })
-export class FeaturesComponent implements OnInit, OnChanges {
+export class FeaturesComponent implements OnInit {
 
   private readonly _features: BehaviorSubject<FeatureViewModel[]> = new BehaviorSubject<FeatureViewModel[]>(null!);
   public set features(value: FeatureViewModel[]) {
@@ -19,17 +19,8 @@ export class FeaturesComponent implements OnInit, OnChanges {
     return this._features.getValue();
   }
 
-  private readonly _quickFixes: BehaviorSubject<QuickFixViewModel[]> = new BehaviorSubject<QuickFixViewModel[]>(null!);
-  public get quickFixes(): QuickFixViewModel[] {
-    return this._quickFixes.value;
-  }
-
   constructor(private api: ApiClientService, private fa: FaIconLibrary) {
     fa.addIconPacks(fas);
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
   }
 
   ngOnInit(): void {

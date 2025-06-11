@@ -9,8 +9,14 @@ using rubberduckvba.Server.Services.rubberduckdb;
 
 namespace rubberduckvba.Server.Api.Features;
 
+public class MarkdownContentViewModel
+{
+    public string Content { get; init; } = string.Empty;
+}
+
 
 [AllowAnonymous]
+[EnableCors(CorsPolicies.AllowAll)]
 public class FeaturesController : RubberduckApiController
 {
     private readonly CacheService cache;
@@ -18,8 +24,9 @@ public class FeaturesController : RubberduckApiController
     private readonly FeatureServices features;
     private readonly IRepository<TagAssetEntity> assetsRepository;
     private readonly IRepository<TagEntity> tagsRepository;
+    private readonly IMarkdownFormattingService markdownService;
 
-    public FeaturesController(CacheService cache, IRubberduckDbService db, FeatureServices features,
+    public FeaturesController(CacheService cache, IRubberduckDbService db, FeatureServices features, IMarkdownFormattingService markdownService,
         IRepository<TagAssetEntity> assetsRepository, IRepository<TagEntity> tagsRepository, ILogger<FeaturesController> logger)
         : base(logger)
     {
@@ -28,6 +35,7 @@ public class FeaturesController : RubberduckApiController
         this.features = features;
         this.assetsRepository = assetsRepository;
         this.tagsRepository = tagsRepository;
+        this.markdownService = markdownService;
     }
 
     private static RepositoryOptionViewModel[] RepositoryOptions { get; } =
@@ -38,8 +46,6 @@ public class FeaturesController : RubberduckApiController
             .ContinueWith(t => t.Result.Select(e => new FeatureOptionViewModel { Id = e.Id, Name = e.Name, Title = e.Title }).ToArray());
 
     [HttpGet("features")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult Index()
     {
         return GuardInternalAction(() =>
@@ -68,8 +74,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("features/{name}")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult Info([FromRoute] string name)
     {
         return GuardInternalAction(() =>
@@ -85,8 +89,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("inspections/{name}")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult Inspection([FromRoute] string name)
     {
         return GuardInternalAction(() =>
@@ -107,8 +109,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("annotations/{name}")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult Annotation([FromRoute] string name)
     {
         return GuardInternalAction(() =>
@@ -129,8 +129,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("quickfixes/{name}")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult QuickFix([FromRoute] string name)
     {
         return GuardInternalAction(() =>
@@ -151,7 +149,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("features/create")]
-    [EnableCors(CorsPolicies.AllowAuthenticated)]
     [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromQuery] RepositoryId repository = RepositoryId.Rubberduck, [FromQuery] int? parentId = default)
     {
@@ -163,7 +160,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpPost("create")]
-    [EnableCors(CorsPolicies.AllowAuthenticated)]
     [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromBody] FeatureEditViewModel model)
     {
@@ -179,14 +175,14 @@ public class FeaturesController : RubberduckApiController
         }
 
         var feature = model.ToFeature();
-        var result = await db.SaveFeature(feature);
 
+        var result = await db.SaveFeature(feature);
         var features = await GetFeatureOptions(model.RepositoryId);
+
         return Ok(new FeatureEditViewModel(result, features, RepositoryOptions));
     }
 
     [HttpPost("features/update")]
-    [EnableCors(CorsPolicies.AllowAuthenticated)]
     [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Update([FromBody] FeatureEditViewModel model)
     {
@@ -201,10 +197,23 @@ public class FeaturesController : RubberduckApiController
             return BadRequest("Model is invalid for this endpoint.");
         }
 
-        var result = await db.SaveFeature(model.ToFeature());
+        var feature = model.ToFeature();
+
+        var result = await db.SaveFeature(feature);
         var features = await GetFeatureOptions(model.RepositoryId);
 
         return new FeatureEditViewModel(result, features, RepositoryOptions);
+    }
+
+    [HttpPost("markdown/format")]
+    public MarkdownContentViewModel FormatMarkdown([FromBody] MarkdownContentViewModel model)
+    {
+        var markdown = model.Content;
+        var formatted = markdownService.FormatMarkdownDocument(markdown, withSyntaxHighlighting: true);
+        return new MarkdownContentViewModel
+        {
+            Content = formatted
+        };
     }
 
     private InspectionsFeatureViewModel GetInspections()
@@ -274,5 +283,4 @@ public class FeaturesController : RubberduckApiController
 
         return result;
     }
-
 }

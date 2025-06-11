@@ -35,7 +35,6 @@ public class HangfireAuthenticationFilter : IDashboardAuthorizationFilter
 public static class CorsPolicies
 {
     public const string AllowAll = "AllowAll";
-    public const string AllowAuthenticated = "AllowAuthenticated";
 }
 
 public class Program
@@ -57,17 +56,9 @@ public class Program
             {
                 policy
                     .SetIsOriginAllowed(origin => true)
+                    .WithMethods("OPTIONS", "GET", "POST")
                     .AllowAnyHeader()
-                    .WithMethods("OPTIONS", "GET", "POST")
-                    .Build();
-            });
-            builder.AddPolicy(CorsPolicies.AllowAuthenticated, policy =>
-            {
-                policy
-                    .SetIsOriginAllowed(origin => true)
-                    .WithHeaders("X-ACCESS-TOKEN")
-                    .WithMethods("OPTIONS", "GET", "POST")
-                    .AllowCredentials()
+                    .AllowAnyOrigin()
                     .Build();
             });
         });

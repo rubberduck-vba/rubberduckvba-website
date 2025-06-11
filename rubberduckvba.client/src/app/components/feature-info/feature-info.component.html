@@ -4,6 +4,9 @@
         <p *ngIf="(feature?.featureId) && feature?.featureId != 0"><a href="/">Home</a>▸<a href="/features">Features</a>▸<a href="/features/{{feature?.featureName}}">{{feature?.featureName}}</a>▸</p>
         <div [ngClass]="(feature?.name != 'CodeInspections' && feature?.name != 'CommentAnnotations') && (!links || links.length == 0) ? 'col-12' : 'col-lg-8'">
             <h2>{{feature?.title}}</h2>
+            <div *ngIf="feature && user?.isAdmin">
+                <edit-feature [feature]="feature" [action]="editAction"></edit-feature>
+            </div>
             <p [innerHtml]="feature?.description"></p>
         </div>
         <div [ngClass]="(feature?.name != 'CodeInspections' && feature?.name != 'CommentAnnotations') && (!links || links.length == 0) ? 'col-12' : 'col-lg-4'">
@@ -34,6 +37,7 @@
 
     <!-- subfeatures -->
     <div *ngIf="feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0" class="col-12">
+        <edit-feature *ngIf="!feature.featureId && user?.isAdmin" [feature]="feature" [action]="createAction"></edit-feature>
         <div *ngFor="let subFeature of subfeatures">
             <feature-box *ngIf="!feature.isHidden && !(subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [hasOwnDetailsPage]="false"></feature-box>
         </div>

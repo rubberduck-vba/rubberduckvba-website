@@ -160,7 +160,7 @@ public class RubberduckDbService : IRubberduckDbService
     {
         var features = _featureServices.Get(topLevelOnly: false).ToList();
         var feature = features.Single(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
-        var children = features.Where(e => e.FeatureId == feature.Id);
+        var children = features.Where(e => e.ParentId == feature.Id);
         return new FeatureGraph(feature.ToEntity())
         {
             Features = children.ToArray()

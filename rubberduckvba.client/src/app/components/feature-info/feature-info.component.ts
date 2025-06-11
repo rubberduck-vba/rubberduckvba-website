@@ -1,17 +1,24 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { AnnotationViewModel, AnnotationsFeatureViewModel, BlogLink, FeatureViewModel, InspectionViewModel, InspectionsFeatureViewModel, QuickFixViewModel, QuickFixesFeatureViewModel, SubFeatureViewModel, XmlDocItemViewModel, XmlDocOrFeatureViewModel, XmlDocViewModel } from '../../model/feature.model';
+import { AnnotationViewModel, AnnotationsFeatureViewModel, BlogLink, FeatureViewModel, InspectionViewModel, InspectionsFeatureViewModel, QuickFixViewModel, QuickFixesFeatureViewModel, SubFeatureViewModel, UserViewModel, XmlDocItemViewModel, XmlDocOrFeatureViewModel, XmlDocViewModel } from '../../model/feature.model';
 import { BehaviorSubject } from 'rxjs';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { ApiClientService } from '../../services/api-client.service';
+import { AuthService } from '../../services/auth.service';
+import { AdminAction } from '../edit-feature/edit-feature.component';
 
 @Component({
   selector: 'feature-info',
   templateUrl: './feature-info.component.html',
 })
-export class FeatureInfoComponent implements OnInit, OnChanges {
+export class FeatureInfoComponent implements OnInit {
 
   private readonly _info: BehaviorSubject<XmlDocOrFeatureViewModel> = new BehaviorSubject<XmlDocOrFeatureViewModel>(null!);
+  private readonly _user: BehaviorSubject<UserViewModel> = new BehaviorSubject<UserViewModel>(null!);
+
+  public editAction: AdminAction = AdminAction.Edit;
+  public createAction: AdminAction = AdminAction.Create;
+  public deleteAction: AdminAction = AdminAction.Delete;
 
   public filterState = {
     // searchbox
@@ -68,20 +75,25 @@ export class FeatureInfoComponent implements OnInit, OnChanges {
     return feature?.links ?? [];
   }
 
-  constructor(private api: ApiClientService, private fa: FaIconLibrary) {
+  public get user(): UserViewModel {
+    return this._user.getValue();
+  }
+
+  constructor(private auth: AuthService, private api: ApiClientService, private fa: FaIconLibrary) {
     fa.addIconPacks(fas);
   }
 
   ngOnInit(): void {
+    this.auth.getUser().subscribe(result => {
+      if (result) {
+        this._user.next(result as UserViewModel);
+      }
+    });
     this.api.getFeature('quickfixes').subscribe(result => {
       if (result) {
         this._quickfixes.next((result as QuickFixesFeatureViewModel).quickFixes.slice());
       }
     });
-  }
-
-
-  ngOnChanges(changes: SimpleChanges): void {
   }
 
   public onFilter(): void {

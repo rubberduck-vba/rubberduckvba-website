@@ -29,5 +29,14 @@
                 </div>
             </div>
         </div>
+        <div *ngIf="feature && user && user.isAdmin" class="card-footer">
+            <div class="row text-end text-muted">
+                <div class="col-12">
+                    <edit-feature [feature]="feature" [action]="editAction" (onApplyChanges)="applyChanges"></edit-feature>
+                    <edit-feature *ngIf="!hasOwnDetailsPage" [feature]="feature" [action]="editDetailsAction" (onApplyChanges)="applyChanges"></edit-feature>
+                    <edit-feature *ngIf="!isProtected" [feature]="feature" [action]="deleteAction"></edit-feature>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

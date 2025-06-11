@@ -26,6 +26,8 @@ import { AnnotationItemBoxComponent } from './components/feature-item-box/annota
 import { BlogLinkBoxComponent } from './components/blog-link-box/blog-link-box.component';
 import { QuickFixItemBoxComponent } from './components/feature-item-box/quickfix-item-box/quickfix-item-box.component';
 
+import { EditFeatureComponent } from './components/edit-feature/edit-feature.component';
+
 import { HomeComponent } from './routes/home/home.component';
 import { AboutComponent } from './routes/about/about.component';
 import { FeaturesComponent } from './routes/features/features.component';
@@ -78,7 +80,8 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     InspectionComponent,
     AnnotationComponent,
     QuickFixComponent,
-    AboutComponent
+    AboutComponent,
+    EditFeatureComponent
   ],
   bootstrap: [AppComponent],
   imports: [

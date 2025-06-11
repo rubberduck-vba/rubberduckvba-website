@@ -15,7 +15,7 @@ public class FeatureServices(
     public IEnumerable<Feature> Get(bool topLevelOnly = true)
     {
         return featureRepository.GetAll()
-            .Where(e => !topLevelOnly || e.FeatureId is null)
+            .Where(e => !topLevelOnly || e.ParentId is null)
             .Select(e => new Feature(e));
     }
 

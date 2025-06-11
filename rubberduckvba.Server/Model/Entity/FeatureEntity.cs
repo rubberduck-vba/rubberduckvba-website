@@ -4,7 +4,7 @@ namespace rubberduckvba.Server.Model.Entity;
 
 public record class FeatureEntity : Entity
 {
-    public int? FeatureId { get; init; }
+    public int? ParentId { get; init; }
     public string FeatureName { get; init; } = default!;
     public int RepositoryId { get; init; }
     public string Title { get; init; } = default!;

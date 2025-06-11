@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { LatestTags, Tag } from "../model/tags.model";
-import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, UserViewModel, XmlDocOrFeatureViewModel } from "../model/feature.model";
+import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, MarkdownContent, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, UserViewModel, XmlDocOrFeatureViewModel } from "../model/feature.model";
 import { DownloadInfo } from "../model/downloads.model";
 import { DataService } from "./data.service";
 import { environment } from "../../environments/environment.prod";
@@ -81,5 +81,23 @@ export class ApiClientService {
       model.indentedCode = lines.join('\n');
       return model;
     }));
+  }
+
+  public saveFeature(model: SubFeatureViewModel): Observable<SubFeatureViewModel> {
+    const url = `${environment.apiBaseUrl}features/update`;
+    return this.data.postAsync<SubFeatureViewModel, SubFeatureViewModel>(url, model).pipe(map(result => new SubFeatureViewModelClass(result as SubFeatureViewModel)));
+  }
+
+  public deleteFeature(model: SubFeatureViewModel): Observable<SubFeatureViewModel> {
+    const url = `${environment.apiBaseUrl}features/delete`;
+    return this.data.postAsync<SubFeatureViewModel, undefined>(url, model).pipe(map(() => model));
+  }
+
+  public formatMarkdown(raw: string): Observable<MarkdownContent> {
+    const url = `${environment.apiBaseUrl}markdown/format`;
+    const content: MarkdownContent = {
+      content: raw
+    };
+    return this.data.postAsync<MarkdownContent, MarkdownContent>(url, content);
   }
 }
