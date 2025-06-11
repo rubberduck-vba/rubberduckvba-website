@@ -21,6 +21,7 @@ export interface SubFeatureViewModel extends ViewModel {
 
   title: string;
   description: string;
+  shortDescription?: string | undefined;
 }
 
 export interface XmlDocViewModel extends SubFeatureViewModel {
@@ -265,11 +266,13 @@ export class SubFeatureViewModelClass extends ViewModelBase implements SubFeatur
   featureTitle?: string | undefined;
   title: string;
   description: string;
+  shortDescription?: string | undefined;
 
   constructor(model: SubFeatureViewModel) {
     super(model);
     this.title = model.title;
     this.description = model.description;
+    this.shortDescription = model.shortDescription;
     this.isDetailsCollapsed = true;
     this.featureId = model.featureId;
     this.featureName = model.featureName;
@@ -281,11 +284,9 @@ export class EditSubFeatureViewModelClass extends SubFeatureViewModelClass {
     super(model);
     this.isDetailsCollapsed = false;
     this.descriptionPreview = model.description;
-    this.shortDescription = (model as FeatureViewModel)?.shortDescription;
   }
 
   public descriptionPreview: string;
-  public shortDescription?: string;
 }
 
 export class InspectionViewModelClass extends SubFeatureViewModelClass implements InspectionViewModel {

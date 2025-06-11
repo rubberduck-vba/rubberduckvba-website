@@ -24,6 +24,7 @@ export class EditFeatureComponent implements OnInit, OnChanges {
   private _action: AdminAction = AdminAction.Create;
 
   @ViewChild('editModal', { read: TemplateRef }) editModal: TemplateRef<any> | undefined;
+  @ViewChild('createModal', { read: TemplateRef }) createModal: TemplateRef<any> | undefined;
   @ViewChild('deleteModal', { read: TemplateRef }) deleteModal: TemplateRef<any> | undefined;
 
   public modal = inject(NgbModal);
@@ -52,6 +53,8 @@ export class EditFeatureComponent implements OnInit, OnChanges {
   public onApplyChanges = new EventEmitter<SubFeatureViewModel>();
 
 
+  public subfeature: EditSubFeatureViewModelClass = null!;
+
   constructor(private fa: FaIconLibrary, private api: ApiClientService) {
     fa.addIconPacks(fas);
   }
@@ -63,29 +66,68 @@ export class EditFeatureComponent implements OnInit, OnChanges {
   }
 
   public doAction(): void {
-    const localModal = this.action == 'delete' ? this.deleteModal : this.editModal;
+    const localModal = this.action == 'delete' ? this.deleteModal
+                      : this.action == 'create' ? this.createModal
+                      : this.editModal;
     const size = this.action == 'delete' ? 'modal-m' : 'modal-xl';
+
+    if (this.action == 'create') {
+      const parentId = this.feature.id;
+      const parentName = this.feature.name;
+      const parentTitle = this.feature.title;
+
+      this.subfeature = new EditSubFeatureViewModelClass({
+        dateInserted: '',
+        dateUpdated: '',
+        description: '',
+        id: 0,
+        isHidden: false,
+        isNew: false,
+        name: 'NewFeature1',
+        title: 'New Feature',
+        featureId: parentId,
+        featureName: parentName,
+        featureTitle: parentTitle,
+        isCollapsed: false,
+        isDetailsCollapsed: true,
+      });
+    }
+
     this.modal.open(localModal, { modalDialogClass: size });
   }
 
   public onConfirmChanges(): void {
     this.modal.dismissAll();
     this.api.saveFeature(this.feature).subscribe(saved => {
-      this._feature.next(new EditSubFeatureViewModelClass(saved));
-      this.onApplyChanges.emit(saved)
+      window.location.reload();
+    });
+  }
+
+  public onConfirmCreate(): void {
+    this.modal.dismissAll();
+    this.api.saveFeature(this.subfeature).subscribe(saved => {
+      window.location.reload();
     });
   }
 
   public onPreviewDescription(): void {
-    this.api.formatMarkdown(this.feature.description).subscribe((formatted: MarkdownContent) => {
-      this.feature.descriptionPreview = formatted.content;
+    const raw = this.action == 'create'
+      ? this.subfeature.description
+      : this.feature.description;
+    this.api.formatMarkdown(raw).subscribe((formatted: MarkdownContent) => {
+      if (this.action == 'create') {
+        this.subfeature.descriptionPreview = formatted.content;
+      }
+      else {
+        this.feature.descriptionPreview = formatted.content;
+      }
     });
   }
 
   public onDeleteFeature(): void {
     this.modal.dismissAll();
     this.api.deleteFeature(this.feature).subscribe(() => {
-      this._feature.next(new EditSubFeatureViewModelClass(null!));
+      window.location.reload();
     });
   }
 }
