@@ -83,6 +83,11 @@ export class ApiClientService {
     }));
   }
 
+  public createFeature(model: SubFeatureViewModel): Observable<SubFeatureViewModel> {
+    const url = `${environment.apiBaseUrl}features/create`;
+    return this.data.postAsync<SubFeatureViewModel, SubFeatureViewModel>(url, model).pipe(map(result => new SubFeatureViewModelClass(result as SubFeatureViewModel)));
+  }
+
   public saveFeature(model: SubFeatureViewModel): Observable<SubFeatureViewModel> {
     const url = `${environment.apiBaseUrl}features/update`;
     return this.data.postAsync<SubFeatureViewModel, SubFeatureViewModel>(url, model).pipe(map(result => new SubFeatureViewModelClass(result as SubFeatureViewModel)));

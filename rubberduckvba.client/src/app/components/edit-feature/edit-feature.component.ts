@@ -80,11 +80,12 @@ export class EditFeatureComponent implements OnInit, OnChanges {
         dateInserted: '',
         dateUpdated: '',
         description: '',
-        id: 0,
+        id: undefined,
         isHidden: false,
         isNew: false,
         name: 'NewFeature1',
         title: 'New Feature',
+        shortDescription: '',
         featureId: parentId,
         featureName: parentName,
         featureTitle: parentTitle,
@@ -105,7 +106,7 @@ export class EditFeatureComponent implements OnInit, OnChanges {
 
   public onConfirmCreate(): void {
     this.modal.dismissAll();
-    this.api.saveFeature(this.subfeature).subscribe(saved => {
+    this.api.createFeature(this.subfeature).subscribe(saved => {
       window.location.reload();
     });
   }

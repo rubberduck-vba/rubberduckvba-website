@@ -1,5 +1,5 @@
 export interface ViewModel {
-  id: number;
+  id: number | undefined;
   dateInserted: string;
   dateUpdated: string;
   name: string;
@@ -21,7 +21,7 @@ export interface SubFeatureViewModel extends ViewModel {
 
   title: string;
   description: string;
-  shortDescription?: string | undefined;
+  shortDescription: string;
 }
 
 export interface XmlDocViewModel extends SubFeatureViewModel {
@@ -190,7 +190,7 @@ export interface AnnotationViewModel extends XmlDocViewModel {
 export type XmlDocItemViewModel = InspectionViewModel | QuickFixViewModel | AnnotationViewModel;
 
 export class ViewModelBase implements ViewModel {
-  id: number;
+  id: number | undefined;
   dateInserted: string;
   dateUpdated: string;
   name: string;
@@ -266,7 +266,7 @@ export class SubFeatureViewModelClass extends ViewModelBase implements SubFeatur
   featureTitle?: string | undefined;
   title: string;
   description: string;
-  shortDescription?: string | undefined;
+  shortDescription: string;
 
   constructor(model: SubFeatureViewModel) {
     super(model);

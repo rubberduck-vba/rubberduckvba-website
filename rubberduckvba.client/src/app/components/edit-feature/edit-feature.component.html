@@ -40,8 +40,8 @@
             </div>
             <div class="row">
                 <span *ngIf="action == 'edit'" class="text-small text-muted text-end">{{feature.description.length}}</span>
-                <span *ngIf="action == 'summary'" class="text-small text-muted text-end">{{feature.shortDescription?.length ?? 0}}</span>
-            </div>
+                <span *ngIf="action == 'summary'" class="text-small text-muted text-end">{{feature.shortDescription.length}}</span>
+            </div>x
             <div *ngIf="action == 'edit'">
                 <hr />
                 <button type="button" class="btn btn-outline-secondary mb-2" (click)="onPreviewDescription()">

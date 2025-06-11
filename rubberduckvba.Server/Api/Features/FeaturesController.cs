@@ -159,7 +159,7 @@ public class FeaturesController : RubberduckApiController
         return Ok(model);
     }
 
-    [HttpPost("create")]
+    [HttpPost("features/create")]
     [Authorize("github")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromBody] FeatureEditViewModel model)
     {
@@ -168,7 +168,7 @@ public class FeaturesController : RubberduckApiController
             return BadRequest("Model is invalid for this endpoint.");
         }
 
-        var existing = await db.ResolveFeature(model.RepositoryId, model.Name);
+        var existing = await db.GetFeatureId(model.RepositoryId, model.Name);
         if (existing != null)
         {
             return BadRequest($"Model [Name] must be unique; feature '{model.Name}' already exists.");
@@ -204,6 +204,8 @@ public class FeaturesController : RubberduckApiController
 
         return new FeatureEditViewModel(result, features, RepositoryOptions);
     }
+
+
 
     [HttpPost("markdown/format")]
     public MarkdownContentViewModel FormatMarkdown([FromBody] MarkdownContentViewModel model)

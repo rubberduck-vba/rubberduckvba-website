@@ -11,7 +11,7 @@ public class FeatureServices(
     IRepository<QuickFixEntity> quickfixRepository,
     IRepository<AnnotationEntity> annotationRepository)
 {
-    public int GetId(string name) => featureRepository.GetId(name);
+    public int? GetId(string name) => featureRepository.TryGetId(name, out var id) ? id : null;
     public IEnumerable<Feature> Get(bool topLevelOnly = true)
     {
         return featureRepository.GetAll()

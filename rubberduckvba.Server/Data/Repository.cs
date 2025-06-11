@@ -9,6 +9,7 @@ namespace rubberduckvba.Server.Data;
 
 public interface IRepository<TEntity> where TEntity : Entity
 {
+    bool TryGetId(string name, out int id);
     int GetId(string name);
     TEntity GetById(int id);
     IEnumerable<TEntity> GetAll();
@@ -70,6 +71,20 @@ public abstract class Repository<TEntity> : QueryableRepository<TEntity>, IRepos
         ParentFKColumnName is null || !parentId.HasValue
             ? GetAll()
             : Query(db => db.Query<TEntity>($"{SelectSql} WHERE a.[{ParentFKColumnName}]=@parentId", new { parentId }));
+
+    public virtual bool TryGetId(string name, out int id)
+    {
+        id = default;
+
+        var result = Get(db => db.QuerySingleOrDefault<int?>($"SELECT [Id] FROM [dbo].[{TableName}] WHERE [Name]=@name", new { name }));
+        if (result.HasValue)
+        {
+            id = result.Value;
+            return true;
+        }
+
+        return false;
+    }
 
     public virtual int GetId(string name) => Get(db => db.QuerySingle<int>($"SELECT [Id] FROM [dbo].[{TableName}] WHERE [Name]=@name", new { name }));
     public virtual TEntity GetById(int id) => Get(db => db.QuerySingle<TEntity>(SelectSql + " WHERE a.[Id]=@id", new { id }));
