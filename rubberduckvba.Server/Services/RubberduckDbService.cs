@@ -69,6 +69,7 @@ public interface IRubberduckDbService
     Task<FeatureGraph> ResolveFeature(RepositoryId repositoryId, string name);
     Task<int?> GetFeatureId(RepositoryId repositoryId, string name);
     Task<Feature> SaveFeature(Feature feature);
+    Task DeleteFeature(int id);
 }
 
 public class RubberduckDbService : IRubberduckDbService
@@ -236,6 +237,11 @@ public class RubberduckDbService : IRubberduckDbService
 
         //        Logger.LogInformation(nameof(ResolveFeature) + " | All SELECT operations completed | ⏱️ {elapsed}", sw.Elapsed);
         //        return graph;
+    }
+
+    public async Task DeleteFeature(int id)
+    {
+        _featureServices.DeleteFeature(id);
     }
 
     public async Task<Feature> SaveFeature(Feature feature)

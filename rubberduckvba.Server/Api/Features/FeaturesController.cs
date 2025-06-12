@@ -168,8 +168,8 @@ public class FeaturesController : RubberduckApiController
             return BadRequest("Model is invalid for this endpoint.");
         }
 
-        var existing = await db.GetFeatureId(model.RepositoryId, model.Name);
-        if (existing != null)
+        var existingId = await db.GetFeatureId(model.RepositoryId, model.Name);
+        if (existingId != null)
         {
             return BadRequest($"Model [Name] must be unique; feature '{model.Name}' already exists.");
         }
@@ -191,8 +191,8 @@ public class FeaturesController : RubberduckApiController
             return BadRequest("Model is invalid for this endpoint.");
         }
 
-        var existing = await db.ResolveFeature(model.RepositoryId, model.Name);
-        if (existing is null)
+        var existingId = await db.GetFeatureId(model.RepositoryId, model.Name);
+        if (existingId is null)
         {
             return BadRequest("Model is invalid for this endpoint.");
         }
@@ -205,7 +205,22 @@ public class FeaturesController : RubberduckApiController
         return new FeatureEditViewModel(result, features, RepositoryOptions);
     }
 
+    [HttpPost("features/delete")]
+    [Authorize("github")]
+    public async Task Delete([FromBody] IFeature model)
+    {
+        if (model.Id == default)
+        {
+            throw new ArgumentException("Model is invalid for this endpoint.");
+        }
+        var existingId = await db.GetFeatureId(RepositoryId.Rubberduck, model.Name);
+        if (existingId is null)
+        {
+            throw new ArgumentException("Model is invalid for this endpoint.");
+        }
 
+        await db.DeleteFeature(existingId.Value);
+    }
 
     [HttpPost("markdown/format")]
     public MarkdownContentViewModel FormatMarkdown([FromBody] MarkdownContentViewModel model)

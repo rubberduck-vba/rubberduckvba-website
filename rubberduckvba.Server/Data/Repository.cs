@@ -18,6 +18,7 @@ public interface IRepository<TEntity> where TEntity : Entity
     IEnumerable<TEntity> Insert(IEnumerable<TEntity> entities);
     void Update(TEntity entity);
     void Update(IEnumerable<TEntity> entities);
+    void Delete(int id);
 }
 
 public abstract class QueryableRepository<T> where T : class
@@ -88,6 +89,18 @@ public abstract class Repository<TEntity> : QueryableRepository<TEntity>, IRepos
 
     public virtual int GetId(string name) => Get(db => db.QuerySingle<int>($"SELECT [Id] FROM [dbo].[{TableName}] WHERE [Name]=@name", new { name }));
     public virtual TEntity GetById(int id) => Get(db => db.QuerySingle<TEntity>(SelectSql + " WHERE a.[Id]=@id", new { id }));
+
+    public virtual void Delete(int id)
+    {
+        using var db = new SqlConnection(ConnectionString);
+        db.Open();
+
+        using var transaction = db.BeginTransaction();
+        db.Execute($"DELETE FROM [dbo].[{TableName}] WHERE [Id]=@id", new { id }, transaction);
+
+        transaction.Commit();
+    }
+
     public virtual TEntity Insert(TEntity entity) => Insert([entity]).Single();
     public virtual IEnumerable<TEntity> Insert(IEnumerable<TEntity> entities)
     {

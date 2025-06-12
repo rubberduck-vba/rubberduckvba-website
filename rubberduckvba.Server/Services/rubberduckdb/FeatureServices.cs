@@ -94,4 +94,6 @@ public class FeatureServices(
     public void Insert(IEnumerable<Inspection> inspections) => inspectionRepository.Insert(inspections.Select(inspection => inspection.ToEntity()));
     public void Insert(IEnumerable<QuickFix> quickFixes) => quickfixRepository.Insert(quickFixes.Select(quickfix => quickfix.ToEntity()));
     public void Insert(IEnumerable<Annotation> annotations) => annotationRepository.Insert(annotations.Select(annotation => annotation.ToEntity()));
+
+    public void DeleteFeature(int id) => featureRepository.Delete(id);
 }

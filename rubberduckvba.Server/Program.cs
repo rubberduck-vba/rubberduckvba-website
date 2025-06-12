@@ -3,6 +3,7 @@ using Hangfire.Annotations;
 using Hangfire.Dashboard;
 using Hangfire.SqlServer;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using NLog.Config;
 using NLog.Extensions.Logging;
@@ -226,6 +227,7 @@ public class Program
         services.AddSingleton<CacheService>();
 
         services.AddSession(ConfigureSession);
+        services.AddSingleton<IMemoryCache>(provider => new MemoryCache(new MemoryCacheOptions(), provider.GetRequiredService<ILoggerFactory>()));
     }
 
     private static void ConfigureLogging(IServiceCollection services)
