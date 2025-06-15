@@ -203,7 +203,7 @@ public class ContextAlreadyInitializedException : InvalidOperationException
     {
         if (values.Any(e => e != null))
         {
-            throw new ContextAlreadyInitializedException();
+            //throw new ContextAlreadyInitializedException();
         }
     }
 }

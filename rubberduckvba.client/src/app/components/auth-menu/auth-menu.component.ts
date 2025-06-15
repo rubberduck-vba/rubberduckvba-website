@@ -70,7 +70,7 @@ export class AuthMenuComponent implements OnInit {
 
   public auditsCountIconClass(): string {
     if (this.pendingAudits == 0) {
-      return 'text-success disabled';
+      return 'text-success';
     }
     else {
       return 'text-danger';

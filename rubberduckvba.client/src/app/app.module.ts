@@ -40,6 +40,7 @@ import { IndenterComponent } from './routes/indenter/indenter.component';
 import { DefaultUrlSerializer, UrlTree } from '@angular/router';
 import { AuthComponent } from './routes/auth/auth.component';
 import { AuthMenuComponent } from './components/auth-menu/auth-menu.component';
+import { AuditsAdminComponent } from './routes/audits/audits.component';
 
 /**
  * https://stackoverflow.com/a/39560520
@@ -61,6 +62,7 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     HomeComponent,
     AuthComponent,
     AuthMenuComponent,
+    AuditsAdminComponent,
     IndenterComponent,
     FeaturesComponent,
     FeatureComponent,
@@ -93,6 +95,7 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
       { path: 'inspections/details/:name', redirectTo: 'inspections/:name' },
       // actual routes:
       { path: 'auth/github', component: AuthComponent },
+      { path: 'audits', component: AuditsAdminComponent },
       { path: 'features', component: FeaturesComponent },
       { path: 'features/:name', component: FeatureComponent },
       { path: 'inspections/:name', component: InspectionComponent },
