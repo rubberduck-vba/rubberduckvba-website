@@ -228,6 +228,7 @@ public class Program
 
         services.AddSession(ConfigureSession);
         services.AddSingleton<IMemoryCache>(provider => new MemoryCache(new MemoryCacheOptions(), provider.GetRequiredService<ILoggerFactory>()));
+        services.AddSingleton<IAuditService, AuditService>();
     }
 
     private static void ConfigureLogging(IServiceCollection services)

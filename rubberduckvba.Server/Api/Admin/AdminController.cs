@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
 
 namespace rubberduckvba.Server.Api.Admin;
 
 [ApiController]
 [EnableCors(CorsPolicies.AllowAll)]
-public class AdminController(ConfigurationOptions options, HangfireLauncherService hangfire, CacheService cache) : ControllerBase
+public class AdminController(ConfigurationOptions options, HangfireLauncherService hangfire, CacheService cache, IAuditService audits) : ControllerBase
 {
     /// <summary>
     /// Enqueues a job that updates xmldoc content from the latest release/pre-release tags.
@@ -40,6 +41,16 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     {
         cache.Clear();
         return Ok();
+    }
+
+    [Authorize("github")]
+    [HttpGet("admin/audits")]
+    public async Task<IActionResult> GetPendingAudits()
+    {
+        var edits = await audits.GetPendingItems<FeatureEditEntity>();
+        var ops = await audits.GetPendingItems<FeatureOpEntity>();
+
+        return Ok(new { edits = edits.ToArray(), other = ops.ToArray() });
     }
 
 #if DEBUG

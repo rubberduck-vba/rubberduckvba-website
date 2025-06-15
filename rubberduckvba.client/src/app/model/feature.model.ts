@@ -14,6 +14,48 @@ export interface MarkdownContent {
   content: string;
 }
 
+export interface AuditRecordViewModel {
+  id: number,
+  dateInserted: string,
+  dateModified: string | null,
+  author: string,
+  approvedAt: string | null,
+  approvedBy: string | null,
+  rejectedAt: string | null,
+  rejectedBy: string | null,
+}
+
+export interface FeatureEditViewModel extends AuditRecordViewModel {
+  featureId: string,
+  featureName: string,
+  fieldName: string,
+  valueBefore: string | null,
+  valueAfter: string,
+}
+
+export enum FeatureOperation {
+  Create = 'Create',
+  Delete = 'Delete',
+}
+
+export interface FeatureOperationViewModel extends AuditRecordViewModel {
+  featureName: string;
+  featureAction: FeatureOperation;
+  parentId: number | null,
+  title: string | null;
+  shortDescription: string | null;
+  description: string | null;
+  isNew: boolean | null;
+  isHidden: boolean | null;
+  hasImage: boolean | null;
+  links: BlogLink[] | null;
+}
+
+export interface PendingAuditsViewModel {
+  edits: FeatureEditViewModel[];
+  other: FeatureOperationViewModel[];
+}
+
 export interface SubFeatureViewModel extends ViewModel {
   featureId?: number;
   featureName?: string;

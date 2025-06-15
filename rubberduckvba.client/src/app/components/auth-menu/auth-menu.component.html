@@ -32,6 +32,21 @@
                         Clear cache
                     </button>
                 </div>
+                <hr />
+                <div ngbDropdownItem>
+                    <button type="button" role="button" class="nav-link text-dark btn-link" title="" [disabled]="disableReviewLink()" (click)="reviewPendingAudits()">
+                        Review pending audits
+                        <i *ngIf="pendingAudits == 0" [class]="'fa-circle-check'"></i>
+                        <span class="fa-stack" *ngIf="pendingAudits <= 9 && pendingAudits > 0">
+                            <fa-icon class="fa-stack-1x" [icon]="['fas', 'circle']"></fa-icon>
+                            <fa-icon class="fa-stack-1x fa-inverse" [icon]="auditsCountIcon()"></fa-icon>
+                        </span>
+                        <span class="fa-stack" *ngIf="pendingAudits > 9">
+                            <i class="fa-circle"></i>
+                            <i [class]="'fa-circle-exclamation'"></i>
+                        </span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

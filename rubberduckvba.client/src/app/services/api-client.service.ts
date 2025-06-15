@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { LatestTags, Tag } from "../model/tags.model";
-import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, MarkdownContent, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, UserViewModel, XmlDocOrFeatureViewModel } from "../model/feature.model";
+import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, MarkdownContent, PendingAuditsViewModel, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, UserViewModel, XmlDocOrFeatureViewModel } from "../model/feature.model";
 import { DownloadInfo } from "../model/downloads.model";
 import { DataService } from "./data.service";
 import { environment } from "../../environments/environment.prod";
@@ -96,6 +96,11 @@ export class ApiClientService {
   public deleteFeature(model: SubFeatureViewModel): Observable<SubFeatureViewModel> {
     const url = `${environment.apiBaseUrl}features/delete`;
     return this.data.postAsync<SubFeatureViewModel, undefined>(url, model).pipe(map(() => model));
+  }
+
+  public getPendingAudits(): Observable<PendingAuditsViewModel> {
+    const url = `${environment.apiBaseUrl}admin/audits`;
+    return this.data.getAsync<PendingAuditsViewModel>(url);
   }
 
   public formatMarkdown(raw: string): Observable<MarkdownContent> {

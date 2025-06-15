@@ -6,6 +6,7 @@ using rubberduckvba.Server.Model;
 using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
 using rubberduckvba.Server.Services.rubberduckdb;
+using System.Security.Principal;
 
 namespace rubberduckvba.Server.Api.Features;
 
@@ -21,17 +22,19 @@ public class FeaturesController : RubberduckApiController
 {
     private readonly CacheService cache;
     private readonly IRubberduckDbService db;
+    private readonly IAuditService admin;
     private readonly FeatureServices features;
     private readonly IRepository<TagAssetEntity> assetsRepository;
     private readonly IRepository<TagEntity> tagsRepository;
     private readonly IMarkdownFormattingService markdownService;
 
-    public FeaturesController(CacheService cache, IRubberduckDbService db, FeatureServices features, IMarkdownFormattingService markdownService,
+    public FeaturesController(CacheService cache, IRubberduckDbService db, IAuditService admin, FeatureServices features, IMarkdownFormattingService markdownService,
         IRepository<TagAssetEntity> assetsRepository, IRepository<TagEntity> tagsRepository, ILogger<FeaturesController> logger)
         : base(logger)
     {
         this.cache = cache;
         this.db = db;
+        this.admin = admin;
         this.features = features;
         this.assetsRepository = assetsRepository;
         this.tagsRepository = tagsRepository;
@@ -175,11 +178,15 @@ public class FeaturesController : RubberduckApiController
         }
 
         var feature = model.ToFeature();
-
-        var result = await db.SaveFeature(feature);
-        var features = await GetFeatureOptions(model.RepositoryId);
-
-        return Ok(new FeatureEditViewModel(result, features, RepositoryOptions));
+        if (User.Identity is IIdentity identity)
+        {
+            await admin.CreateFeature(feature, identity);
+            return Ok(feature);
+        }
+        else
+        {
+            return Unauthorized("User identity is not available.");
+        }
     }
 
     [HttpPost("features/update")]
@@ -198,11 +205,15 @@ public class FeaturesController : RubberduckApiController
         }
 
         var feature = model.ToFeature();
-
-        var result = await db.SaveFeature(feature);
-        var features = await GetFeatureOptions(model.RepositoryId);
-
-        return new FeatureEditViewModel(result, features, RepositoryOptions);
+        if (User.Identity is IIdentity identity)
+        {
+            await admin.UpdateFeature(feature, identity);
+            return Ok(feature);
+        }
+        else
+        {
+            return Unauthorized("User identity is not available.");
+        }
     }
 
     [HttpPost("features/delete")]
@@ -213,13 +224,20 @@ public class FeaturesController : RubberduckApiController
         {
             throw new ArgumentException("Model is invalid for this endpoint.");
         }
-        var existingId = await db.GetFeatureId(RepositoryId.Rubberduck, model.Name);
-        if (existingId is null)
+        var existing = await db.ResolveFeature(RepositoryId.Rubberduck, model.Name);
+        if (existing is null)
         {
             throw new ArgumentException("Model is invalid for this endpoint.");
         }
 
-        await db.DeleteFeature(existingId.Value);
+        if (User.Identity is IIdentity identity)
+        {
+            await admin.DeleteFeature(existing, identity);
+        }
+        else
+        {
+            throw new UnauthorizedAccessException("User identity is not available.");
+        }
     }
 
     [HttpPost("markdown/format")]
