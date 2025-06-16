@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
+using System.Security.Principal;
 
 namespace rubberduckvba.Server.Api.Admin;
 
@@ -44,13 +45,95 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     }
 
     [Authorize("github")]
-    [HttpGet("admin/audits")]
+    [HttpGet("admin/audits/pending")]
     public async Task<IActionResult> GetPendingAudits()
     {
         var edits = await audits.GetPendingItems<FeatureEditEntity>();
         var ops = await audits.GetPendingItems<FeatureOpEntity>();
 
         return Ok(new { edits = edits.ToArray(), other = ops.ToArray() });
+    }
+
+    [Authorize("github")]
+    [HttpGet("admin/audits/{featureId}")]
+    public async Task<IActionResult> GetPendingAudits([FromRoute] int featureId)
+    {
+        var edits = await audits.GetPendingItems<FeatureEditEntity>(featureId);
+        var ops = await audits.GetPendingItems<FeatureOpEntity>(featureId);
+
+        return Ok(new { edits = edits.ToArray(), other = ops.ToArray() });
+    }
+
+    [Authorize("github")]
+    [HttpPost("admin/audits/approve/{id}")]
+    public async Task<IActionResult> ApprovePendingAudit([FromRoute] int id)
+    {
+        if (User.Identity is not IIdentity identity)
+        {
+            // this is arguably a bug in the authentication middleware, but we can handle it gracefully here
+            return Unauthorized("User identity is not available.");
+        }
+
+        var edits = await audits.GetPendingItems<FeatureEditEntity>();
+        AuditEntity? audit;
+
+        audit = edits.SingleOrDefault(e => e.Id == id);
+        if (audit is null)
+        {
+            var ops = await audits.GetPendingItems<FeatureOpEntity>();
+            audit = ops.SingleOrDefault(e => e.Id == id);
+        }
+
+        if (audit is null)
+        {
+            // TODO log this
+            return BadRequest("Invalid ID");
+        }
+
+        if (!audit.IsPending)
+        {
+            // TODO log this
+            return BadRequest($"This operation has already been audited");
+        }
+
+        await audits.Approve(audit, identity);
+        return Ok("Operation was approved successfully.");
+    }
+
+    [Authorize("github")]
+    [HttpPost("admin/audits/reject/{id}")]
+    public async Task<IActionResult> RejectPendingAudit([FromRoute] int id)
+    {
+        if (User.Identity is not IIdentity identity)
+        {
+            // this is arguably a bug in the authentication middleware, but we can handle it gracefully here
+            return Unauthorized("User identity is not available.");
+        }
+
+        var edits = await audits.GetPendingItems<FeatureEditEntity>();
+        AuditEntity? audit;
+
+        audit = edits.SingleOrDefault(e => e.Id == id);
+        if (audit is null)
+        {
+            var ops = await audits.GetPendingItems<FeatureOpEntity>();
+            audit = ops.SingleOrDefault(e => e.Id == id);
+        }
+
+        if (audit is null)
+        {
+            // TODO log this
+            return BadRequest("Invalid ID");
+        }
+
+        if (!audit.IsPending)
+        {
+            // TODO log this
+            return BadRequest($"This operation has already been audited");
+        }
+
+        await audits.Reject(audit, identity);
+        return Ok("Operation was rejected successfully.");
     }
 
 #if DEBUG

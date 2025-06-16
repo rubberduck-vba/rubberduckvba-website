@@ -34,14 +34,15 @@ export interface FeatureEditViewModel extends AuditRecordViewModel {
 }
 
 export enum FeatureOperation {
-  Create = 'Create',
-  Delete = 'Delete',
+  Create = 1,
+  Delete = 2,
 }
 
 export interface FeatureOperationViewModel extends AuditRecordViewModel {
   featureName: string;
   featureAction: FeatureOperation;
-  parentId: number | null,
+  parentId: number | null;
+  name: string | null;
   title: string | null;
   shortDescription: string | null;
   description: string | null;
@@ -80,6 +81,8 @@ export interface FeatureViewModel extends SubFeatureViewModel {
 
   features: FeatureViewModel[];
   links: BlogLink[];
+
+  isCreatePending: boolean;
 }
 
 export interface BlogLink {
@@ -289,6 +292,8 @@ export class FeatureViewModelClass extends ViewModelBase {
   features: FeatureViewModel[];
   links: BlogLink[];
 
+  isCreatePending: boolean;
+
   constructor(model: FeatureViewModel) {
     super(model);
     this.title = model.title;
@@ -299,6 +304,7 @@ export class FeatureViewModelClass extends ViewModelBase {
     this.links = model.links?.map(e => new BlogLinkViewModelClass(e)) ?? [];
 
     this.isCollapsed = !model.hasImage;
+    this.isCreatePending = model.isCreatePending;
   }
 }
 

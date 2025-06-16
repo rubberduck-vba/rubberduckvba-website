@@ -218,7 +218,7 @@ public class FeaturesController : RubberduckApiController
 
     [HttpPost("features/delete")]
     [Authorize("github")]
-    public async Task Delete([FromBody] IFeature model)
+    public async Task Delete([FromBody] Feature model)
     {
         if (model.Id == default)
         {

@@ -27,7 +27,7 @@ public record class Feature() : IFeature
         DateTimeInserted = entity.DateTimeInserted;
         DateTimeUpdated = entity.DateTimeUpdated;
         Name = entity.Name;
-        ParentId = entity.ParentId;
+        FeatureId = entity.ParentId;
         FeatureName = entity.FeatureName;
         RepositoryId = (Services.RepositoryId)entity.RepositoryId;
         Title = entity.Title;
@@ -45,7 +45,7 @@ public record class Feature() : IFeature
     public DateTime? DateTimeUpdated { get; init; }
     public string Name { get; init; } = string.Empty;
 
-    public int? ParentId { get; init; }
+    public int? FeatureId { get; init; }
     public string FeatureName { get; init; } = string.Empty;
     public Services.RepositoryId RepositoryId { get; init; } = Services.RepositoryId.Rubberduck;
     public string Title { get; init; } = string.Empty;
@@ -69,7 +69,7 @@ public record class Feature() : IFeature
         IsNew = IsNew,
         Name = Name,
         ShortDescription = ShortDescription,
-        ParentId = ParentId,
+        ParentId = FeatureId,
         FeatureName = FeatureName,
         RepositoryId = (int)Services.RepositoryId.Rubberduck,
         Title = Title,

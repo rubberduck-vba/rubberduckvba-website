@@ -29,7 +29,7 @@ public class FeatureEditViewModel
         return new Feature
         {
             Id = Id ?? default,
-            ParentId = FeatureId,
+            FeatureId = FeatureId,
             RepositoryId = RepositoryId,
             Name = Name,
             Title = Title,
@@ -43,7 +43,7 @@ public class FeatureEditViewModel
     public FeatureEditViewModel(Feature model, FeatureOptionViewModel[] features, RepositoryOptionViewModel[] repositories)
     {
         Id = model.Id;
-        FeatureId = model.ParentId;
+        FeatureId = model.FeatureId;
         RepositoryId = model.RepositoryId;
 
         Name = model.Name;

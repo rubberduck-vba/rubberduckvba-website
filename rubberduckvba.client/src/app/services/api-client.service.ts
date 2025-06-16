@@ -98,9 +98,22 @@ export class ApiClientService {
     return this.data.postAsync<SubFeatureViewModel, undefined>(url, model).pipe(map(() => model));
   }
 
-  public getPendingAudits(): Observable<PendingAuditsViewModel> {
-    const url = `${environment.apiBaseUrl}admin/audits`;
+  public getPendingAudits(featureId: number): Observable<PendingAuditsViewModel> {
+    const url = `${environment.apiBaseUrl}admin/audits/${featureId}`;
     return this.data.getAsync<PendingAuditsViewModel>(url);
+  }
+  public getAllPendingAudits(): Observable<PendingAuditsViewModel> {
+    const url = `${environment.apiBaseUrl}admin/audits/pending`;
+    return this.data.getAsync<PendingAuditsViewModel>(url);
+  }
+
+  public approvePendingAudit(auditId: number): Observable<void> {
+    const url = `${environment.apiBaseUrl}admin/audits/approve/${auditId}`;
+    return this.data.postAsync(url);
+  }
+  public rejectPendingAudit(auditId: number): Observable<void> {
+    const url = `${environment.apiBaseUrl}admin/audits/reject/${auditId}`;
+    return this.data.postAsync(url);
   }
 
   public formatMarkdown(raw: string): Observable<MarkdownContent> {

@@ -1,22 +1,22 @@
-<button *ngIf="action == 'edit'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()">
+<button *ngIf="action == 'edit'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
     <span>
         <fa-icon [icon]="'edit'"></fa-icon>&nbsp;Edit Description
     </span>
 </button>
 
-<button *ngIf="action == 'summary'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()">
+<button *ngIf="action == 'summary'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
     <span>
         <fa-icon [icon]="'edit'"></fa-icon>&nbsp;Edit Summary
     </span>
 </button>
 
-<button *ngIf="action == 'create'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()">
+<button *ngIf="action == 'create'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
     <span>
         <fa-icon [icon]="'plus-circle'"></fa-icon>&nbsp;Add Feature
     </span>
 </button>
 
-<button *ngIf="action == 'delete'" type="button" class="btn btn-outline-danger rounded-pill m-1" (click)="doAction()">
+<button *ngIf="action == 'delete'" type="button" class="btn btn-outline-danger rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
     <span>
         <fa-icon [icon]="'trash-can'"></fa-icon>&nbsp;Delete
     </span>
@@ -155,8 +155,9 @@
         <div class="modal-body my-2 mx-4">
             <div class="row">
                 <h5>Delete Feature</h5>
-                <p>The record for feature <strong>{{feature.name}}</strong> will be deleted.</p>
-                <p class="text-danger-emphasis">This action cannot be undone. Are you sure?</p>
+                <p>The record for feature <strong>{{feature.name}}</strong> will only be deleted after an explicit approval. Proceed?</p>
+                <hr />
+                <p class="small text-muted"><fa-icon [icon]="'triangle-exclamation'"></fa-icon> This action will be logged and associated to your login.</p>
             </div>
         </div>
         <div class="modal-footer">

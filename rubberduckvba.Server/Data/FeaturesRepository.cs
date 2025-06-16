@@ -17,7 +17,7 @@ SELECT
     a.[DateTimeInserted],
     a.[DateTimeUpdated],
     a.[RepositoryId],
-    a.[ParentId] AS [FeatureId],
+    a.[ParentId],
     f.[Name] AS [FeatureName],
     a.[Name],
     a.[Title],

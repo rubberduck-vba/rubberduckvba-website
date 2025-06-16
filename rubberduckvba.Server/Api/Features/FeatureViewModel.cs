@@ -11,7 +11,7 @@ public class FeatureViewModel
         DateInserted = model.DateTimeInserted;
         DateUpdated = model.DateTimeUpdated;
 
-        FeatureId = model.ParentId;
+        FeatureId = model.FeatureId;
         FeatureName = model.FeatureName;
 
         Name = model.Name;

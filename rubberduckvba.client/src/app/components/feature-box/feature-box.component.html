@@ -29,14 +29,67 @@
                 </div>
             </div>
         </div>
-        <div *ngIf="feature && user && user.isAdmin" class="card-footer">
-            <div class="row text-end text-muted">
-                <div class="col-12">
+        <div *ngIf="feature && user.isAdmin" class="card-footer">
+            <div class="row text-muted">
+                <div class="col-6 text-start">
+                    <button *ngIf="feature.isCreatePending" class="btn btn-success rounded-pill m-1" role="button" (onclick)="onConfirmCreate()"
+                            title="Approve as {{user.name}} pending create operation submitted {{feature.dateInserted}}">
+                        <fa-icon [icon]="['fas', 'plus-circle']"></fa-icon>
+                        Confirm create
+                    </button>
+                    <button *ngIf="feature.isCreatePending"
+                            class="btn btn-danger rounded-pill m-1" role="button"
+                            title="Reject as {{user.name}} pending create operation submitted {{feature.dateInserted}}"
+                            (click)="onRejectPendingCreate()">
+                        <fa-icon [icon]="['fas', 'trash-can']"></fa-icon>
+                        Reject
+                    </button>
+                    <div *ngIf="!feature.isCreatePending && !hasPendingDelete && pendingEdits.length > 0">
+                        <a class="btn btn-primary rounded-pill m-1" role="button" href="/admin/review/{{pendingEdit.id}}"
+                           title="Review as {{user.name}} pending edits submitted {{pendingEdit.dateInserted}} by {{pendingEdit.author}}">
+                            <fa-icon class="mx-2" [icon]="'check-circle'"></fa-icon>
+                            Pending edits
+                        </a>
+                    </div>
+                </div>
+                <div *ngIf="!feature.isCreatePending" class="col-6 text-end">
                     <edit-feature [feature]="feature" [action]="editAction" (onApplyChanges)="applyChanges"></edit-feature>
                     <edit-feature *ngIf="!hasOwnDetailsPage" [feature]="feature" [action]="editDetailsAction" (onApplyChanges)="applyChanges"></edit-feature>
-                    <edit-feature *ngIf="!isProtected" [feature]="feature" [action]="deleteAction"></edit-feature>
+                    <edit-feature *ngIf="!isProtected && !hasPendingDelete" [disabled]="hasPendingDelete" [feature]="feature" [action]="deleteAction"></edit-feature>
+                    <button *ngIf="hasPendingDelete"
+                            class="btn btn-danger rounded-pill m-1" role="button"
+                            title="Approve as {{user.name}} pending delete operation submitted {{pendingDelete.dateInserted}} by {{pendingDelete.author}}"
+                            (click)="onApprovePendingDelete()">
+                        <fa-icon [icon]="['fas', 'trash-can']"></fa-icon>
+                        Pending deletion
+                    </button>
+                </div>
+                <div *ngIf="feature.isCreatePending" class="col-6 text-end">
+                    <span class="small text-muted">Pending approval</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+<ng-template #confirmDeleteFeature let-modal>
+    <div *ngIf="feature">
+        <div class="modal-header align-content-center">
+            <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;Delete Feature</h4>
+            <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+        </div>
+        <div class="modal-body my-2 mx-4">
+            <div class="row">
+                <h5>Final Confirmation</h5>
+                <p>The record for feature <strong>{{feature.name}}</strong> will be permanently deleted. Proceed?</p>
+                <hr />
+                <p class="small text-muted"><fa-icon [icon]="'triangle-exclamation'"></fa-icon> This action will be logged and associated to your login.</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-primary" (click)="modal.dismiss('x')">Cancel</button>
+            <button type="button" class="btn btn-danger" (click)="onConfirmApprovePendingDelete()">Confirm</button>
+        </div>
+    </div>
+</ng-template>

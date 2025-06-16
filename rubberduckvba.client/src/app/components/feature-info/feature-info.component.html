@@ -11,9 +11,9 @@
         </div>
         <div [ngClass]="(feature?.name != 'CodeInspections' && feature?.name != 'CommentAnnotations') && (!links || links.length == 0) ? 'col-12' : 'col-lg-4'">
             <!-- subfeatures -->
-            <div *ngIf="feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0">
+            <div *ngIf="user && feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0">
                 <div *ngFor="let subFeature of subfeatures">
-                    <feature-box *ngIf="!feature.isHidden && (subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [hasOwnDetailsPage]="true"></feature-box>
+                    <feature-box *ngIf="!feature.isHidden && (subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [hasOwnDetailsPage]="true" [user]="user"></feature-box>
                 </div>
             </div>
 
@@ -33,13 +33,19 @@
         <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
     </div>
 </section>
-<section class="row">
+<section *ngIf="user && feature" class="row">
 
     <!-- subfeatures -->
     <div *ngIf="feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0" class="col-12">
         <edit-feature *ngIf="!feature.featureId && user?.isAdmin" [feature]="feature" [action]="createAction"></edit-feature>
         <div *ngFor="let subFeature of subfeatures">
-            <feature-box *ngIf="!feature.isHidden && !(subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [hasOwnDetailsPage]="false"></feature-box>
+            <feature-box *ngIf="!feature.isHidden && !(subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [user]="user" [hasOwnDetailsPage]="false"></feature-box>
+        </div>
+    </div>
+
+    <div *ngIf="pendingFeatures.length > 0">
+        <div *ngFor="let newFeature of pendingFeatures">
+            <feature-box [user]="user" [parentFeatureName]="newFeature.name" [feature]="newFeature" [hasOwnDetailsPage]="false"></feature-box>
         </div>
     </div>
 

@@ -14,9 +14,11 @@ public class FeatureServices(
     public int? GetId(string name) => featureRepository.TryGetId(name, out var id) ? id : null;
     public IEnumerable<Feature> Get(bool topLevelOnly = true)
     {
-        return featureRepository.GetAll()
-            .Where(e => !topLevelOnly || e.ParentId is null)
-            .Select(e => new Feature(e));
+        var features = featureRepository.GetAll();
+        return features
+            .Where(e => e.ParentId == null || !topLevelOnly)
+            .Select(e => new Feature(e))
+            .ToList();
     }
 
     public Inspection GetInspection(string name)

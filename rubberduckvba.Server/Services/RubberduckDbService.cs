@@ -67,7 +67,7 @@ public interface IAuditService
     Task UpdateFeature(Feature feature, IIdentity identity);
 
 
-    Task<IEnumerable<T>> GetPendingItems<T>() where T : AuditEntity;
+    Task<IEnumerable<T>> GetPendingItems<T>(int? featureId = default) where T : AuditEntity;
 
     Task Approve<T>(T entity, IIdentity identity) where T : AuditEntity;
     Task Reject<T>(T entity, IIdentity identity) where T : AuditEntity;
@@ -107,8 +107,8 @@ public class AuditService : IAuditService
     {
         var procName = entity switch
         {
-            FeatureOpEntity => "audits.ApproveFeatureOp",
-            FeatureEditEntity => "audits.ApproveFeatureEdit",
+            FeatureOpEntity => "audits.RejectFeatureOp",
+            FeatureEditEntity => "audits.RejectFeatureEdit",
             _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for approval."),
         };
         await ApproveOrReject(procName, entity.Id, identity);
@@ -149,7 +149,7 @@ public class AuditService : IAuditService
             login,
             name = feature.Name,
             action = Convert.ToInt32(operation),
-            parentId = feature.ParentId,
+            parentId = feature.FeatureId,
             title = feature.Title,
             summary = feature.ShortDescription,
             description = feature.Description,
@@ -203,16 +203,29 @@ public class AuditService : IAuditService
         });
     }
 
-    public async Task<IEnumerable<T>> GetPendingItems<T>() where T : AuditEntity
+    public async Task<IEnumerable<T>> GetPendingItems<T>(int? featureId = default) where T : AuditEntity
     {
         using var db = await GetDbConnection();
-        var tableName = typeof(T).Name switch
+        var (tableName, columns) = typeof(T).Name switch
         {
-            nameof(FeatureOpEntity) => "audits.FeatureOps",
-            nameof(FeatureEditEntity) => "audits.FeatureEdits",
+            nameof(FeatureOpEntity) => ("audits.FeatureOps src", string.Join(',', typeof(FeatureOpEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureEditEntity) => ("audits.FeatureEdits src", string.Join(',', typeof(FeatureEditEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
             _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
         };
-        return await db.QueryAsync<T>($"SELECT * FROM {tableName} WHERE ApprovedBy IS NULL AND RejectedBy IS NULL ORDER BY DateInserted DESC");
+
+        const string pendingFilter = "src.[ApprovedBy] IS NULL AND src.[RejectedBy] IS NULL";
+
+        var sql = featureId.HasValue
+            ? typeof(T).Name switch
+            {
+                nameof(FeatureOpEntity) => $"SELECT {columns} FROM {tableName} INNER JOIN dbo.Features f ON src.[FeatureName] = f.[Name] WHERE {pendingFilter} AND f.[Id] = {featureId}",
+                nameof(FeatureEditEntity) => $"SELECT {columns} FROM {tableName} WHERE {pendingFilter} AND src.[FeatureId] = {featureId}",
+                _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
+            }
+            : $"SELECT {columns} FROM {tableName} WHERE {pendingFilter}";
+
+        sql += " ORDER BY src.[DateInserted] DESC";
+        return await db.QueryAsync<T>(sql);
     }
 }
 
@@ -257,7 +270,7 @@ public class RubberduckDbService : IRubberduckDbService
     {
         var features = _featureServices.Get(topLevelOnly: false).ToList();
         var feature = features.Single(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
-        var children = features.Where(e => e.ParentId == feature.Id);
+        var children = features.Where(e => e.FeatureId == feature.Id);
         return new FeatureGraph(feature.ToEntity())
         {
             Features = children.ToArray()

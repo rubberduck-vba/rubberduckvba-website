@@ -26,6 +26,14 @@ public record class AuditEntity
     public DateTime DateInserted { get; init; }
     public DateTime? DateModified { get; init; }
     public string Author { get; init; } = string.Empty;
+
+    public string? ApprovedBy { get; init; }
+    public DateTime? ApprovedAt { get; init; }
+    public string? RejectedBy { get; init; }
+    public DateTime? RejectedAt { get; init; }
+
+    public bool IsPending => !ApprovedAt.HasValue && !RejectedAt.HasValue;
+    public bool IsApproved => ApprovedAt.HasValue && !RejectedAt.HasValue;
 }
 
 public record class FeatureEditEntity : AuditEntity
@@ -34,10 +42,6 @@ public record class FeatureEditEntity : AuditEntity
     public string FieldName { get; init; } = string.Empty;
     public string? ValueBefore { get; init; }
     public string ValueAfter { get; init; } = string.Empty;
-    public string? ApprovedBy { get; init; }
-    public DateTime? ApprovedAt { get; init; }
-    public string? RejectedBy { get; init; }
-    public DateTime? RejectedAt { get; init; }
 }
 
 public enum FeatureOperation
@@ -52,7 +56,6 @@ public record class FeatureOpEntity : AuditEntity
 
     public int? ParentId { get; init; }
     public string FeatureName { get; init; } = default!;
-    public int RepositoryId { get; init; }
     public string Title { get; init; } = default!;
     public string ShortDescription { get; init; } = default!;
     public string Description { get; init; } = default!;

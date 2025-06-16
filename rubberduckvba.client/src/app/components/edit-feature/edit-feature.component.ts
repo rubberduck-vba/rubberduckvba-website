@@ -17,8 +17,7 @@ export enum AdminAction {
   selector: 'edit-feature',
   templateUrl: './edit-feature.component.html'
 })
-export class EditFeatureComponent implements OnInit, OnChanges {
-  private readonly _user: BehaviorSubject<UserViewModel> = new BehaviorSubject<UserViewModel>(null!);
+export class EditFeatureComponent implements OnInit {
   private readonly _feature: BehaviorSubject<EditSubFeatureViewModelClass> = new BehaviorSubject<EditSubFeatureViewModelClass>(null!);
 
   private _action: AdminAction = AdminAction.Create;
@@ -40,6 +39,17 @@ export class EditFeatureComponent implements OnInit, OnChanges {
     return this._feature.value;
   }
 
+  private _disabled: boolean = false;
+
+  @Input()
+  public set disabled(value: boolean) {
+    this._disabled = value;
+  }
+
+  public get disabled(): boolean {
+    return this._disabled;
+  }
+
   @Input()
   public set action(value: AdminAction) {
     this._action = value;
@@ -57,9 +67,6 @@ export class EditFeatureComponent implements OnInit, OnChanges {
 
   constructor(private fa: FaIconLibrary, private api: ApiClientService) {
     fa.addIconPacks(fas);
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
   }
 
   ngOnInit(): void {

@@ -15,7 +15,7 @@ export class AuditsAdminComponent implements OnInit {
   public pendingAudits: PendingAuditsViewModel = { edits: [], other: [] };
 
   ngOnInit(): void {
-    this.api.getPendingAudits().subscribe(e => this.pendingAudits = e);
+    this.api.getAllPendingAudits().subscribe(e => this.pendingAudits = e);
   }
   
 }
