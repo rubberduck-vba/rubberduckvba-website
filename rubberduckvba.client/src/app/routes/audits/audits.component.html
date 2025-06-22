@@ -5,5 +5,68 @@
     </p>
 </div>
 <div class="row">
-    <h3>TODO</h3>
+    <h3>Edits</h3>
+    <div class="col-12">
+        <p>
+            Edits are changes to existing features, such as changing the description, or changing the title.
+        </p>
+        <div *ngIf="pendingAudits.edits.length == 0">
+            <p class="text-muted">There are no pending edits.</p>
+        </div>
+        <div ngbAccordion>
+            <div ngbAccordionItem *ngFor="let edit of pendingAudits.edits" class="mb-2" [collapsed]="false">
+                <div ngbAccordionHeader>
+                    <h4>{{edit.featureName}}</h4>
+                    <p><span class="fw-bold">{{edit.author}}</span> wants to edit the '{{edit.fieldName.toLowerCase()}}' field.</p>
+                    <p>Submitted <span class="fw-bold">{{edit.dateInserted}}</span> <span *ngIf="edit.dateModified != null">, last modified <span class="fw-bold">{{edit.dateModified}}</span></span></p>
+                </div>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <div class="vbe-mock-debugger">
+                            <div class="code-area">
+                                <div [innerHtml]="getDiffHtml(edit.valueBefore ?? '', edit.valueAfter)"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-success" (click)="onApproveEdit(edit)">Approve</button>
+                <button class="btn btn-outline-danger" (click)="onRejectEdit(edit)">Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <h3>Operations</h3>
+    <div class="col-12">
+        <p>
+            Operations are additions or deletions of features, such as adding a new feature, or deleting an existing feature.
+        </p>
+        <div *ngIf="pendingAudits.other.length == 0">
+            <p class="text-muted">There are no pending operations.</p>
+        </div>
+        <div ngbAccordion>
+            <div ngbAccordionItem *ngFor="let op of pendingAudits.other" class="mb-2" [collapsed]="false">
+                <div ngbAccordionHeader>
+                    <h4>{{op.featureName}}</h4>
+                    <div *ngIf="op.featureAction == deleteOp">
+                        <p><span class="fw-bold">{{op.author}}</span> wants to DELETE the '<span class="fw-bold">{{op.featureName}}</span>' feature.</p>
+                        <p>Submitted <span class="fw-bold">{{op.dateInserted}}</span> <span *ngIf="op.dateModified != null">, last modified <span class="fw-bold">{{op.dateModified}}</span></span></p>
+                    </div>
+                    <div *ngIf="op.featureAction == createOp">
+                        <p><span class="fw-bold">{{op.author}}</span> wants to add a new '<span class="fw-bold">{{op.featureName}}</span>' feature.</p>
+                        <p>Submitted <span class="fw-bold">{{op.dateInserted}}</span> <span *ngIf="op.dateModified != null">, last modified <span class="fw-bold">{{op.dateModified}}</span></span></p>
+                    </div>
+                </div>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <h3>{{op.title}}</h3>
+                        <p [innerText]="op.shortDescription"></p>
+                        <p [innerHTML]="op.description"></p>
+                        <button class="btn btn-success" (click)="onApproveOperation(op)">Approve</button>
+                        <button class="btn btn-outline-danger" (click)="onRejectOperation(op)">Reject</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

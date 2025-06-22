@@ -115,15 +115,16 @@ public class AuthController : RubberduckApiController
     {
         return GuardInternalAction(() =>
         {
-            Logger.LogInformation("OAuth token was received. State: {state}", vm.State);
+            Logger.LogInformation("OAuth code was received. State: {state}", vm.State);
             var clientId = configuration.Value.ClientId;
             var clientSecret = configuration.Value.ClientSecret;
             var agent = configuration.Value.UserAgent;
 
             var github = new GitHubClient(new ProductHeaderValue(agent));
-
             var request = new OauthTokenRequest(clientId, clientSecret, vm.Code);
+
             var token = github.Oauth.CreateAccessToken(request).GetAwaiter().GetResult();
+
             if (token is null)
             {
                 Logger.LogWarning("OAuth access token was not created.");
@@ -171,6 +172,13 @@ public class AuthController : RubberduckApiController
                 Thread.CurrentPrincipal = HttpContext.User;
 
                 Logger.LogInformation("GitHub user with login {login} has signed in with role authorizations '{role}'.", githubUser.Login, configuration.Value.OwnerOrg);
+                Response.Cookies.Append(GitHubAuthenticationHandler.AuthCookie, token, new CookieOptions
+                {
+                    IsEssential = true,
+                    HttpOnly = true,
+                    Secure = true,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                });
                 return token;
             }
             else

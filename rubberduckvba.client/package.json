@@ -31,6 +31,8 @@
     "@popperjs/core": "^2.11.6",
     "angular-device-information": "^4.0.0",
     "bootstrap": "^5.2.3",
+    "diff": "^8.0.2",
+    "html-entities": "^2.6.0",
     "jest-editor-support": "*",
     "run-script-os": "*",
     "rxjs": "~7.8.0",

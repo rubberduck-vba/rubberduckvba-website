@@ -37,7 +37,7 @@ export class AuthService {
 
     const url = `${environment.apiBaseUrl}auth/signin`;
     this.data.postAsync<AuthViewModel, string>(url, vm)
-      .subscribe((result: string) => this.redirect(result));
+      .subscribe((redirectUrl: string) => this.redirect(redirectUrl));
   }
 
   public signout(): void {
@@ -66,7 +66,6 @@ export class AuthService {
       }
     }
     else {
-      console.log('xsrf:state mismatched!');
       this.redirect();
     }
   }

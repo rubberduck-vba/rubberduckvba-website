@@ -177,8 +177,12 @@ public class AuditService : IAuditService
 
         foreach (var name in editableFields)
         {
-            valueBefore = current?.GetType().GetProperty(name)?.GetValue(current)?.ToString();
-            valueAfter = feature.GetType().GetProperty(name)?.GetValue(feature)?.ToString() ?? string.Empty;
+            var currentProperty = current.GetType().GetProperty(name);
+            var property = feature.GetType().GetProperty(name)!;
+            var asJson = property.PropertyType.IsClass && property.PropertyType != typeof(string);
+
+            valueBefore = asJson ? JsonSerializer.Serialize(currentProperty?.GetValue(current)) : currentProperty?.GetValue(current)?.ToString() ?? string.Empty;
+            valueAfter = asJson ? JsonSerializer.Serialize(property?.GetValue(feature)) : property?.GetValue(feature)?.ToString() ?? string.Empty;
 
             if (valueBefore != valueAfter)
             {
