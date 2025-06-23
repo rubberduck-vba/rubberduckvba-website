@@ -13,6 +13,18 @@ public record class ConnectionSettings
     public string HangfireDb { get; set; } = default!;
 }
 
+public static class RDConstants
+{
+    public const int OrganisationId = 12832254;
+    public const string WebAdminTeam = "WebAdmin";
+    public const string ContributorsTeam = "Contributors";
+
+    public const string ReaderRole = "rd-reader";
+    public const string WriterRole = "rd-writer";
+    public const string ReviewerRole = "rd-reviewer";
+    public const string AdminRole = "rd-admin";
+}
+
 public record class GitHubSettings
 {
     public string ClientId { get; set; } = default!;

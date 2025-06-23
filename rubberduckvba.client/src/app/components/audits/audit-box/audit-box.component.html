@@ -1,0 +1,67 @@
+<div class="card">
+    <div class="card-header">
+        <div *ngIf="isEdit"><h4>{{auditEdit!.fieldName}}</h4></div>
+        <div *ngIf="isCreateOp"><h4>Create</h4><span>{{auditOp!.name}}</span></div>
+        <div *ngIf="isDeleteOp"><h4>Delete</h4><span>{{auditOp!.name}}</span></div>
+        <div>Submitted <strong>{{dateSubmitted}}</strong> by <strong>{{author}}</strong></div>
+        <div class="small text-muted" *ngIf="dateModified.length > 0">, last modified <strong>{{dateModified}}</strong></div>
+    </div>
+    <div class="card-body">
+        <div *ngIf="isCreateOp">
+            <review-feature-add [audit]="auditOp"></review-feature-add>
+        </div>
+        <div *ngIf="isDeleteOp">
+            <p>(todo: delete op)</p>
+            <!-- review-feature-delete [audit]="audit" -->
+        </div>
+        <div *ngIf="isEdit">
+            <review-edit-markdown [audit]="auditEdit"></review-edit-markdown>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="text-end">
+            <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#confirmReject"><fa-icon [icon]="['fas','trash-can']"></fa-icon>&nbsp;Reject</button>
+            <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#confirmApprove"><fa-icon [icon]="['fas','check']"></fa-icon>&nbsp;Approve</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirmApprove" class="modal" role="dialog" aria-hidden="true">
+    <div class="modal-content" *ngIf="audit">
+        <div class="modal-header align-content-center">
+            <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;Approve this operation</h4>
+            <button type="button" class="btn-close" aria-label="close" data-dismiss="modal"></button>
+        </div>
+        <div class="modal-body my-2 mx-4">
+            <div class="row">
+                <p>Audit record ID <strong>{{audit.id}}</strong> will be marked as approved. Proceed?</p>
+                <hr />
+                <p class="small text-muted"><fa-icon [icon]="'triangle-exclamation'"></fa-icon> This action will be logged and associated to your login.</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-success" (click)="onConfirmApprove()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirmReject" class="modal" role="dialog" aria-hidden="true">
+    <div class="modal-content" *ngIf="audit">
+        <div class="modal-header align-content-center">
+            <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;Reject this operation</h4>
+            <button type="button" class="btn-close" aria-label="close" data-dismiss="modal"></button>
+        </div>
+        <div class="modal-body my-2 mx-4">
+            <div class="row">
+                <p>Audit record ID <strong>{{audit.id}}</strong> will be marked as approved. Proceed?</p>
+                <hr />
+                <p class="small text-muted"><fa-icon [icon]="'triangle-exclamation'"></fa-icon> This action will be logged and associated to your login.</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-success" (click)="onConfirmReject()">Confirm</button>
+        </div>
+    </div>
+</div>

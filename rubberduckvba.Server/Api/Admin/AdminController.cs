@@ -16,7 +16,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     /// Enqueues a job that updates xmldoc content from the latest release/pre-release tags.
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
-    [Authorize("github")]
+    [Authorize("github", Roles = RDConstants.AdminRole)]
     [HttpPost("admin/update/xmldoc")]
     public IActionResult UpdateXmldocContent()
     {
@@ -28,7 +28,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
     /// Enqueues a job that gets the latest release/pre-release tags and their respective assets, and updates the installer download stats.
     /// </summary>
     /// <returns>The unique identifier of the enqueued job.</returns>
-    [Authorize("github")]
+    [Authorize("github", Roles = RDConstants.AdminRole)]
     [HttpPost("admin/update/tags")]
     public IActionResult UpdateTagMetadata()
     {
@@ -36,7 +36,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
         return Ok(jobId);
     }
 
-    [Authorize("github")]
+    [Authorize("github", Roles = RDConstants.AdminRole)]
     [HttpPost("admin/cache/clear")]
     public IActionResult ClearCache()
     {
@@ -44,7 +44,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
         return Ok();
     }
 
-    [Authorize("github")]
+    [Authorize("github", Roles = $"{RDConstants.AdminRole},{RDConstants.ReviewerRole}")]
     [HttpGet("admin/audits/pending")]
     public async Task<IActionResult> GetPendingAudits()
     {
@@ -54,7 +54,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
         return Ok(new { edits = edits.ToArray(), other = ops.ToArray() });
     }
 
-    [Authorize("github")]
+    [Authorize("github", Roles = $"{RDConstants.AdminRole},{RDConstants.ReviewerRole}")]
     [HttpGet("admin/audits/{featureId}")]
     public async Task<IActionResult> GetPendingAudits([FromRoute] int featureId)
     {
@@ -64,7 +64,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
         return Ok(new { edits = edits.ToArray(), other = ops.ToArray() });
     }
 
-    [Authorize("github")]
+    [Authorize("github", Roles = $"{RDConstants.AdminRole},{RDConstants.ReviewerRole}")]
     [HttpPost("admin/audits/approve/{id}")]
     public async Task<IActionResult> ApprovePendingAudit([FromRoute] int id)
     {
@@ -100,7 +100,7 @@ public class AdminController(ConfigurationOptions options, HangfireLauncherServi
         return Ok("Operation was approved successfully.");
     }
 
-    [Authorize("github")]
+    [Authorize("github", Roles = $"{RDConstants.AdminRole},{RDConstants.ReviewerRole}")]
     [HttpPost("admin/audits/reject/{id}")]
     public async Task<IActionResult> RejectPendingAudit([FromRoute] int id)
     {

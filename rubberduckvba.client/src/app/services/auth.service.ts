@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Observable, map } from "rxjs";
+import { BehaviorSubject, Observable, map } from "rxjs";
 import { environment } from "../../environments/environment";
 import { UserViewModel } from "../model/feature.model";
 import { AuthViewModel, DataService } from "./data.service";
@@ -7,8 +7,17 @@ import { AuthViewModel, DataService } from "./data.service";
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private timeout: number = 10000;
-  constructor(private data: DataService) { }
+  private readonly _anonymousUser = {
+    isAdmin: false,
+    isWriter: false,
+    isReviewer: false,
+    isAuthenticated: false,
+    name: '(anonymous)',
+  };
+  private _user: BehaviorSubject<UserViewModel> = new BehaviorSubject<UserViewModel>(this._anonymousUser);
+
+  constructor(private data: DataService) {
+  }
 
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -27,8 +36,14 @@ export class AuthService {
   }
 
   public getUser(): Observable<UserViewModel> {
+    if (this._user.getValue().isAuthenticated) {
+      return this._user;
+    }
+
     const url = `${environment.apiBaseUrl}auth`;
-    return this.data.getAsync<UserViewModel>(url);
+    const request = this.data.getAsync<UserViewModel>(url);
+    request.subscribe(user => { this._user.next(user); });
+    return request;
   }
 
   public signin(): void {
@@ -41,6 +56,7 @@ export class AuthService {
   }
 
   public signout(): void {
+    this._user.next(this._anonymousUser);
     sessionStorage.clear();
   }
 

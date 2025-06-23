@@ -39,13 +39,15 @@ export class AuthMenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.getUserInfo();
-    this.api.getAllPendingAudits().subscribe(e => {if (e) { this.pendingAudits = e.edits.length + e.other.length }});
   }
 
   getUserInfo(): void {
     this.auth.getUser().subscribe(result => {
       if (result) {
         this._user.next(result);
+        if (result.isReviewer) {
+          this.api.getAllPendingAudits().subscribe(e => { if (e) { this.pendingAudits = e.edits.length + e.other.length } });
+        }
       }
     });
   }

@@ -494,4 +494,6 @@ export interface UserViewModel {
   name: string;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isReviewer: boolean;
+  isWriter: boolean;
 }

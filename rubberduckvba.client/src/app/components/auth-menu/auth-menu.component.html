@@ -33,7 +33,7 @@
                     </button>
                 </div>
                 <hr />
-                <div ngbDropdownItem>
+                <div *ngIf="user.isReviewer" ngbDropdownItem>
                     <button type="button" role="button" class="nav-link text-dark btn-link" title="" [disabled]="disableReviewLink()" (click)="reviewPendingAudits()">
                         Review pending audits
                         <i *ngIf="pendingAudits == 0" [class]="'fa-circle-check'"></i>

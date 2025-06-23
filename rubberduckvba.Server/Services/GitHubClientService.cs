@@ -42,21 +42,46 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
         var credentials = new Credentials(token);
         var client = new GitHubClient(new ProductHeaderValue(config.UserAgent), new InMemoryCredentialStore(credentials));
 
+        var user = await client.User.Current();
         var orgs = await client.Organization.GetAllForCurrent();
-        var isOrgMember = orgs.Any(e => e.Id == config.RubberduckOrgId);
-        if (!isOrgMember)
+
+        var org = orgs.SingleOrDefault(e => e.Id == RDConstants.OrganisationId);
+        var isOrgMember = org is Organization rdOrg;
+
+        var claims = new List<Claim>
         {
-            return null;
+            new(ClaimTypes.Name, user.Login),
+            new(ClaimTypes.Authentication, token),
+            new("access_token", token)
+        };
+
+        if (isOrgMember && !user.Suspended)
+        {
+            var teams = await client.Organization.Team.GetAllForCurrent();
+
+            var adminTeam = teams.SingleOrDefault(e => e.Name == RDConstants.WebAdminTeam);
+            if (adminTeam is not null)
+            {
+                // authenticated members of the org who are in the admin team can manage the site and approve their own changes
+                claims.Add(new Claim(ClaimTypes.Role, RDConstants.AdminRole));
+            }
+            else
+            {
+                var contributorsTeam = teams.SingleOrDefault(e => e.Name == RDConstants.ContributorsTeam);
+                if (contributorsTeam is not null)
+                {
+                    // members of the contributors team can review/approve/reject suggested changes
+                    claims.Add(new Claim(ClaimTypes.Role, RDConstants.ReviewerRole));
+                }
+                else
+                {
+                    // authenticated members of the org can submit edits
+                    claims.Add(new Claim(ClaimTypes.Role, RDConstants.WriterRole));
+                }
+            }
         }
 
-        var user = await client.User.Current();
-        var identity = new ClaimsIdentity(new[]
-        {
-            new Claim(ClaimTypes.Name, user.Login),
-            new Claim(ClaimTypes.Role, config.OwnerOrg),
-            new Claim(ClaimTypes.Authentication, token),
-            new Claim("access_token", token)
-        }, "github");
+        var identity = new ClaimsIdentity(claims, "github");
         return new ClaimsPrincipal(identity);
     }
 

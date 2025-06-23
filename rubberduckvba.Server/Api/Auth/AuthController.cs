@@ -10,11 +10,13 @@ namespace rubberduckvba.Server.Api.Auth;
 
 public record class UserViewModel
 {
-    public static UserViewModel Anonymous { get; } = new UserViewModel { Name = "(anonymous)", IsAuthenticated = false, IsAdmin = false };
+    public static UserViewModel Anonymous { get; } = new UserViewModel { Name = "(anonymous)", IsAuthenticated = false, IsAdmin = false, IsReviewer = false, IsWriter = false };
 
     public string Name { get; init; } = default!;
     public bool IsAuthenticated { get; init; }
     public bool IsAdmin { get; init; }
+    public bool IsReviewer { get; init; }
+    public bool IsWriter { get; init; }
 }
 
 public record class SignInViewModel
@@ -59,7 +61,9 @@ public class AuthController : RubberduckApiController
                 {
                     Name = name,
                     IsAuthenticated = isAuthenticated,
-                    IsAdmin = role == configuration.Value.OwnerOrg
+                    IsAdmin = role == RDConstants.AdminRole,
+                    IsReviewer = role == RDConstants.AdminRole || role == RDConstants.ReviewerRole,
+                    IsWriter = role == RDConstants.WriterRole || role == RDConstants.AdminRole || role == RDConstants.ReviewerRole,
                 };
 
                 return Ok(model);

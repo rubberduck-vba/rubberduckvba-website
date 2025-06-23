@@ -41,6 +41,9 @@ import { DefaultUrlSerializer, UrlTree } from '@angular/router';
 import { AuthComponent } from './routes/auth/auth.component';
 import { AuthMenuComponent } from './components/auth-menu/auth-menu.component';
 import { AuditsAdminComponent } from './routes/audits/audits.component';
+import { AuditFeatureAdditionComponent } from './components/audits/feature-add.review/feature-add.review.component';
+import { AuditBoxComponent } from './components/audits/audit-box/audit-box.component';
+import { AuditFeatureEditMarkdownComponent } from './components/audits/feature-markdown.review/feature-edit-markdown.review.component';
 
 /**
  * https://stackoverflow.com/a/39560520
@@ -63,6 +66,9 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     AuthComponent,
     AuthMenuComponent,
     AuditsAdminComponent,
+    AuditBoxComponent,
+    AuditFeatureAdditionComponent,
+    AuditFeatureEditMarkdownComponent,
     IndenterComponent,
     FeaturesComponent,
     FeatureComponent,
