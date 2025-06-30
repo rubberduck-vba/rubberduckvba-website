@@ -100,10 +100,6 @@ export class AuthMenuComponent implements OnInit {
     window.location.href = '/audits';
   }
 
-  public disableReviewLink(): boolean {
-    return this.pendingAudits == 0;
-  }
-
   public signin(): void {
     this.auth.signin();
   }

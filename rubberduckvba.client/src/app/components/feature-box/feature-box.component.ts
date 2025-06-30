@@ -12,10 +12,10 @@ import { ApiClientService } from '../../services/api-client.service';
   selector: 'feature-box',
   templateUrl: './feature-box.component.html'
 })
-export class FeatureBoxComponent implements OnInit, OnChanges {
+export class FeatureBoxComponent implements OnInit {
 
   private readonly _info: BehaviorSubject<FeatureViewModel> = new BehaviorSubject<FeatureViewModel>(null!);
-  private readonly _edits: BehaviorSubject<AuditRecordViewModel[]> = new BehaviorSubject<AuditRecordViewModel[]>([]);
+  private readonly _edits: BehaviorSubject<FeatureEditViewModel[]> = new BehaviorSubject<FeatureEditViewModel[]>([]);
   private readonly _ops: BehaviorSubject<FeatureOperationViewModel[]> = new BehaviorSubject<FeatureOperationViewModel[]>([]);
 
   private _audits?: PendingAuditsViewModel;
@@ -43,23 +43,23 @@ export class FeatureBoxComponent implements OnInit, OnChanges {
   @Input()
   public set pendingAudits(value: PendingAuditsViewModel) {
     this._audits = value;
-    this._edits.next(value.edits.filter(e => this.feature && e.featureId == this.feature.id?.toString()));
-    this._ops.next(value.other.filter(e => this.feature && e.featureName == this.feature.name));
+    this._edits.next(value.edits?.filter(e => this.feature && e.featureId == this.feature.id?.toString()));
+    this._ops.next(value.other?.filter(e => this.feature && e.featureName == this.feature.name));
+
+    if (this.pendingEdit) {
+      this.api.formatMarkdown(this.pendingEdit.valueAfter).subscribe(e => this._pendingSummaryHtml = e.content);
+    }
   };
 
-  public get prndingAudits(): PendingAuditsViewModel {
+  public get pendingAudits(): PendingAuditsViewModel {
     return this._audits ?? {
       edits: [],
       other: []
     };
   }
 
-
   constructor(private fa: FaIconLibrary, private api: ApiClientService, private auth: AuthService) {
     fa.addIconPacks(fas);
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
   }
 
   ngOnInit(): void {
@@ -83,6 +83,7 @@ export class FeatureBoxComponent implements OnInit, OnChanges {
   public set feature(value: FeatureViewModel | undefined) {
     if (value != null) {
       this._info.next(value);
+      this.api.formatMarkdown(value.shortDescription).subscribe(e => this._summaryHtml = e.content);
     }
   }
 
@@ -91,7 +92,12 @@ export class FeatureBoxComponent implements OnInit, OnChanges {
   public createAction: AdminAction = AdminAction.Create;
   public deleteAction: AdminAction = AdminAction.Delete;
 
-  public get pendingEdits(): AuditRecordViewModel[] {
+  public showPendingEdit: boolean = true;
+  public get canToggleShowPendingEdit(): boolean {
+    return this.hasPendingEdits && (this.user.isAdmin || this.pendingEdit.author == this.user.name);
+  }
+
+  public get pendingEdits(): FeatureEditViewModel[] {
     return this._edits.getValue();
   }
 
@@ -103,7 +109,7 @@ export class FeatureBoxComponent implements OnInit, OnChanges {
     return this._edits.getValue().length > 0;
   }
 
-  public get pendingEdit(): AuditRecordViewModel {
+  public get pendingEdit(): FeatureEditViewModel {
     return this._edits.getValue()[0];
   }
 
@@ -160,6 +166,15 @@ export class FeatureBoxComponent implements OnInit, OnChanges {
 
   public get subFeature(): SubFeatureViewModel | undefined {
     return this._info.value as SubFeatureViewModel;
+  }
+
+  private _pendingSummaryHtml: string = '';
+  private _summaryHtml: string = '';
+
+  public get summaryHtml(): string {
+    return this.showPendingEdit && this.canToggleShowPendingEdit
+      ? this._pendingSummaryHtml
+      : this._summaryHtml;
   }
 
   public applyChanges(model: any): void {

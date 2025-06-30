@@ -44,6 +44,10 @@ import { AuditsAdminComponent } from './routes/audits/audits.component';
 import { AuditFeatureAdditionComponent } from './components/audits/feature-add.review/feature-add.review.component';
 import { AuditBoxComponent } from './components/audits/audit-box/audit-box.component';
 import { AuditFeatureEditMarkdownComponent } from './components/audits/feature-markdown.review/feature-edit-markdown.review.component';
+import { AuditFeatureDeleteComponent } from './components/audits/feature-delete.review/feature-delete.review.component';
+import { UserProfileComponent } from './routes/profile/user-profile.component';
+import { AuditItemComponent } from './routes/audits/audit-item/audit-item.component';
+import { AuthService } from './services/auth.service';
 
 /**
  * https://stackoverflow.com/a/39560520
@@ -64,10 +68,13 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     AppComponent,
     HomeComponent,
     AuthComponent,
+    UserProfileComponent,
     AuthMenuComponent,
     AuditsAdminComponent,
+    AuditItemComponent,
     AuditBoxComponent,
     AuditFeatureAdditionComponent,
+    AuditFeatureDeleteComponent,
     AuditFeatureEditMarkdownComponent,
     IndenterComponent,
     FeaturesComponent,
@@ -102,7 +109,10 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
       { path: 'inspections/details/:name', redirectTo: 'inspections/:name' },
       // actual routes:
       { path: 'auth/github', component: AuthComponent },
+      { path: 'profile', component: UserProfileComponent },
       { path: 'audits', component: AuditsAdminComponent },
+      { path: 'audits/edits/:id', component: AuditItemComponent},
+      { path: 'audits/ops/:id', component: AuditItemComponent },
       { path: 'features', component: FeaturesComponent },
       { path: 'features/:name', component: FeatureComponent },
       { path: 'inspections/:name', component: InspectionComponent },
@@ -118,6 +128,7 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
   providers: [
     DataService,
     ApiClientService,
+    AuthService,
     NgbAccordionDirective,
     provideHttpClient(withInterceptorsFromDi()),
     {

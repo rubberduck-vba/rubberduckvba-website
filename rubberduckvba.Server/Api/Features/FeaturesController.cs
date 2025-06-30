@@ -152,7 +152,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("features/create")]
-    [Authorize("github", Roles = $"{RDConstants.AdminRole},{RDConstants.ReviewerRole},{RDConstants.WriterRole}")]
+    [Authorize("github", Roles = $"{RDConstants.Roles.AdminRole},{RDConstants.Roles.ReviewerRole}")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromQuery] RepositoryId repository = RepositoryId.Rubberduck, [FromQuery] int? parentId = default)
     {
         var features = await GetFeatureOptions(repository);
@@ -163,7 +163,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpPost("features/create")]
-    [Authorize("github", Roles = $"{RDConstants.AdminRole},{RDConstants.ReviewerRole},{RDConstants.WriterRole}")]
+    [Authorize("github", Roles = $"{RDConstants.Roles.AdminRole},{RDConstants.Roles.ReviewerRole}")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromBody] FeatureEditViewModel model)
     {
         if (model.Id.HasValue || string.IsNullOrWhiteSpace(model.Name) || model.Name.Trim().Length < 3)
@@ -190,7 +190,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpPost("features/update")]
-    [Authorize("github", Roles = $"{RDConstants.AdminRole},{RDConstants.ReviewerRole},{RDConstants.WriterRole}")]
+    [Authorize("github", Roles = $"{RDConstants.Roles.AdminRole},{RDConstants.Roles.ReviewerRole}")]
     public async Task<ActionResult<FeatureEditViewModel>> Update([FromBody] FeatureEditViewModel model)
     {
         if (model.Id.GetValueOrDefault() == default)
@@ -217,7 +217,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpPost("features/delete")]
-    [Authorize("github", Roles = $"{RDConstants.AdminRole},{RDConstants.ReviewerRole},{RDConstants.WriterRole}")]
+    [Authorize("github", Roles = $"{RDConstants.Roles.AdminRole},{RDConstants.Roles.ReviewerRole}")]
     public async Task Delete([FromBody] Feature model)
     {
         if (model.Id == default)

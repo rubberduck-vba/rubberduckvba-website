@@ -29,7 +29,10 @@ export class FeaturesComponent implements OnInit {
   }
 
   public get audits() {
-    return this._audits.getValue();
+    return this._audits.getValue() ?? {
+      edits: [],
+      other: []
+    };
   }
 
   constructor(private api: ApiClientService, private auth: AuthService, private fa: FaIconLibrary) {

@@ -61,9 +61,9 @@ public class AuthController : RubberduckApiController
                 {
                     Name = name,
                     IsAuthenticated = isAuthenticated,
-                    IsAdmin = role == RDConstants.AdminRole,
-                    IsReviewer = role == RDConstants.AdminRole || role == RDConstants.ReviewerRole,
-                    IsWriter = role == RDConstants.WriterRole || role == RDConstants.AdminRole || role == RDConstants.ReviewerRole,
+                    IsAdmin = role == RDConstants.Roles.AdminRole,
+                    IsReviewer = role == RDConstants.Roles.AdminRole || role == RDConstants.Roles.ReviewerRole,
+                    IsWriter = role == RDConstants.Roles.WriterRole || role == RDConstants.Roles.AdminRole || role == RDConstants.Roles.ReviewerRole,
                 };
 
                 return Ok(model);

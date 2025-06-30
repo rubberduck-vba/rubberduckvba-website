@@ -3,7 +3,7 @@
     <div class="card my-2">
         <div class="card-body">
             <h4>{{feature.title}}</h4>
-            <div [innerHtml]="feature.shortDescription"></div>
+            <div [innerHtml]="summaryHtml"></div>
 
             <a *ngIf="hasOwnDetailsPage" role="button" class="btn btn-outline-dark btn-ducky rounded-pill mt-4" href="features/{{feature.name.toLowerCase()}}">
                 <span>Details ▸</span>
@@ -29,7 +29,7 @@
                 </div>
             </div>
         </div>
-        <div *ngIf="feature && user.isAdmin" class="card-footer">
+        <div *ngIf="feature && user.isReviewer" class="card-footer">
             <div class="row text-muted">
                 <div class="col-6 text-start">
                     <button *ngIf="feature.isCreatePending" class="btn btn-success rounded-pill m-1" role="button" (onclick)="onConfirmCreate()"
@@ -45,11 +45,16 @@
                         Reject
                     </button>
                     <div *ngIf="!feature.isCreatePending && !hasPendingDelete && pendingEdits.length > 0">
-                        <a class="btn btn-primary rounded-pill m-1" role="button" href="/admin/review/{{pendingEdit.id}}"
+                        <a class="btn btn-primary rounded-pill m-1" role="button" href="audits/edits/{{pendingEdit.id}}"
                            title="Review as {{user.name}} pending edits submitted {{pendingEdit.dateInserted}} by {{pendingEdit.author}}">
                             <fa-icon class="mx-2" [icon]="'check-circle'"></fa-icon>
                             Pending edits
                         </a>
+                        <div *ngIf="canToggleShowPendingEdit" >
+                            <label class="form-text fw-bold d-inline-block" for="showPendingEditBox">
+                                <input id="showPendingEditBox" type="checkbox" [(ngModel)]="showPendingEdit" />&nbsp;Preview pending edit
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div *ngIf="!feature.isCreatePending" class="col-6 text-end">

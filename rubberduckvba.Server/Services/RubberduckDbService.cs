@@ -1,10 +1,12 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
+using rubberduckvba.Server.Api.Auth;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Model;
 using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services.rubberduckdb;
+using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Json;
 using static Dapper.SqlMapper;
@@ -67,7 +69,9 @@ public interface IAuditService
     Task UpdateFeature(Feature feature, IIdentity identity);
 
 
-    Task<IEnumerable<T>> GetPendingItems<T>(int? featureId = default) where T : AuditEntity;
+    Task<T?> GetItem<T>(int id) where T : AuditEntity;
+    Task<IEnumerable<T>> GetPendingItems<T>(IIdentity? identity, int? featureId = default) where T : AuditEntity;
+    Task<IEnumerable<AuditActivityEntity>> GetAllActivity(IIdentity identity);
 
     Task Approve<T>(T entity, IIdentity identity) where T : AuditEntity;
     Task Reject<T>(T entity, IIdentity identity) where T : AuditEntity;
@@ -96,10 +100,11 @@ public class AuditService : IAuditService
     {
         var procName = entity switch
         {
-            FeatureOpEntity => "audits.ApproveFeatureOp",
-            FeatureEditEntity => "audits.ApproveFeatureEdit",
+            FeatureOpEntity => "[audits].[ApproveFeatureOp]",
+            FeatureEditEntity => "[audits].[ApproveFeatureEdit]",
             _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for approval."),
         };
+
         await ApproveOrReject(procName, entity.Id, identity);
     }
 
@@ -107,8 +112,8 @@ public class AuditService : IAuditService
     {
         var procName = entity switch
         {
-            FeatureOpEntity => "audits.RejectFeatureOp",
-            FeatureEditEntity => "audits.RejectFeatureEdit",
+            FeatureOpEntity => "[audits].[RejectFeatureOp]",
+            FeatureEditEntity => "[audits].[RejectFeatureEdit]",
             _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for approval."),
         };
         await ApproveOrReject(procName, entity.Id, identity);
@@ -116,10 +121,24 @@ public class AuditService : IAuditService
 
     private async Task ApproveOrReject(string procedure, int id, IIdentity identity)
     {
-        var login = identity?.Name ?? throw new ArgumentNullException(nameof(identity), "Identity name cannot be null.");
+        var authorized = false;
+        if (identity is ClaimsIdentity user)
+        {
+            if (user.IsReviewer())
+            {
+                authorized = true;
 
-        using var db = await GetDbConnection();
-        db.Execute($"EXEC {procedure} @id, @login", new { id, login });
+                using var db = await GetDbConnection();
+                db.Execute($"EXEC {procedure} @id, @login", new { id, login = user.Name });
+            }
+        }
+
+        if (!authorized)
+        {
+            // we should never be here; auth middleware should already have prevented unauthorized access to these endpoints.
+            _logger.LogWarning("Unauthorized attempt to use login '{UserName}' to execute '{procedure}'.", identity.Name, procedure);
+            throw new UnauthorizedAccessException("The provided user identity is not authorized to perform this action.");
+        }
     }
 
     public async Task CreateFeature(Feature feature, IIdentity identity)
@@ -168,7 +187,9 @@ public class AuditService : IAuditService
 
         using var db = await GetDbConnection();
 
-        var current = await db.QuerySingleOrDefaultAsync<FeatureEntity>("SELECT * FROM dbo.Features WHERE Id = @featureId", new { featureId = feature.Id });
+        var current = await db.QuerySingleOrDefaultAsync<FeatureEntity>("SELECT * FROM dbo.Features WHERE Id = @featureId", new { featureId = feature.Id })
+            ?? throw new ArgumentOutOfRangeException(nameof(feature), "Invalid feature ID");
+
         var editableFields = await db.QueryAsync<string>("SELECT FieldName FROM audits.v_FeatureColumns");
 
         string? fieldName = null;
@@ -207,13 +228,143 @@ public class AuditService : IAuditService
         });
     }
 
-    public async Task<IEnumerable<T>> GetPendingItems<T>(int? featureId = default) where T : AuditEntity
+    public async Task<IEnumerable<AuditActivityEntity>> GetAllActivity(IIdentity identity)
+    {
+        const string sql = @$"
+SELECT 
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[DateInserted]
+    ,[Activity] = 'SubmitEdit'
+    ,[Description] = src.[FieldName] + ' of ' + ISNULL(f.[Name], '(deleted)')
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureEdits] src
+LEFT JOIN [dbo].[Features] f ON src.[FeatureId] = f.[Id]
+WHERE src.[Author] = @login 
+UNION ALL
+SELECT 
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[ApprovedAt]
+    ,[Activity] = 'ApproveEdit'
+    ,[Description] = src.[FieldName] + ' of ' + ISNULL(f.[Name], '(deleted)')
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureEdits] src
+LEFT JOIN [dbo].[Features] f ON src.[FeatureId] = f.[Id]
+WHERE src.[ApprovedBy] = @login
+UNION ALL
+SELECT 
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[RejectedAt]
+    ,[Activity] = 'RejectEdit'
+    ,[Description] = src.[FieldName] + ' of ' + ISNULL(f.[Name], '(deleted)')
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureEdits] src
+LEFT JOIN [dbo].[Features] f ON src.[FeatureId] = f.[Id]
+WHERE src.[RejectedBy] = @login
+
+UNION ALL
+
+SELECT
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[DateInserted]
+    ,[Activity] = CASE WHEN src.[FeatureAction] = 1 THEN 'SubmitCreate' ELSE 'SubmitDelete' END
+    ,[Description] = src.[FeatureName] + CASE WHEN src.[ParentId] IS NULL THEN ' (top-level)' ELSE ' (' + ISNULL(parent.[Name], 'deleted') + ')' END
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureOps] src
+LEFT JOIN [dbo].[Features] parent ON src.[ParentId] = parent.[Id]
+WHERE src.[Author] = @login
+UNION ALL
+SELECT
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[DateInserted]
+    ,[Activity] = CASE WHEN src.[FeatureAction] = 1 THEN 'ApproveCreate' ELSE 'ApproveDelete' END
+    ,[Description] = src.[FeatureName] + CASE WHEN src.[ParentId] IS NULL THEN ' (top-level)' ELSE ' (' + ISNULL(parent.[Name], 'deleted') + ')' END
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureOps] src
+LEFT JOIN [dbo].[Features] parent ON src.[ParentId] = parent.[Id]
+WHERE src.[ApprovedBy] = @login
+UNION ALL
+SELECT
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[DateInserted]
+    ,[Activity] = CASE WHEN src.[FeatureAction] = 1 THEN 'RejectCreate' ELSE 'RejectDelete' END
+    ,[Description] = src.[FeatureName] + CASE WHEN src.[ParentId] IS NULL THEN ' (top-level)' ELSE ' (' + ISNULL(parent.[Name], 'deleted') + ')' END
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureOps] src
+LEFT JOIN [dbo].[Features] parent ON src.[ParentId] = parent.[Id]
+WHERE src.[RejectedBy] = @login
+
+ORDER BY ActivityTimestamp DESC;
+";
+        using var db = await GetDbConnection();
+        return await db.QueryAsync<AuditActivityEntity>(sql, new { login = identity.Name });
+    }
+
+    public async Task<T?> GetItem<T>(int id) where T : AuditEntity
     {
         using var db = await GetDbConnection();
         var (tableName, columns) = typeof(T).Name switch
         {
-            nameof(FeatureOpEntity) => ("audits.FeatureOps src", string.Join(',', typeof(FeatureOpEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
-            nameof(FeatureEditEntity) => ("audits.FeatureEdits src", string.Join(',', typeof(FeatureEditEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureOpEntity) => ("[audits].[FeatureOps] src", string.Join(',', typeof(FeatureOpEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureEditEntity) => ("[audits].[FeatureEdits] src", string.Join(',', typeof(FeatureEditEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureEditViewEntity) => ("[audits].[v_FeatureEdits] src", string.Join(',', typeof(FeatureEditViewEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
+        };
+
+        var sql = typeof(T).Name switch
+        {
+            nameof(FeatureOpEntity) => $"SELECT {columns} FROM {tableName} INNER JOIN dbo.Features f ON src.[FeatureName] = f.[Name] WHERE src.[Id] = @id",
+            nameof(FeatureEditEntity) => $"SELECT {columns} FROM {tableName} INNER JOIN dbo.Features f ON src.[FeatureId] = f.[Id] WHERE src.[Id] = @id",
+            nameof(FeatureEditViewEntity) => $"SELECT {columns} FROM {tableName} WHERE src.[Id] = @id",
+            _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
+        };
+
+        return await db.QuerySingleOrDefaultAsync<T>(sql, new { id });
+    }
+
+    public async Task<IEnumerable<T>> GetPendingItems<T>(IIdentity? identity, int? featureId = default) where T : AuditEntity
+    {
+        using var db = await GetDbConnection();
+        var (tableName, columns) = typeof(T).Name switch
+        {
+            nameof(FeatureOpEntity) => ("[audits].[FeatureOps] src", string.Join(',', typeof(FeatureOpEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureEditEntity) => ("[audits].[FeatureEdits] src", string.Join(',', typeof(FeatureEditEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureEditViewEntity) => ("[audits].[v_FeatureEdits] src", string.Join(',', typeof(FeatureEditViewEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
             _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
         };
 
@@ -224,12 +375,35 @@ public class AuditService : IAuditService
             {
                 nameof(FeatureOpEntity) => $"SELECT {columns} FROM {tableName} INNER JOIN dbo.Features f ON src.[FeatureName] = f.[Name] WHERE {pendingFilter} AND f.[Id] = {featureId}",
                 nameof(FeatureEditEntity) => $"SELECT {columns} FROM {tableName} WHERE {pendingFilter} AND src.[FeatureId] = {featureId}",
+                nameof(FeatureEditViewEntity) => $"SELECT {columns} FROM {tableName} WHERE {pendingFilter} AND src.[FeatureId] = {featureId}",
                 _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
             }
             : $"SELECT {columns} FROM {tableName} WHERE {pendingFilter}";
 
-        sql += " ORDER BY src.[DateInserted] DESC";
-        return await db.QueryAsync<T>(sql);
+        var rlsFilter = "src.[Author] = @login"; // default to 'mine' only
+
+        if (identity is ClaimsIdentity user)
+        {
+            // unless a user has admin rights, they cannot review their own edits.
+
+            if (user.IsReviewer())
+            {
+                rlsFilter = "1=1";
+            }
+
+            sql += $" AND {rlsFilter} ORDER BY src.[DateInserted] DESC";
+
+            if (rlsFilter.Contains("@login"))
+            {
+                return await db.QueryAsync<T>(sql, new { login = user.Name });
+            }
+            else
+            {
+                return await db.QueryAsync<T>(sql);
+            }
+        }
+
+        return [];
     }
 }
 

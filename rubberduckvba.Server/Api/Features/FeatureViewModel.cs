@@ -242,7 +242,6 @@ public class InspectionsFeatureViewModel : FeatureViewModel
     public InspectionsFeatureViewModel(FeatureGraph model, IEnumerable<QuickFixViewModel> quickFixes, IDictionary<int, Tag> tagsByAssetId, bool summaryOnly = false)
         : base(model, summaryOnly)
     {
-
         Inspections = model.Inspections.OrderBy(e => e.Name).Select(e => new InspectionViewModel(e, quickFixes, tagsByAssetId)).ToArray();
     }
 

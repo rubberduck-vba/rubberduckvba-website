@@ -23,6 +23,8 @@ export interface AuditRecordViewModel {
   approvedBy: string | null,
   rejectedAt: string | null,
   rejectedBy: string | null,
+  isStale: boolean,
+  isPending: boolean,
 }
 
 export interface FeatureEditViewModel extends AuditRecordViewModel {
@@ -496,4 +498,63 @@ export interface UserViewModel {
   isAdmin: boolean;
   isReviewer: boolean;
   isWriter: boolean;
+}
+
+export enum UserActivityType {
+  SubmitEdit = 'SubmitEdit',
+  ApproveEdit = 'ApproveEdit',
+  RejectEdit = 'RejectEdit',
+  SubmitCreate = 'SubmitCreate',
+  ApproveCreate = 'ApproveCreate',
+  RejectCreate = 'RejectCreate',
+  SubmitDelete = 'SubmitDelete',
+  ApproveDelete = 'ApproveDelete',
+  RejectDelete = 'RejectDelete',
+}
+
+export interface UserActivityItem {
+  id: number;
+  activityTimestamp: string;
+  author: string;
+  activity: UserActivityType;
+  description: string;
+  status: UserActivityStatus;
+  reviewedBy?: string;
+}
+
+export enum UserActivityStatus {
+  pending = 'Pending',
+  approved = 'Approved',
+  rejected = 'Rejected'
+}
+
+export class UserActivityItemClass implements UserActivityItem {
+  id: number;
+  activityTimestamp: string;
+  author: string;
+  activity: UserActivityType;
+  description: string;
+  status: UserActivityStatus;
+  reviewedBy?: string;
+
+  constructor(item: UserActivityItem) {
+    this.id = item.id;
+    this.activityTimestamp = item.activityTimestamp;
+    this.author = item.author;
+    this.activity = item.activity;
+    this.description = item.description;
+    this.status = item.status;
+    this.reviewedBy = item.reviewedBy;
+  }
+
+  public get linkUrl(): string {
+    switch (this.activity) {
+      case UserActivityType.SubmitEdit:
+      case UserActivityType.ApproveEdit:
+      case UserActivityType.RejectEdit:
+        return `audits/edits/${this.id}`;
+      default:
+        return `audits/ops/${this.id}`;
+    }
+  }
 }

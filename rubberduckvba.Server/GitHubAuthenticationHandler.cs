@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using rubberduckvba.Server.Services;
+using System.Collections.Concurrent;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
@@ -10,8 +11,6 @@ namespace rubberduckvba.Server;
 public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     public static readonly string AuthCookie = "x-access-token";
-
-    private static readonly object _lock = new object();
 
     private readonly IGitHubClientService _github;
     private readonly IMemoryCache _cache;
@@ -28,6 +27,8 @@ public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationS
         _github = github;
         _cache = cache;
     }
+
+    private static readonly ConcurrentDictionary<string, Task<AuthenticateResult?>> _authApiTask = new();
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -46,20 +47,17 @@ public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationS
                 return Task.FromResult(cachedResult)!;
             }
 
-            lock (_lock)
+            if (TryAuthenticateGitHubToken(token, out var result)
+                && result is AuthenticateResult
+                && result.Ticket is AuthenticationTicket ticket)
             {
-                if (TryAuthenticateGitHubToken(token, out var result)
-                    && result is AuthenticateResult
-                    && result.Ticket is AuthenticationTicket ticket)
-                {
-                    CacheAuthenticatedTicket(token, ticket);
-                    return Task.FromResult(result!);
-                }
+                CacheAuthenticatedTicket(token, ticket);
+                return Task.FromResult(result!);
+            }
 
-                if (TryAuthenticateFromCache(token, out cachedResult))
-                {
-                    return Task.FromResult(cachedResult!);
-                }
+            if (TryAuthenticateFromCache(token, out cachedResult))
+            {
+                return Task.FromResult(cachedResult!);
             }
 
             return Task.FromResult(AuthenticateResult.Fail("Missing or invalid access token"));
@@ -99,16 +97,30 @@ public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationS
     private bool TryAuthenticateGitHubToken(string token, out AuthenticateResult? result)
     {
         result = null;
-        var principal = _github.ValidateTokenAsync(token).GetAwaiter().GetResult();
+        if (_authApiTask.TryGetValue(token, out var task) && task is not null)
+        {
+            result = task.GetAwaiter().GetResult();
+            return result is not null;
+        }
+
+        _authApiTask[token] = AuthenticateGitHubAsync(token);
+        result = _authApiTask[token].GetAwaiter().GetResult();
+
+        _authApiTask[token] = null!;
+        return result is not null;
+    }
+
+    private async Task<AuthenticateResult?> AuthenticateGitHubAsync(string token)
+    {
+        var principal = await _github.ValidateTokenAsync(token);
         if (principal is ClaimsPrincipal)
         {
             Context.User = principal;
             Thread.CurrentPrincipal = principal;
 
             var ticket = new AuthenticationTicket(principal, "github");
-            result = AuthenticateResult.Success(ticket);
-            return true;
+            return AuthenticateResult.Success(ticket);
         }
-        return false;
+        return null;
     }
 }

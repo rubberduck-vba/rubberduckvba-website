@@ -8,8 +8,6 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist\rubberduckvba.client\</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="src\app\components\audits\feature-state.review\" />
-    <Folder Include="src\app\components\audits\feature-delete.review\" />
     <Folder Include="src\app\routes\build\" />
   </ItemGroup>
 </Project>

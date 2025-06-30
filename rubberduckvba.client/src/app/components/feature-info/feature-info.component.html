@@ -7,7 +7,7 @@
             <div *ngIf="feature && user?.isAdmin">
                 <edit-feature [feature]="feature" [action]="editAction"></edit-feature>
             </div>
-            <p [innerHtml]="feature?.description"></p>
+            <p [innerHtml]="formattedDescriptionHtml"></p>
         </div>
         <div [ngClass]="(feature?.name != 'CodeInspections' && feature?.name != 'CommentAnnotations') && (!links || links.length == 0) ? 'col-12' : 'col-lg-4'">
             <!-- subfeatures -->

@@ -2,9 +2,10 @@ import { Component, Input, OnInit, TemplateRef, ViewChild, inject } from "@angul
 import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { BehaviorSubject } from "rxjs";
-import { AuditRecordViewModel, FeatureEditViewModel, FeatureOperationViewModel } from "../../../model/feature.model";
+import { AuditRecordViewModel, FeatureEditViewModel, FeatureOperationViewModel, UserViewModel } from "../../../model/feature.model";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ApiClientService } from "../../../services/api-client.service";
+import { AuthService } from "../../../services/auth.service";
 
 @Component({
   selector: 'audit-box',
@@ -14,11 +15,19 @@ export class AuditBoxComponent implements OnInit {
   private readonly _audit: BehaviorSubject<AuditRecordViewModel> = new BehaviorSubject<AuditRecordViewModel>(null!);
   private _isEdit: boolean = false;
 
-  constructor(private fa: FaIconLibrary, private api: ApiClientService) {
+  @ViewChild('confirmApproveModal', { read: TemplateRef }) confirmApproveModal: TemplateRef<any> | undefined;
+  @ViewChild('confirmRejectModal', { read: TemplateRef }) confirmRejectModal: TemplateRef<any> | undefined;
+
+  constructor(private fa: FaIconLibrary, private api: ApiClientService, private auth: AuthService, private modal: NgbModal) {
     fa.addIconPacks(fas);
   }
 
+  private _user: UserViewModel = null!;
+
   ngOnInit(): void {
+    this.auth.getUser().subscribe(user => {
+      this._user = user;
+    });
   }
 
   @Input()
@@ -30,6 +39,20 @@ export class AuditBoxComponent implements OnInit {
   public set auditEdit(value: FeatureEditViewModel) {
     this._audit.next(value);
     this._isEdit = true;
+  }
+
+  public isCollapsed: boolean = true;
+  public isCollapsible: boolean = true;
+
+  @Input()
+  public set collapsible(value: boolean) {
+    this.isCollapsible = value;
+    this.isCollapsed = this.isCollapsible;
+  }
+
+  public get canReview(): boolean {
+    return this._user && (!this.collapsible || !this.isCollapsed)
+      && this._user.isAdmin || (this._user.isReviewer && this.audit.author != this._user.name);
   }
 
   public get auditOp(): FeatureOperationViewModel | undefined {
@@ -89,14 +112,31 @@ export class AuditBoxComponent implements OnInit {
     return this.auditOp!.featureAction == 2;
   }
 
-  public onConfirmApprove(): void {
-    
+  public confirmApprove(): void {
+    this.modal.open(this.confirmApproveModal);
+  }
+
+  public confirmReject(): void {
+    this.modal.open(this.confirmRejectModal);
+  }
+
+  public onCancelModal(): void {
+    this.modal.dismissAll();
+  }
+
+  public onConfirmApprove(): void {    
+    console.log(`approving audit operation id ${this.audit.id}`);
+    console.log(this.audit);
+    this.modal.dismissAll();
     this.api.approvePendingAudit(this.audit.id).subscribe(() => {
       window.location.reload();
     });
   }
 
   public onConfirmReject(): void {
+    console.log(`rejecting audit operation id ${this.audit.id}`);
+    console.log(this.audit);
+    this.modal.dismissAll();
     this.api.rejectPendingAudit(this.audit.id).subscribe(() => {
       window.location.reload();
     });

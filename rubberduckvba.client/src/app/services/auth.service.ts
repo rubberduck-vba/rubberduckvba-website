@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable, map } from "rxjs";
+import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
 import { environment } from "../../environments/environment";
 import { UserViewModel } from "../model/feature.model";
 import { AuthViewModel, DataService } from "./data.service";
@@ -41,7 +41,7 @@ export class AuthService {
     }
 
     const url = `${environment.apiBaseUrl}auth`;
-    const request = this.data.getAsync<UserViewModel>(url);
+    const request = this.data.getAsync<UserViewModel>(url).pipe(shareReplay(2));
     request.subscribe(user => { this._user.next(user); });
     return request;
   }

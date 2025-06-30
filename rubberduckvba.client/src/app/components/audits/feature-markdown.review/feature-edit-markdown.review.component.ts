@@ -63,6 +63,15 @@ export class AuditFeatureEditMarkdownComponent implements OnInit {
     this.renderPreview();
   }
 
+  private _showBefore: boolean = true;
+  public get showBefore(): boolean {
+    return this._showBefore;
+  }
+
+  public set showBefore(value: boolean) {
+    this._showBefore = value;
+  }
+
   private getDiffHtml(before: string, after: string): string {
     const diff = diffWords(before, after, { ignoreCase: false });
     return diff.map((part: Change) => {

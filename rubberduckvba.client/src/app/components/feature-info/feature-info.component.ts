@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { AdminAction } from '../edit-feature/edit-feature.component';
+import { ApiClientService } from '../../services/api-client.service';
 
 @Component({
   selector: 'feature-info',
@@ -39,13 +40,28 @@ export class FeatureInfoComponent implements OnInit {
   public set feature(value: XmlDocOrFeatureViewModel | undefined) {
     if (value != null) {
       this._info.next(value);
+      this._formattedDescriptionHtml = value.description;
+      this._formattedShortDescriptionHtml = value.shortDescription;
       this.filterByNameOrDescription(this.filterState.filterText)
+
+      this.api.formatMarkdown(value.description).subscribe(e => this._formattedDescriptionHtml = e.content);
+      this.api.formatMarkdown(value.shortDescription).subscribe(e => this._formattedShortDescriptionHtml = e.content);
     }
   }
   public get feature(): XmlDocOrFeatureViewModel | undefined {
-    return this._info.value;
+    return this._info.getValue();
   }
 
+  private _formattedDescriptionHtml: string = '';
+  private _formattedShortDescriptionHtml: string = '';
+
+  public get formattedDescriptionHtml(): string {
+    return this._formattedDescriptionHtml;
+  }
+
+  public get formattedShortDescriptionHtml(): string {
+    return this._formattedShortDescriptionHtml;
+  }
   @Input()
   public set user(value: UserViewModel) {
     this._user.next(value);
@@ -121,7 +137,7 @@ export class FeatureInfoComponent implements OnInit {
     return feature?.links ?? [];
   }
 
-  constructor(private fa: FaIconLibrary) {
+  constructor(private fa: FaIconLibrary, private api: ApiClientService) {
     fa.addIconPacks(fas);
   }
 

@@ -45,7 +45,7 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
         var user = await client.User.Current();
         var orgs = await client.Organization.GetAllForCurrent();
 
-        var org = orgs.SingleOrDefault(e => e.Id == RDConstants.OrganisationId);
+        var org = orgs.SingleOrDefault(e => e.Id == RDConstants.Org.OrganisationId);
         var isOrgMember = org is Organization rdOrg;
 
         var claims = new List<Claim>
@@ -59,26 +59,30 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
         {
             var teams = await client.Organization.Team.GetAllForCurrent();
 
-            var adminTeam = teams.SingleOrDefault(e => e.Name == RDConstants.WebAdminTeam);
+            var adminTeam = teams.SingleOrDefault(e => e.Name == RDConstants.Org.WebAdminTeam);
             if (adminTeam is not null)
             {
                 // authenticated members of the org who are in the admin team can manage the site and approve their own changes
-                claims.Add(new Claim(ClaimTypes.Role, RDConstants.AdminRole));
+                claims.Add(new Claim(ClaimTypes.Role, RDConstants.Roles.AdminRole));
             }
             else
             {
-                var contributorsTeam = teams.SingleOrDefault(e => e.Name == RDConstants.ContributorsTeam);
+                var contributorsTeam = teams.SingleOrDefault(e => e.Name == RDConstants.Org.ContributorsTeam);
                 if (contributorsTeam is not null)
                 {
                     // members of the contributors team can review/approve/reject suggested changes
-                    claims.Add(new Claim(ClaimTypes.Role, RDConstants.ReviewerRole));
+                    claims.Add(new Claim(ClaimTypes.Role, RDConstants.Roles.ReviewerRole));
                 }
                 else
                 {
                     // authenticated members of the org can submit edits
-                    claims.Add(new Claim(ClaimTypes.Role, RDConstants.WriterRole));
+                    claims.Add(new Claim(ClaimTypes.Role, RDConstants.Roles.WriterRole));
                 }
             }
+        }
+        else
+        {
+            claims.Add(new Claim(ClaimTypes.Role, RDConstants.Roles.ReaderRole));
         }
 
         var identity = new ClaimsIdentity(claims, "github");

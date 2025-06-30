@@ -37,15 +37,15 @@ public class FeatureServices(
         return new QuickFix(quickfixRepository.GetById(id));
     }
 
-    public FeatureGraph Get(string name)
+    public FeatureGraph Get(string name, bool formatMarkdown = false)
     {
         var id = featureRepository.GetId(name);
         var feature = featureRepository.GetById(id);
         var children = featureRepository.GetAll(parentId: id).Select(e =>
             new Feature(e with
             {
-                Description = markdown.FormatMarkdownDocument(e.Description, withSyntaxHighlighting: true),
-                ShortDescription = markdown.FormatMarkdownDocument(e.ShortDescription),
+                Description = formatMarkdown ? markdown.FormatMarkdownDocument(e.Description, withSyntaxHighlighting: true) : e.Description,
+                ShortDescription = formatMarkdown ? markdown.FormatMarkdownDocument(e.ShortDescription) : e.ShortDescription,
             })).ToList();
 
         IEnumerable<Inspection> inspections = [];
@@ -74,8 +74,8 @@ public class FeatureServices(
         return new FeatureGraph(
             feature with
             {
-                Description = markdown.FormatMarkdownDocument(feature.Description, withSyntaxHighlighting: true),
-                ShortDescription = markdown.FormatMarkdownDocument(feature.ShortDescription),
+                Description = formatMarkdown ? markdown.FormatMarkdownDocument(feature.Description, withSyntaxHighlighting: true) : feature.Description,
+                ShortDescription = formatMarkdown ? markdown.FormatMarkdownDocument(feature.ShortDescription) : feature.ShortDescription,
             })
         {
             Features = children,

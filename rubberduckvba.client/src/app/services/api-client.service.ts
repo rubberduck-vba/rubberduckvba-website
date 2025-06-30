@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
 import { LatestTags, Tag } from "../model/tags.model";
-import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, MarkdownContent, PendingAuditsViewModel, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, UserViewModel, XmlDocOrFeatureViewModel } from "../model/feature.model";
+import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, MarkdownContent, PendingAuditsViewModel, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, UserActivityItem, UserActivityType, XmlDocOrFeatureViewModel } from "../model/feature.model";
 import { DownloadInfo } from "../model/downloads.model";
 import { DataService } from "./data.service";
 import { environment } from "../../environments/environment.prod";
 import { Observable, map } from "rxjs";
-import { IndenterVersionViewModelClass, IndenterViewModel, IndenterViewModelClass } from "../model/indenter.model";
+import { IndenterViewModel, IndenterViewModelClass } from "../model/indenter.model";
 
 @Injectable()
 export class ApiClientService {
@@ -83,6 +83,11 @@ export class ApiClientService {
     }));
   }
 
+  public getUserActivity(): Observable<UserActivityItem[]> {
+    const url = `${environment.apiBaseUrl}profile/activity`;
+    return this.data.getAsync<UserActivityItem[]>(url);
+  }
+
   public createFeature(model: SubFeatureViewModel): Observable<SubFeatureViewModel> {
     const url = `${environment.apiBaseUrl}features/create`;
     return this.data.postAsync<SubFeatureViewModel, SubFeatureViewModel>(url, model).pipe(map(result => new SubFeatureViewModelClass(result as SubFeatureViewModel)));
@@ -98,8 +103,12 @@ export class ApiClientService {
     return this.data.postAsync<SubFeatureViewModel, undefined>(url, model).pipe(map(() => model));
   }
 
+  public getAudit(id: number, type: UserActivityType): Observable<PendingAuditsViewModel> {
+    const url = `${environment.apiBaseUrl}admin/audits/${id}?type=${type}`;
+    return this.data.getAsync<PendingAuditsViewModel>(url);
+  }
   public getPendingAudits(featureId: number): Observable<PendingAuditsViewModel> {
-    const url = `${environment.apiBaseUrl}admin/audits/${featureId}`;
+    const url = `${environment.apiBaseUrl}admin/audits/feature/${featureId}`;
     return this.data.getAsync<PendingAuditsViewModel>(url);
   }
   public getAllPendingAudits(): Observable<PendingAuditsViewModel> {
