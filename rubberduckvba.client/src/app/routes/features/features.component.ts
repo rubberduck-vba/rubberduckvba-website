@@ -1,17 +1,22 @@
-import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApiClientService } from "../../services/api-client.service";
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { BehaviorSubject } from 'rxjs';
-import { FeatureViewModel, QuickFixViewModel } from '../../model/feature.model';
+import { FeatureViewModel, PendingAuditsViewModel, QuickFixViewModel, UserViewModel } from '../../model/feature.model';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-features',
   templateUrl: './features.component.html',
 })
-export class FeaturesComponent implements OnInit, OnChanges {
+export class FeaturesComponent implements OnInit {
+
+  private readonly _user: BehaviorSubject<UserViewModel> = new BehaviorSubject<UserViewModel>(null!);
+  private readonly _audits: BehaviorSubject<PendingAuditsViewModel> = new BehaviorSubject<PendingAuditsViewModel>(null!);
 
   private readonly _features: BehaviorSubject<FeatureViewModel[]> = new BehaviorSubject<FeatureViewModel[]>(null!);
+
   public set features(value: FeatureViewModel[]) {
     this._features.next(value);
   }
@@ -19,23 +24,37 @@ export class FeaturesComponent implements OnInit, OnChanges {
     return this._features.getValue();
   }
 
-  private readonly _quickFixes: BehaviorSubject<QuickFixViewModel[]> = new BehaviorSubject<QuickFixViewModel[]>(null!);
-  public get quickFixes(): QuickFixViewModel[] {
-    return this._quickFixes.value;
+  public get user() {
+    return this._user.getValue();
   }
 
-  constructor(private api: ApiClientService, private fa: FaIconLibrary) {
+  public get audits() {
+    return this._audits.getValue() ?? {
+      edits: [],
+      other: []
+    };
+  }
+
+  constructor(private api: ApiClientService, private auth: AuthService, private fa: FaIconLibrary) {
     fa.addIconPacks(fas);
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
   }
 
   ngOnInit(): void {
     this.api.getFeatureSummaries().subscribe(result => {
       if (result) {
         this._features.next(result.filter(e => !e.isHidden));
+      }
+    });
+    this.auth.getUser().subscribe(result => {
+      if (result) {
+        this._user.next(result);
+        if (this.user.isAdmin) {
+          this.api.getAllPendingAudits().subscribe(audits => {
+            if (audits) {
+              this._audits.next(audits);
+            }
+          })
+        }
       }
     });
   }

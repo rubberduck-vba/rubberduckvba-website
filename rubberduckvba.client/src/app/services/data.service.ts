@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpContext, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { map, timeout, catchError, throwError, Observable } from "rxjs";
 
@@ -14,13 +14,11 @@ export class DataService {
     let headers = new HttpHeaders()
       .append('accept', 'application/json');
     const token = sessionStorage.getItem('github:access_token');
-    let withCreds = false;
     if (token) {
-      headers = headers.append('X-ACCESS-TOKEN', token);
-      withCreds = true;
+      headers = headers.append('x-access-token', token);
     }
 
-    return this.http.get(url, { headers, withCredentials: withCreds })
+    return this.http.get(url, { headers })
       .pipe(
         map(result => <TResult>result),
         timeout(this.timeout),
@@ -38,15 +36,13 @@ export class DataService {
       .append('Content-Type', 'application/json; charset=utf-8');
 
     const token = sessionStorage.getItem('github:access_token');
-    let withCreds = false;
     if (token) {
-      headers = headers.append('X-ACCESS-TOKEN', token);
-      withCreds = true;
+      headers = headers.append('x-access-token', token);
     }
 
     return (content
-      ? this.http.post(url, content, { headers, withCredentials: withCreds })
-      : this.http.post(url, null, { headers, withCredentials: withCreds }))
+      ? this.http.post(url, content, { headers })
+      : this.http.post(url, null, { headers }))
       .pipe(
         map(result => <TResult>result),
         timeout(this.timeout),

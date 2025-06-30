@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionDirective, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, UrlSerializer } from '@angular/router';
@@ -26,6 +26,8 @@ import { AnnotationItemBoxComponent } from './components/feature-item-box/annota
 import { BlogLinkBoxComponent } from './components/blog-link-box/blog-link-box.component';
 import { QuickFixItemBoxComponent } from './components/feature-item-box/quickfix-item-box/quickfix-item-box.component';
 
+import { EditFeatureComponent } from './components/edit-feature/edit-feature.component';
+
 import { HomeComponent } from './routes/home/home.component';
 import { AboutComponent } from './routes/about/about.component';
 import { FeaturesComponent } from './routes/features/features.component';
@@ -38,6 +40,14 @@ import { IndenterComponent } from './routes/indenter/indenter.component';
 import { DefaultUrlSerializer, UrlTree } from '@angular/router';
 import { AuthComponent } from './routes/auth/auth.component';
 import { AuthMenuComponent } from './components/auth-menu/auth-menu.component';
+import { AuditsAdminComponent } from './routes/audits/audits.component';
+import { AuditFeatureAdditionComponent } from './components/audits/feature-add.review/feature-add.review.component';
+import { AuditBoxComponent } from './components/audits/audit-box/audit-box.component';
+import { AuditFeatureEditMarkdownComponent } from './components/audits/feature-markdown.review/feature-edit-markdown.review.component';
+import { AuditFeatureDeleteComponent } from './components/audits/feature-delete.review/feature-delete.review.component';
+import { UserProfileComponent } from './routes/profile/user-profile.component';
+import { AuditItemComponent } from './routes/audits/audit-item/audit-item.component';
+import { AuthService } from './services/auth.service';
 
 /**
  * https://stackoverflow.com/a/39560520
@@ -58,7 +68,14 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     AppComponent,
     HomeComponent,
     AuthComponent,
+    UserProfileComponent,
     AuthMenuComponent,
+    AuditsAdminComponent,
+    AuditItemComponent,
+    AuditBoxComponent,
+    AuditFeatureAdditionComponent,
+    AuditFeatureDeleteComponent,
+    AuditFeatureEditMarkdownComponent,
     IndenterComponent,
     FeaturesComponent,
     FeatureComponent,
@@ -78,11 +95,13 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     InspectionComponent,
     AnnotationComponent,
     QuickFixComponent,
-    AboutComponent
+    AboutComponent,
+    EditFeatureComponent
   ],
   bootstrap: [AppComponent],
   imports: [
     CommonModule,
+    NgbModule,
     BrowserModule,
     FormsModule,
     RouterModule.forRoot([
@@ -90,6 +109,10 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
       { path: 'inspections/details/:name', redirectTo: 'inspections/:name' },
       // actual routes:
       { path: 'auth/github', component: AuthComponent },
+      { path: 'profile', component: UserProfileComponent },
+      { path: 'audits', component: AuditsAdminComponent },
+      { path: 'audits/edits/:id', component: AuditItemComponent},
+      { path: 'audits/ops/:id', component: AuditItemComponent },
       { path: 'features', component: FeaturesComponent },
       { path: 'features/:name', component: FeatureComponent },
       { path: 'inspections/:name', component: InspectionComponent },
@@ -105,6 +128,8 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
   providers: [
     DataService,
     ApiClientService,
+    AuthService,
+    NgbAccordionDirective,
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide: UrlSerializer,

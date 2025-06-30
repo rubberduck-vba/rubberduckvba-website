@@ -6,28 +6,39 @@ using rubberduckvba.Server.Model;
 using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
 using rubberduckvba.Server.Services.rubberduckdb;
+using System.Security.Principal;
 
 namespace rubberduckvba.Server.Api.Features;
 
+public class MarkdownContentViewModel
+{
+    public string Content { get; init; } = string.Empty;
+}
+
 
 [AllowAnonymous]
+[EnableCors(CorsPolicies.AllowAll)]
 public class FeaturesController : RubberduckApiController
 {
     private readonly CacheService cache;
     private readonly IRubberduckDbService db;
+    private readonly IAuditService admin;
     private readonly FeatureServices features;
     private readonly IRepository<TagAssetEntity> assetsRepository;
     private readonly IRepository<TagEntity> tagsRepository;
+    private readonly IMarkdownFormattingService markdownService;
 
-    public FeaturesController(CacheService cache, IRubberduckDbService db, FeatureServices features,
+    public FeaturesController(CacheService cache, IRubberduckDbService db, IAuditService admin, FeatureServices features, IMarkdownFormattingService markdownService,
         IRepository<TagAssetEntity> assetsRepository, IRepository<TagEntity> tagsRepository, ILogger<FeaturesController> logger)
         : base(logger)
     {
         this.cache = cache;
         this.db = db;
+        this.admin = admin;
         this.features = features;
         this.assetsRepository = assetsRepository;
         this.tagsRepository = tagsRepository;
+        this.markdownService = markdownService;
     }
 
     private static RepositoryOptionViewModel[] RepositoryOptions { get; } =
@@ -38,8 +49,6 @@ public class FeaturesController : RubberduckApiController
             .ContinueWith(t => t.Result.Select(e => new FeatureOptionViewModel { Id = e.Id, Name = e.Name, Title = e.Title }).ToArray());
 
     [HttpGet("features")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult Index()
     {
         return GuardInternalAction(() =>
@@ -68,8 +77,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("features/{name}")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult Info([FromRoute] string name)
     {
         return GuardInternalAction(() =>
@@ -85,8 +92,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("inspections/{name}")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult Inspection([FromRoute] string name)
     {
         return GuardInternalAction(() =>
@@ -107,8 +112,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("annotations/{name}")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult Annotation([FromRoute] string name)
     {
         return GuardInternalAction(() =>
@@ -129,8 +132,6 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("quickfixes/{name}")]
-    [EnableCors(CorsPolicies.AllowAll)]
-    [AllowAnonymous]
     public IActionResult QuickFix([FromRoute] string name)
     {
         return GuardInternalAction(() =>
@@ -151,8 +152,7 @@ public class FeaturesController : RubberduckApiController
     }
 
     [HttpGet("features/create")]
-    [EnableCors(CorsPolicies.AllowAuthenticated)]
-    [Authorize("github")]
+    [Authorize("github", Roles = $"{RDConstants.Roles.AdminRole},{RDConstants.Roles.ReviewerRole}")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromQuery] RepositoryId repository = RepositoryId.Rubberduck, [FromQuery] int? parentId = default)
     {
         var features = await GetFeatureOptions(repository);
@@ -162,9 +162,8 @@ public class FeaturesController : RubberduckApiController
         return Ok(model);
     }
 
-    [HttpPost("create")]
-    [EnableCors(CorsPolicies.AllowAuthenticated)]
-    [Authorize("github")]
+    [HttpPost("features/create")]
+    [Authorize("github", Roles = $"{RDConstants.Roles.AdminRole},{RDConstants.Roles.ReviewerRole}")]
     public async Task<ActionResult<FeatureEditViewModel>> Create([FromBody] FeatureEditViewModel model)
     {
         if (model.Id.HasValue || string.IsNullOrWhiteSpace(model.Name) || model.Name.Trim().Length < 3)
@@ -172,22 +171,26 @@ public class FeaturesController : RubberduckApiController
             return BadRequest("Model is invalid for this endpoint.");
         }
 
-        var existing = await db.ResolveFeature(model.RepositoryId, model.Name);
-        if (existing != null)
+        var existingId = await db.GetFeatureId(model.RepositoryId, model.Name);
+        if (existingId != null)
         {
             return BadRequest($"Model [Name] must be unique; feature '{model.Name}' already exists.");
         }
 
         var feature = model.ToFeature();
-        var result = await db.SaveFeature(feature);
-
-        var features = await GetFeatureOptions(model.RepositoryId);
-        return Ok(new FeatureEditViewModel(result, features, RepositoryOptions));
+        if (User.Identity is IIdentity identity)
+        {
+            await admin.CreateFeature(feature, identity);
+            return Ok(feature);
+        }
+        else
+        {
+            return Unauthorized("User identity is not available.");
+        }
     }
 
     [HttpPost("features/update")]
-    [EnableCors(CorsPolicies.AllowAuthenticated)]
-    [Authorize("github")]
+    [Authorize("github", Roles = $"{RDConstants.Roles.AdminRole},{RDConstants.Roles.ReviewerRole}")]
     public async Task<ActionResult<FeatureEditViewModel>> Update([FromBody] FeatureEditViewModel model)
     {
         if (model.Id.GetValueOrDefault() == default)
@@ -195,16 +198,57 @@ public class FeaturesController : RubberduckApiController
             return BadRequest("Model is invalid for this endpoint.");
         }
 
-        var existing = await db.ResolveFeature(model.RepositoryId, model.Name);
-        if (existing is null)
+        var existingId = await db.GetFeatureId(model.RepositoryId, model.Name);
+        if (existingId is null)
         {
             return BadRequest("Model is invalid for this endpoint.");
         }
 
-        var result = await db.SaveFeature(model.ToFeature());
-        var features = await GetFeatureOptions(model.RepositoryId);
+        var feature = model.ToFeature();
+        if (User.Identity is IIdentity identity)
+        {
+            await admin.UpdateFeature(feature, identity);
+            return Ok(feature);
+        }
+        else
+        {
+            return Unauthorized("User identity is not available.");
+        }
+    }
 
-        return new FeatureEditViewModel(result, features, RepositoryOptions);
+    [HttpPost("features/delete")]
+    [Authorize("github", Roles = $"{RDConstants.Roles.AdminRole},{RDConstants.Roles.ReviewerRole}")]
+    public async Task Delete([FromBody] Feature model)
+    {
+        if (model.Id == default)
+        {
+            throw new ArgumentException("Model is invalid for this endpoint.");
+        }
+        var existing = await db.ResolveFeature(RepositoryId.Rubberduck, model.Name);
+        if (existing is null)
+        {
+            throw new ArgumentException("Model is invalid for this endpoint.");
+        }
+
+        if (User.Identity is IIdentity identity)
+        {
+            await admin.DeleteFeature(existing, identity);
+        }
+        else
+        {
+            throw new UnauthorizedAccessException("User identity is not available.");
+        }
+    }
+
+    [HttpPost("markdown/format")]
+    public MarkdownContentViewModel FormatMarkdown([FromBody] MarkdownContentViewModel model)
+    {
+        var markdown = model.Content;
+        var formatted = markdownService.FormatMarkdownDocument(markdown, withSyntaxHighlighting: true);
+        return new MarkdownContentViewModel
+        {
+            Content = formatted
+        };
     }
 
     private InspectionsFeatureViewModel GetInspections()
@@ -274,5 +318,4 @@ public class FeaturesController : RubberduckApiController
 
         return result;
     }
-
 }

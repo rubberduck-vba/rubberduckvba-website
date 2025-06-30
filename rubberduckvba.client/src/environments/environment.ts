@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://api.rubberduckvba.com/'
+  apiBaseUrl: 'https://localhost:44314/'
 };
 
 /*

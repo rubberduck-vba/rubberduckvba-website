@@ -1,0 +1,78 @@
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-11">
+                <div *ngIf="isEdit"><h4>Edit the {{auditEdit!.fieldName.toLowerCase()}} of {{auditEdit!.featureName}}</h4></div>
+                <div *ngIf="isCreateOp"><h4>Create {{auditOp!.featureName}}</h4></div>
+                <div *ngIf="isDeleteOp"><h4>Delete {{auditOp!.featureName}}</h4></div>
+                <div><fa-icon [icon]="['fas', 'clock']"></fa-icon> Submitted <strong>{{dateSubmitted}}</strong> by <strong>{{author}}</strong></div>
+                <div class="small text-muted" *ngIf="dateModified.length > 0">, last modified <strong>{{dateModified}}</strong></div>
+                <div *ngIf="audit.isStale" class="text-danger">
+                    <fa-icon [icon]="['fas', 'exclamation-triangle']"></fa-icon> This operation is stale
+                </div>
+            </div>
+            <div *ngIf="isCollapsible" class="col-1 text-end">
+                <button type="button" class="btn btn-link" (click)="isCollapsed = !isCollapsed" data-toggle="collapse" data-target="#auditBody" aria-controls="auditBody">
+                    <fa-icon [icon]="['fas', isCollapsed ? 'chevron-down' : 'chevron-up']"></fa-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="collapse" id="auditBody" [ngClass]="{ 'show': !isCollapsible || !isCollapsed}">
+        <div class="card-body">
+            <div *ngIf="isEdit">
+                <review-edit-markdown [audit]="auditEdit"></review-edit-markdown>
+            </div>
+            <div *ngIf="isCreateOp">
+                <review-feature-add [audit]="auditOp"></review-feature-add>
+            </div>
+            <div *ngIf="isDeleteOp">
+                <review-feature-delete [audit]="auditOp"></review-feature-delete>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="!isCollapsed" class="card-footer">
+        <div class="text-end">
+            <button *ngIf="audit.isPending" [disabled]="!canReview" type="button" class="btn btn-outline-danger mx-1" (click)="confirmReject()"><fa-icon [icon]="['fas','trash-can']"></fa-icon>&nbsp;Reject</button>
+            <button *ngIf="audit.isPending" [disabled]="!canReview" type="button" class="btn btn-outline-success ms-1" (click)="confirmApprove()"><fa-icon [icon]="['fas','check']"></fa-icon>&nbsp;Approve</button>
+            <button *ngIf="audit.approvedBy" [disabled]="true" type="button" class="btn btn-outline-primary mx-1"><fa-icon [icon]="['fas','user-check']"></fa-icon>&nbsp;Approved by {{audit.approvedBy}}</button>
+            <button *ngIf="audit.rejectedBy" [disabled]="true" type="button" class="btn btn-outline-secondary ms-1"><fa-icon [icon]="['fas','user-xmark']"></fa-icon>&nbsp;Rejected by {{audit.rejectedBy}}</button>
+        </div>
+    </div>
+</div>
+
+<ng-template #confirmApproveModal let-modal>
+    <div class="modal-header align-content-center">
+        <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;Approve this operation</h4>
+        <button type="button" class="btn-close" aria-label="close" (click)="onCancelModal()"></button>
+    </div>
+    <div class="modal-body my-2 mx-4">
+        <div class="row">
+            <p>Audit record  will be marked as <strong>APPROVED</strong>> and the operation will be carried out immediately. Proceed?</p>
+            <hr />
+            <p class="small text-muted"><fa-icon [icon]="'triangle-exclamation'"></fa-icon> This action will be logged and associated to your login.</p>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="onCancelModal()">Cancel</button>
+        <button type="button" class="btn btn-outline-danger" (click)="onConfirmApprove()">Confirm</button>
+    </div>
+</ng-template>
+
+<ng-template #confirmRejectModal let-modal>
+    <div class="modal-header align-content-center">
+        <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;Reject this operation</h4>
+        <button type="button" class="btn-close" aria-label="close" (click)="onCancelModal()"></button>
+    </div>
+    <div class="modal-body my-2 mx-4">
+        <div class="row">
+            <p>Audit record  will be marked as <strong>REJECTED</strong> . Proceed?</p>
+            <hr />
+            <p class="small text-muted"><fa-icon [icon]="'triangle-exclamation'"></fa-icon> This action will be logged and associated to your login.</p>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="onCancelModal()">Cancel</button>
+        <button type="button" class="btn btn-outline-danger" (click)="onConfirmReject()">Confirm</button>
+    </div>
+</ng-template>

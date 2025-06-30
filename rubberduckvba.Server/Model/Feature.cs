@@ -27,7 +27,7 @@ public record class Feature() : IFeature
         DateTimeInserted = entity.DateTimeInserted;
         DateTimeUpdated = entity.DateTimeUpdated;
         Name = entity.Name;
-        FeatureId = entity.FeatureId;
+        FeatureId = entity.ParentId;
         FeatureName = entity.FeatureName;
         RepositoryId = (Services.RepositoryId)entity.RepositoryId;
         Title = entity.Title;
@@ -69,7 +69,7 @@ public record class Feature() : IFeature
         IsNew = IsNew,
         Name = Name,
         ShortDescription = ShortDescription,
-        FeatureId = FeatureId,
+        ParentId = FeatureId,
         FeatureName = FeatureName,
         RepositoryId = (int)Services.RepositoryId.Rubberduck,
         Title = Title,

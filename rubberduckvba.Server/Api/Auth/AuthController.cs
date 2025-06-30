@@ -10,11 +10,13 @@ namespace rubberduckvba.Server.Api.Auth;
 
 public record class UserViewModel
 {
-    public static UserViewModel Anonymous { get; } = new UserViewModel { Name = "(anonymous)", IsAuthenticated = false, IsAdmin = false };
+    public static UserViewModel Anonymous { get; } = new UserViewModel { Name = "(anonymous)", IsAuthenticated = false, IsAdmin = false, IsReviewer = false, IsWriter = false };
 
     public string Name { get; init; } = default!;
     public bool IsAuthenticated { get; init; }
     public bool IsAdmin { get; init; }
+    public bool IsReviewer { get; init; }
+    public bool IsWriter { get; init; }
 }
 
 public record class SignInViewModel
@@ -59,7 +61,9 @@ public class AuthController : RubberduckApiController
                 {
                     Name = name,
                     IsAuthenticated = isAuthenticated,
-                    IsAdmin = role == configuration.Value.OwnerOrg
+                    IsAdmin = role == RDConstants.Roles.AdminRole,
+                    IsReviewer = role == RDConstants.Roles.AdminRole || role == RDConstants.Roles.ReviewerRole,
+                    IsWriter = role == RDConstants.Roles.WriterRole || role == RDConstants.Roles.AdminRole || role == RDConstants.Roles.ReviewerRole,
                 };
 
                 return Ok(model);
@@ -115,15 +119,16 @@ public class AuthController : RubberduckApiController
     {
         return GuardInternalAction(() =>
         {
-            Logger.LogInformation("OAuth token was received. State: {state}", vm.State);
+            Logger.LogInformation("OAuth code was received. State: {state}", vm.State);
             var clientId = configuration.Value.ClientId;
             var clientSecret = configuration.Value.ClientSecret;
             var agent = configuration.Value.UserAgent;
 
             var github = new GitHubClient(new ProductHeaderValue(agent));
-
             var request = new OauthTokenRequest(clientId, clientSecret, vm.Code);
+
             var token = github.Oauth.CreateAccessToken(request).GetAwaiter().GetResult();
+
             if (token is null)
             {
                 Logger.LogWarning("OAuth access token was not created.");
@@ -171,6 +176,13 @@ public class AuthController : RubberduckApiController
                 Thread.CurrentPrincipal = HttpContext.User;
 
                 Logger.LogInformation("GitHub user with login {login} has signed in with role authorizations '{role}'.", githubUser.Login, configuration.Value.OwnerOrg);
+                Response.Cookies.Append(GitHubAuthenticationHandler.AuthCookie, token, new CookieOptions
+                {
+                    IsEssential = true,
+                    HttpOnly = true,
+                    Secure = true,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                });
                 return token;
             }
             else

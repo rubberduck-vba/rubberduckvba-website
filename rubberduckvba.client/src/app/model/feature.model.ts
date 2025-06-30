@@ -1,5 +1,5 @@
 export interface ViewModel {
-  id: number;
+  id: number | undefined;
   dateInserted: string;
   dateUpdated: string;
   name: string;
@@ -10,6 +10,55 @@ export interface ViewModel {
   isDetailsCollapsed: boolean;
 }
 
+export interface MarkdownContent {
+  content: string;
+}
+
+export interface AuditRecordViewModel {
+  id: number,
+  dateInserted: string,
+  dateModified: string | null,
+  author: string,
+  approvedAt: string | null,
+  approvedBy: string | null,
+  rejectedAt: string | null,
+  rejectedBy: string | null,
+  isStale: boolean,
+  isPending: boolean,
+}
+
+export interface FeatureEditViewModel extends AuditRecordViewModel {
+  featureId: string,
+  featureName: string,
+  fieldName: string,
+  valueBefore: string | null,
+  valueAfter: string,
+}
+
+export enum FeatureOperation {
+  Create = 1,
+  Delete = 2,
+}
+
+export interface FeatureOperationViewModel extends AuditRecordViewModel {
+  featureName: string;
+  featureAction: FeatureOperation;
+  parentId: number | null;
+  name: string | null;
+  title: string | null;
+  shortDescription: string | null;
+  description: string | null;
+  isNew: boolean | null;
+  isHidden: boolean | null;
+  hasImage: boolean | null;
+  links: BlogLink[] | null;
+}
+
+export interface PendingAuditsViewModel {
+  edits: FeatureEditViewModel[];
+  other: FeatureOperationViewModel[];
+}
+
 export interface SubFeatureViewModel extends ViewModel {
   featureId?: number;
   featureName?: string;
@@ -17,6 +66,7 @@ export interface SubFeatureViewModel extends ViewModel {
 
   title: string;
   description: string;
+  shortDescription: string;
 }
 
 export interface XmlDocViewModel extends SubFeatureViewModel {
@@ -33,6 +83,8 @@ export interface FeatureViewModel extends SubFeatureViewModel {
 
   features: FeatureViewModel[];
   links: BlogLink[];
+
+  isCreatePending: boolean;
 }
 
 export interface BlogLink {
@@ -185,7 +237,7 @@ export interface AnnotationViewModel extends XmlDocViewModel {
 export type XmlDocItemViewModel = InspectionViewModel | QuickFixViewModel | AnnotationViewModel;
 
 export class ViewModelBase implements ViewModel {
-  id: number;
+  id: number | undefined;
   dateInserted: string;
   dateUpdated: string;
   name: string;
@@ -242,6 +294,8 @@ export class FeatureViewModelClass extends ViewModelBase {
   features: FeatureViewModel[];
   links: BlogLink[];
 
+  isCreatePending: boolean;
+
   constructor(model: FeatureViewModel) {
     super(model);
     this.title = model.title;
@@ -252,6 +306,7 @@ export class FeatureViewModelClass extends ViewModelBase {
     this.links = model.links?.map(e => new BlogLinkViewModelClass(e)) ?? [];
 
     this.isCollapsed = !model.hasImage;
+    this.isCreatePending = model.isCreatePending;
   }
 }
 
@@ -261,15 +316,27 @@ export class SubFeatureViewModelClass extends ViewModelBase implements SubFeatur
   featureTitle?: string | undefined;
   title: string;
   description: string;
+  shortDescription: string;
 
   constructor(model: SubFeatureViewModel) {
     super(model);
     this.title = model.title;
     this.description = model.description;
+    this.shortDescription = model.shortDescription;
     this.isDetailsCollapsed = true;
     this.featureId = model.featureId;
     this.featureName = model.featureName;
   }
+}
+
+export class EditSubFeatureViewModelClass extends SubFeatureViewModelClass {
+  constructor(model: SubFeatureViewModel) {
+    super(model);
+    this.isDetailsCollapsed = false;
+    this.descriptionPreview = model.description;
+  }
+
+  public descriptionPreview: string;
 }
 
 export class InspectionViewModelClass extends SubFeatureViewModelClass implements InspectionViewModel {
@@ -429,4 +496,65 @@ export interface UserViewModel {
   name: string;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isReviewer: boolean;
+  isWriter: boolean;
+}
+
+export enum UserActivityType {
+  SubmitEdit = 'SubmitEdit',
+  ApproveEdit = 'ApproveEdit',
+  RejectEdit = 'RejectEdit',
+  SubmitCreate = 'SubmitCreate',
+  ApproveCreate = 'ApproveCreate',
+  RejectCreate = 'RejectCreate',
+  SubmitDelete = 'SubmitDelete',
+  ApproveDelete = 'ApproveDelete',
+  RejectDelete = 'RejectDelete',
+}
+
+export interface UserActivityItem {
+  id: number;
+  activityTimestamp: string;
+  author: string;
+  activity: UserActivityType;
+  description: string;
+  status: UserActivityStatus;
+  reviewedBy?: string;
+}
+
+export enum UserActivityStatus {
+  pending = 'Pending',
+  approved = 'Approved',
+  rejected = 'Rejected'
+}
+
+export class UserActivityItemClass implements UserActivityItem {
+  id: number;
+  activityTimestamp: string;
+  author: string;
+  activity: UserActivityType;
+  description: string;
+  status: UserActivityStatus;
+  reviewedBy?: string;
+
+  constructor(item: UserActivityItem) {
+    this.id = item.id;
+    this.activityTimestamp = item.activityTimestamp;
+    this.author = item.author;
+    this.activity = item.activity;
+    this.description = item.description;
+    this.status = item.status;
+    this.reviewedBy = item.reviewedBy;
+  }
+
+  public get linkUrl(): string {
+    switch (this.activity) {
+      case UserActivityType.SubmitEdit:
+      case UserActivityType.ApproveEdit:
+      case UserActivityType.RejectEdit:
+        return `audits/edits/${this.id}`;
+      default:
+        return `audits/ops/${this.id}`;
+    }
+  }
 }

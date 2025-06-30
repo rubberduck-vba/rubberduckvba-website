@@ -17,7 +17,7 @@ public class FeatureEditViewModel
             Repositories = repositories,
 
             RepositoryId = repository,
-            ParentId = parent?.Id,
+            FeatureId = parent?.Id,
             Name = parent is null ? "NewFeature" : $"New{parent.Name}Feature",
             Title = "Feature Title",
             ShortDescription = "A short description; markdown is supported.",
@@ -29,7 +29,7 @@ public class FeatureEditViewModel
         return new Feature
         {
             Id = Id ?? default,
-            FeatureId = ParentId,
+            FeatureId = FeatureId,
             RepositoryId = RepositoryId,
             Name = Name,
             Title = Title,
@@ -43,7 +43,7 @@ public class FeatureEditViewModel
     public FeatureEditViewModel(Feature model, FeatureOptionViewModel[] features, RepositoryOptionViewModel[] repositories)
     {
         Id = model.Id;
-        ParentId = model.FeatureId;
+        FeatureId = model.FeatureId;
         RepositoryId = model.RepositoryId;
 
         Name = model.Name;
@@ -59,7 +59,7 @@ public class FeatureEditViewModel
     }
 
     public int? Id { get; init; }
-    public int? ParentId { get; init; }
+    public int? FeatureId { get; init; }
     public RepositoryId RepositoryId { get; init; }
 
     public string Name { get; init; }

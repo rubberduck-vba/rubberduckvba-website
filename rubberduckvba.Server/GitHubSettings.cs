@@ -13,6 +13,36 @@ public record class ConnectionSettings
     public string HangfireDb { get; set; } = default!;
 }
 
+public static class RDConstants
+{
+    public static class Org
+    {
+        public const int OrganisationId = 12832254;
+        public const string WebAdminTeam = "WebAdmin";
+        public const string ContributorsTeam = "Contributors";
+    }
+
+    public static class Roles
+    {
+        /// <summary>
+        /// Anonymous users have this role.
+        /// </summary>
+        public const string ReaderRole = "rd-reader";
+        /// <summary>
+        /// Authenticated (via GitHub OAuth2) users have this role.
+        /// </summary>
+        public const string WriterRole = "rd-writer";
+        /// <summary>
+        /// Authenticated (via GitHub OAuth2) members of the Rubberduck organization have this role.
+        /// </summary>
+        public const string ReviewerRole = "rd-reviewer";
+        /// <summary>
+        /// Authenticated (via GitHub OAuth2) members of the WebApin team within the Rubberduck organization have this role.
+        /// </summary>
+        public const string AdminRole = "rd-admin";
+    }
+}
+
 public record class GitHubSettings
 {
     public string ClientId { get; set; } = default!;

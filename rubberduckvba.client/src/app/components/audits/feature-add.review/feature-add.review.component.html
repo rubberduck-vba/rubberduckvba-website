@@ -1,0 +1,68 @@
+<div class="card-body">
+    <div class="row">
+        <div class="col-lg-6">
+
+            <div class="row">
+                <label class="form-text fw-bold d-inline-block" for="nameBox">Name</label>
+                <div>
+                    <small class="text-muted form-text">The name of the feature. Must be unique.</small>
+                </div>
+                <span class="m-2">
+                    <input id="nameBox" [disabled] type="text" value="{{audit.featureName}}" maxlength="255" [required]="true" class="p-1" />
+                </span>
+            </div>
+
+            <div class="row">
+                <label class="form-text fw-bold d-inline-block" for="titleBox">Title</label>
+                <div>
+                    <small class="text-muted form-text">The display name of the feature</small>
+                </div>
+                <span class="m-2">
+                    <input id="titleBox" [disabled] type="text" value="{{audit.title}}" maxlength="255" [required]="true" class="p-1" />
+                </span>
+            </div>
+
+            <div class="row">
+                <label class="form-text fw-bold d-inline-block" for="isnewBox">
+                    <input id="isnewBox" [disabled] type="checkbox" value="{{audit.isNew}}" />
+                    New
+                </label>
+                <div>
+                    <small class="text-muted form-text">Whether the feature should have a 'new feature' marker on the site</small>
+                </div>
+            </div>
+
+            <div class="row">
+                <label class="form-text fw-bold d-inline-block" for="summaryBox">Summary</label>
+                <div>
+                    <small class="text-muted form-text">A short description of the feature.</small>
+                </div>
+                <span class="m-2">
+                    <textarea [disabled] value="{{audit.shortDescription}}" type="text" maxlength="1023" rows="5" class="font-monospace p-1 w-100"></textarea>
+                </span>
+            </div>
+
+            <div class="row">
+                <label class="form-text fw-bold d-inline-block" for="summaryBox">Description</label>
+                <div>
+                    <small class="text-muted form-text">A markdown document describing the feature in details.</small>
+                </div>
+                <span class="m-2">
+                    <textarea [disabled] value="{{audit.description}}" type="text" maxlength="8000" rows="5" class="font-monospace p-1 w-100"></textarea>
+                </span>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 [innerText]="audit.title"></h4>
+                </div>
+                <div class="card-body">
+                    <p [innerHTML]="htmlSummary"></p>
+                    <hr />
+                    <p [innerHTML]="htmlDescription"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,10 +3,12 @@ import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
 import { BehaviorSubject } from "rxjs";
 import { UserViewModel } from "../../model/feature.model";
 import { AuthService } from "src/app/services/auth.service";
-import { fas } from "@fortawesome/free-solid-svg-icons";
+import { fa1, fa2, fa3, fa4, fa5, fa6, fa7, fa8, fa9, faCircle, faCircleCheck, faCircleExclamation, fas } from "@fortawesome/free-solid-svg-icons";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { ApiClientService } from "../../services/api-client.service";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { far } from "@fortawesome/free-regular-svg-icons";
 
 @Component({
   selector: 'auth-menu',
@@ -30,6 +32,7 @@ export class AuthMenuComponent implements OnInit {
   public modal = inject(NgbModal);
 
   constructor(private auth: AuthService, private api: ApiClientService, private fa: FaIconLibrary) {
+    fa.addIconPacks(far);
     fa.addIconPacks(fas);
     fa.addIconPacks(fab);
   }
@@ -42,9 +45,40 @@ export class AuthMenuComponent implements OnInit {
     this.auth.getUser().subscribe(result => {
       if (result) {
         this._user.next(result);
+        if (result.isReviewer) {
+          this.api.getAllPendingAudits().subscribe(e => { if (e) { this.pendingAudits = e.edits.length + e.other.length } });
+        }
       }
     });
   }
+
+
+  public pendingAudits: number = 0;
+  public auditsCountIcon(): IconProp {
+    switch (this.pendingAudits) {
+      case 0: return faCircleCheck;
+      case 1: return fa1;
+      case 2: return fa2;
+      case 3: return fa3;
+      case 4: return fa4;
+      case 5: return fa5;
+      case 6: return fa6;
+      case 7: return fa7;
+      case 8: return fa8;
+      case 9: return fa9;
+      default: return faCircleExclamation;
+    }
+  }
+
+  public auditsCountIconClass(): string {
+    if (this.pendingAudits == 0) {
+      return 'text-success';
+    }
+    else {
+      return 'text-danger';
+    }
+  }
+  
 
   public confirm(): void {
     this.modal.open(this.confirmbox);
@@ -60,6 +94,10 @@ export class AuthMenuComponent implements OnInit {
 
   public confirmClearCache(): void {
     this.modal.open(this.confirmclearcachebox);
+  }
+
+  public reviewPendingAudits(): void {
+    window.location.href = '/audits';
   }
 
   public signin(): void {

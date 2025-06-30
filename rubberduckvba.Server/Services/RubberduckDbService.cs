@@ -1,9 +1,15 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
+using rubberduckvba.Server.Api.Auth;
 using rubberduckvba.Server.ContentSynchronization.Pipeline.Sections.Context;
 using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services.rubberduckdb;
+using System.Security.Claims;
+using System.Security.Principal;
+using System.Text.Json;
+using static Dapper.SqlMapper;
 
 namespace rubberduckvba.Server.Services;
 
@@ -56,6 +62,351 @@ public enum RepositoryId
     Rubberduck3 = 2
 }
 
+public interface IAuditService
+{
+    Task CreateFeature(Feature feature, IIdentity identity);
+    Task DeleteFeature(Feature feature, IIdentity identity);
+    Task UpdateFeature(Feature feature, IIdentity identity);
+
+
+    Task<T?> GetItem<T>(int id) where T : AuditEntity;
+    Task<IEnumerable<T>> GetPendingItems<T>(IIdentity? identity, int? featureId = default) where T : AuditEntity;
+    Task<IEnumerable<AuditActivityEntity>> GetAllActivity(IIdentity identity);
+
+    Task Approve<T>(T entity, IIdentity identity) where T : AuditEntity;
+    Task Reject<T>(T entity, IIdentity identity) where T : AuditEntity;
+}
+
+public class AuditService : IAuditService
+{
+    private readonly string _connectionString;
+    private readonly ILogger _logger;
+
+    public AuditService(IOptions<ConnectionSettings> settings, ILogger<ServiceLogger> logger)
+    {
+        _connectionString = settings.Value.RubberduckDb ?? throw new InvalidOperationException("ConnectionString 'RubberduckDb' could not be retrieved.");
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    private async Task<SqlConnection> GetDbConnection()
+    {
+        var db = new SqlConnection(_connectionString);
+        await db.OpenAsync();
+
+        return db;
+    }
+
+    public async Task Approve<T>(T entity, IIdentity identity) where T : AuditEntity
+    {
+        var procName = entity switch
+        {
+            FeatureOpEntity => "[audits].[ApproveFeatureOp]",
+            FeatureEditEntity => "[audits].[ApproveFeatureEdit]",
+            _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for approval."),
+        };
+
+        await ApproveOrReject(procName, entity.Id, identity);
+    }
+
+    public async Task Reject<T>(T entity, IIdentity identity) where T : AuditEntity
+    {
+        var procName = entity switch
+        {
+            FeatureOpEntity => "[audits].[RejectFeatureOp]",
+            FeatureEditEntity => "[audits].[RejectFeatureEdit]",
+            _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for approval."),
+        };
+        await ApproveOrReject(procName, entity.Id, identity);
+    }
+
+    private async Task ApproveOrReject(string procedure, int id, IIdentity identity)
+    {
+        var authorized = false;
+        if (identity is ClaimsIdentity user)
+        {
+            if (user.IsReviewer())
+            {
+                authorized = true;
+
+                using var db = await GetDbConnection();
+                db.Execute($"EXEC {procedure} @id, @login", new { id, login = user.Name });
+            }
+        }
+
+        if (!authorized)
+        {
+            // we should never be here; auth middleware should already have prevented unauthorized access to these endpoints.
+            _logger.LogWarning("Unauthorized attempt to use login '{UserName}' to execute '{procedure}'.", identity.Name, procedure);
+            throw new UnauthorizedAccessException("The provided user identity is not authorized to perform this action.");
+        }
+    }
+
+    public async Task CreateFeature(Feature feature, IIdentity identity)
+    {
+        await SubmitFeatureOp(feature, identity, FeatureOperation.Create);
+    }
+
+    public async Task DeleteFeature(Feature feature, IIdentity identity)
+    {
+        await SubmitFeatureOp(feature, identity, FeatureOperation.Delete);
+    }
+
+    public async Task UpdateFeature(Feature feature, IIdentity identity)
+    {
+        await SubmitFeatureEdit(feature, identity);
+    }
+
+    private async Task SubmitFeatureOp(Feature feature, IIdentity identity, FeatureOperation operation)
+    {
+        var login = identity?.Name ?? throw new ArgumentNullException(nameof(identity), "Identity name cannot be null.");
+        const string sql = $@"INSERT INTO audits.FeatureOps (DateInserted,Author,FeatureName,FeatureAction,ParentId,Title,ShortDescription,Description,IsNew,IsHidden,HasImage,Links)
+                             VALUES (GETDATE(),@login,@name,@action,@parentId,@title,@summary,@description,@isNew,@isHidden,@hasImage,@links);";
+
+        using var db = await GetDbConnection();
+        await db.ExecuteAsync(sql, new
+        {
+            login,
+            name = feature.Name,
+            action = Convert.ToInt32(operation),
+            parentId = feature.FeatureId,
+            title = feature.Title,
+            summary = feature.ShortDescription,
+            description = feature.Description,
+            isNew = feature.IsNew,
+            isHidden = feature.IsHidden,
+            hasImage = feature.HasImage,
+            links = JsonSerializer.Serialize(feature.Links)
+        });
+    }
+
+    private async Task SubmitFeatureEdit(Feature feature, IIdentity identity)
+    {
+        var login = identity?.Name ?? throw new ArgumentNullException(nameof(identity), "Identity name cannot be null.");
+        const string sql = $@"INSERT INTO audits.FeatureEdits (DateInserted,Author,FeatureId,FieldName,ValueBefore,ValueAfter)
+                              VALUES (GETDATE(),@login,@featureId,@fieldName,@valueBefore,@valueAfter);";
+
+        using var db = await GetDbConnection();
+
+        var current = await db.QuerySingleOrDefaultAsync<FeatureEntity>("SELECT * FROM dbo.Features WHERE Id = @featureId", new { featureId = feature.Id })
+            ?? throw new ArgumentOutOfRangeException(nameof(feature), "Invalid feature ID");
+
+        var editableFields = await db.QueryAsync<string>("SELECT FieldName FROM audits.v_FeatureColumns");
+
+        string? fieldName = null;
+        string? valueBefore = null;
+        string? valueAfter = null;
+
+        foreach (var name in editableFields)
+        {
+            var currentProperty = current.GetType().GetProperty(name);
+            var property = feature.GetType().GetProperty(name)!;
+            var asJson = property.PropertyType.IsClass && property.PropertyType != typeof(string);
+
+            valueBefore = asJson ? JsonSerializer.Serialize(currentProperty?.GetValue(current)) : currentProperty?.GetValue(current)?.ToString() ?? string.Empty;
+            valueAfter = asJson ? JsonSerializer.Serialize(property?.GetValue(feature)) : property?.GetValue(feature)?.ToString() ?? string.Empty;
+
+            if (valueBefore != valueAfter)
+            {
+                fieldName = name;
+                break;
+            }
+        }
+
+        if (fieldName is null)
+        {
+            _logger.LogInformation("No change detected for field in feature '{FeatureName}'. No audit entry created.", feature.Name);
+            return;
+        }
+
+        await db.ExecuteAsync(sql, new
+        {
+            login,
+            featureId = feature.Id,
+            fieldName,
+            valueBefore,
+            valueAfter
+        });
+    }
+
+    public async Task<IEnumerable<AuditActivityEntity>> GetAllActivity(IIdentity identity)
+    {
+        const string sql = @$"
+SELECT 
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[DateInserted]
+    ,[Activity] = 'SubmitEdit'
+    ,[Description] = src.[FieldName] + ' of ' + ISNULL(f.[Name], '(deleted)')
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureEdits] src
+LEFT JOIN [dbo].[Features] f ON src.[FeatureId] = f.[Id]
+WHERE src.[Author] = @login 
+UNION ALL
+SELECT 
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[ApprovedAt]
+    ,[Activity] = 'ApproveEdit'
+    ,[Description] = src.[FieldName] + ' of ' + ISNULL(f.[Name], '(deleted)')
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureEdits] src
+LEFT JOIN [dbo].[Features] f ON src.[FeatureId] = f.[Id]
+WHERE src.[ApprovedBy] = @login
+UNION ALL
+SELECT 
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[RejectedAt]
+    ,[Activity] = 'RejectEdit'
+    ,[Description] = src.[FieldName] + ' of ' + ISNULL(f.[Name], '(deleted)')
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureEdits] src
+LEFT JOIN [dbo].[Features] f ON src.[FeatureId] = f.[Id]
+WHERE src.[RejectedBy] = @login
+
+UNION ALL
+
+SELECT
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[DateInserted]
+    ,[Activity] = CASE WHEN src.[FeatureAction] = 1 THEN 'SubmitCreate' ELSE 'SubmitDelete' END
+    ,[Description] = src.[FeatureName] + CASE WHEN src.[ParentId] IS NULL THEN ' (top-level)' ELSE ' (' + ISNULL(parent.[Name], 'deleted') + ')' END
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureOps] src
+LEFT JOIN [dbo].[Features] parent ON src.[ParentId] = parent.[Id]
+WHERE src.[Author] = @login
+UNION ALL
+SELECT
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[DateInserted]
+    ,[Activity] = CASE WHEN src.[FeatureAction] = 1 THEN 'ApproveCreate' ELSE 'ApproveDelete' END
+    ,[Description] = src.[FeatureName] + CASE WHEN src.[ParentId] IS NULL THEN ' (top-level)' ELSE ' (' + ISNULL(parent.[Name], 'deleted') + ')' END
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureOps] src
+LEFT JOIN [dbo].[Features] parent ON src.[ParentId] = parent.[Id]
+WHERE src.[ApprovedBy] = @login
+UNION ALL
+SELECT
+     src.[Id]
+    ,src.[Author]
+    ,[ActivityTimestamp] = src.[DateInserted]
+    ,[Activity] = CASE WHEN src.[FeatureAction] = 1 THEN 'RejectCreate' ELSE 'RejectDelete' END
+    ,[Description] = src.[FeatureName] + CASE WHEN src.[ParentId] IS NULL THEN ' (top-level)' ELSE ' (' + ISNULL(parent.[Name], 'deleted') + ')' END
+    ,[ReviewedBy] = ISNULL(src.[ApprovedBy],src.[RejectedBy])
+    ,[Status] = CASE 
+        WHEN src.[ApprovedAt] IS NOT NULL THEN 'Approved'
+        WHEN src.[RejectedAt] IS NOT NULL THEN 'Rejected'
+        ELSE 'Pending'
+        END
+FROM [audits].[FeatureOps] src
+LEFT JOIN [dbo].[Features] parent ON src.[ParentId] = parent.[Id]
+WHERE src.[RejectedBy] = @login
+
+ORDER BY ActivityTimestamp DESC;
+";
+        using var db = await GetDbConnection();
+        return await db.QueryAsync<AuditActivityEntity>(sql, new { login = identity.Name });
+    }
+
+    public async Task<T?> GetItem<T>(int id) where T : AuditEntity
+    {
+        using var db = await GetDbConnection();
+        var (tableName, columns) = typeof(T).Name switch
+        {
+            nameof(FeatureOpEntity) => ("[audits].[FeatureOps] src", string.Join(',', typeof(FeatureOpEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureEditEntity) => ("[audits].[FeatureEdits] src", string.Join(',', typeof(FeatureEditEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureEditViewEntity) => ("[audits].[v_FeatureEdits] src", string.Join(',', typeof(FeatureEditViewEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
+        };
+
+        var sql = typeof(T).Name switch
+        {
+            nameof(FeatureOpEntity) => $"SELECT {columns} FROM {tableName} INNER JOIN dbo.Features f ON src.[FeatureName] = f.[Name] WHERE src.[Id] = @id",
+            nameof(FeatureEditEntity) => $"SELECT {columns} FROM {tableName} INNER JOIN dbo.Features f ON src.[FeatureId] = f.[Id] WHERE src.[Id] = @id",
+            nameof(FeatureEditViewEntity) => $"SELECT {columns} FROM {tableName} WHERE src.[Id] = @id",
+            _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
+        };
+
+        return await db.QuerySingleOrDefaultAsync<T>(sql, new { id });
+    }
+
+    public async Task<IEnumerable<T>> GetPendingItems<T>(IIdentity? identity, int? featureId = default) where T : AuditEntity
+    {
+        using var db = await GetDbConnection();
+        var (tableName, columns) = typeof(T).Name switch
+        {
+            nameof(FeatureOpEntity) => ("[audits].[FeatureOps] src", string.Join(',', typeof(FeatureOpEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureEditEntity) => ("[audits].[FeatureEdits] src", string.Join(',', typeof(FeatureEditEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            nameof(FeatureEditViewEntity) => ("[audits].[v_FeatureEdits] src", string.Join(',', typeof(FeatureEditViewEntity).GetProperties().Where(p => p.CanWrite).Select(p => $"src.[{p.Name}]"))),
+            _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
+        };
+
+        const string pendingFilter = "src.[ApprovedBy] IS NULL AND src.[RejectedBy] IS NULL";
+
+        var sql = featureId.HasValue
+            ? typeof(T).Name switch
+            {
+                nameof(FeatureOpEntity) => $"SELECT {columns} FROM {tableName} INNER JOIN dbo.Features f ON src.[FeatureName] = f.[Name] WHERE {pendingFilter} AND f.[Id] = {featureId}",
+                nameof(FeatureEditEntity) => $"SELECT {columns} FROM {tableName} WHERE {pendingFilter} AND src.[FeatureId] = {featureId}",
+                nameof(FeatureEditViewEntity) => $"SELECT {columns} FROM {tableName} WHERE {pendingFilter} AND src.[FeatureId] = {featureId}",
+                _ => throw new NotSupportedException($"The entity type {typeof(T).Name} is not supported for pending items retrieval."),
+            }
+            : $"SELECT {columns} FROM {tableName} WHERE {pendingFilter}";
+
+        var rlsFilter = "src.[Author] = @login"; // default to 'mine' only
+
+        if (identity is ClaimsIdentity user)
+        {
+            // unless a user has admin rights, they cannot review their own edits.
+
+            if (user.IsReviewer())
+            {
+                rlsFilter = "1=1";
+            }
+
+            sql += $" AND {rlsFilter} ORDER BY src.[DateInserted] DESC";
+
+            if (rlsFilter.Contains("@login"))
+            {
+                return await db.QueryAsync<T>(sql, new { login = user.Name });
+            }
+            else
+            {
+                return await db.QueryAsync<T>(sql);
+            }
+        }
+
+        return [];
+    }
+}
+
 public interface IRubberduckDbService
 {
     Task<IEnumerable<HangfireJobState>> GetJobStateAsync();
@@ -68,92 +419,29 @@ public interface IRubberduckDbService
     Task<IEnumerable<Feature>> GetTopLevelFeatures(RepositoryId? repositoryId = default);
     Task<FeatureGraph> ResolveFeature(RepositoryId repositoryId, string name);
     Task<int?> GetFeatureId(RepositoryId repositoryId, string name);
-    Task<Feature> SaveFeature(Feature feature);
 }
 
 public class RubberduckDbService : IRubberduckDbService
 {
-    private readonly string _connectionString;
     private readonly TagServices _tagServices;
     private readonly FeatureServices _featureServices;
     private readonly HangfireJobStateRepository _hangfireJobState;
 
-    public RubberduckDbService(IOptions<ConnectionSettings> settings, ILogger<ServiceLogger> logger,
-        TagServices tagServices, FeatureServices featureServices, HangfireJobStateRepository hangfireJobState)
+    public RubberduckDbService(TagServices tagServices, FeatureServices featureServices, HangfireJobStateRepository hangfireJobState)
     {
-        _connectionString = settings.Value.RubberduckDb ?? throw new InvalidOperationException("ConnectionString 'RubberduckDb' could not be retrieved.");
-        Logger = logger;
-
         _tagServices = tagServices;
         _featureServices = featureServices;
         _hangfireJobState = hangfireJobState;
     }
 
-    private ILogger Logger { get; }
-
-    private async Task<SqlConnection> GetDbConnection()
-    {
-        var db = new SqlConnection(_connectionString);
-        await db.OpenAsync();
-
-        return db;
-    }
-
     public async Task<IEnumerable<Tag>> GetAllTagsAsync()
     {
         return _tagServices.GetAllTags();
-        //        const string sql = @"
-        //SELECT
-        //    [Id],
-        //    [DateTimeInserted],
-        //    [DateTimeUpdated],
-        //    [RepositoryId],
-        //    [ReleaseId],
-        //    [Name],
-        //    [DateCreated],
-        //    [InstallerDownloadUrl],
-        //    [InstallerDownloads],
-        //    [IsPreRelease]
-        //FROM [Tags]
-        //";
-        //        using var db = await GetDbConnection();
-
-        //        var sw = Stopwatch.StartNew();
-        //        var result = (await db.QueryAsync<Tag>(sql)).ToArray();
-        //        sw.Stop();
-
-        //        Logger.LogInformation(nameof(GetAllTagsAsync) + " | SELECT operation completed ({results}) | ⏱️ {elapsed}", result.Length, sw.Elapsed);
-        //        return result;
     }
 
     public async Task<IEnumerable<Feature>> GetTopLevelFeatures(RepositoryId? repositoryId = default)
     {
         return _featureServices.Get(topLevelOnly: true);
-        //        const string sql = @"
-        //SELECT 
-        //    [Id],
-        //    [DateTimeInserted],
-        //    [DateTimeUpdated],
-        //    [RepositoryId],
-        //    [Name],
-        //    [Title],
-        //    [ShortDescription],
-        //    [IsNew],
-        //    [HasImage]
-        //FROM [Features] 
-        //WHERE [RepositoryId]=ISNULL(@repositoryId,[RepositoryId])
-        //AND [ParentId] IS NULL
-        //AND [IsHidden]=0;
-        //";
-        //        using var db = await GetDbConnection();
-        //        var parameters = new { repositoryId = (int)(repositoryId ?? RepositoryId.Rubberduck) };
-
-        //        var sw = Stopwatch.StartNew();
-        //        var result = (await db.QueryAsync<Feature>(sql, parameters)).ToArray();
-        //        sw.Stop();
-
-        //        Logger.LogInformation(nameof(GetTopLevelFeatures) + " | SELECT operation completed ({results}) | ⏱️ {elapsed}", result.Length, sw.Elapsed);
-        //        return result;
     }
 
     public async Task<FeatureGraph> ResolveFeature(RepositoryId repositoryId, string name)
@@ -165,156 +453,6 @@ public class RubberduckDbService : IRubberduckDbService
         {
             Features = children.ToArray()
         };
-        //        const string featureSql = @"
-        //WITH feature AS (
-        //    SELECT [Id] 
-        //    FROM [Features] 
-        //    WHERE [RepositoryId]=@repositoryId AND LOWER([Name])=LOWER(@name)
-        //)
-        //SELECT 
-        //    src.[Id],
-        //    src.[ParentId],
-        //    src.[DateTimeInserted],
-        //    src.[DateTimeUpdated],
-        //    src.[Name],
-        //    src.[Title],
-        //    src.[ShortDescription],
-        //    src.[Description],
-        //    src.[IsNew],
-        //    src.[HasImage] 
-        //FROM [Features] src 
-        //INNER JOIN feature ON src.[Id]=feature.[Id] OR src.[ParentId]=feature.[Id];
-        //";
-        //        const string itemSql = @"
-        //WITH feature AS (
-        //    SELECT [Id] 
-        //    FROM [Features] 
-        //    WHERE [RepositoryId]=@repositoryId AND LOWER([Name])=LOWER(@name)
-        //)
-        //SELECT 
-        //    src.[Id],
-        //    src.[DateTimeInserted],
-        //    src.[DateTimeUpdated],
-        //    src.[FeatureId],
-        //    f.[Name] AS [FeatureName],
-        //    f.[Title] AS [FeatureTitle],
-        //    src.[Name],
-        //    src.[Title],
-        //    src.[Description] AS [Summary],
-        //    src.[IsNew],
-        //    src.[IsDiscontinued],
-        //    src.[IsHidden],
-        //    src.[TagAssetId],
-        //    t.[Id] AS [TagId],
-        //    src.[SourceUrl],
-        //    src.[Serialized],
-        //    t.[Name] AS [TagName]
-        //FROM [FeatureXmlDoc] src
-        //INNER JOIN feature ON src.[FeatureId]=feature.[Id]
-        //INNER JOIN [Features] f ON feature.[Id]=f.[Id]
-        //INNER JOIN [TagAssets] a ON src.[TagAssetId]=a.[Id]
-        //INNER JOIN [Tags] t ON a.[TagId]=t.[Id]
-        //ORDER BY src.[IsNew] DESC, src.[IsDiscontinued] DESC, src.[Name];
-        //";
-
-        //        using var db = await GetDbConnection();
-        //        var sw = Stopwatch.StartNew();
-
-        //        var parameters = new { repositoryId, name };
-        //        var features = await db.QueryAsync<Feature>(featureSql, parameters);
-        //        var materialized = features.ToArray();
-
-        //        var items = await db.QueryAsync<FeatureXmlDoc>(itemSql, parameters);
-
-        //        var graph = materialized.Where(e => e.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
-        //            .Select(e => new FeatureGraph(e.ToEntity()) with
-        //            {
-        //                Features = materialized.Where(f => f.ParentId == e.Id).ToImmutableArray(),
-        //                Items = items.ToImmutableArray()
-        //            }).Single();
-        //        sw.Stop();
-
-        //        Logger.LogInformation(nameof(ResolveFeature) + " | All SELECT operations completed | ⏱️ {elapsed}", sw.Elapsed);
-        //        return graph;
-    }
-
-    public async Task<Feature> SaveFeature(Feature feature)
-    {
-        if (feature.Id == default)
-        {
-            _featureServices.Insert(new FeatureGraph(feature.ToEntity()));
-        }
-        else
-        {
-            _featureServices.Update(new FeatureGraph(feature.ToEntity()));
-        }
-        // TODO return with id
-        return feature;
-        //        const string insertSql = @"
-        //INSERT INTO [Features] ([DateTimeInserted],[RepositoryId],[ParentId],[Name],[Title],[ShortDescription],[Description],[IsHidden],[IsNew],[HasImage]) 
-        //VALUES (@ts,@repositoryId,@parentId,@name,@title,@shortDescription,@description,@isHidden,@isNew,@hasImage) 
-        //RETURNING [Id];
-        //";
-        //        const string updateSql = @"
-        //UPDATE [Features] SET
-        //  [DateTimeUpdated]=@ts,
-        //  [RepositoryId]=@repositoryId,
-        //  [ParentId]=@parentId,
-        //  [Name]=@name,
-        //  [Title]=@title,
-        //  [ShortDescription]=@shortDescription,
-        //  [Description]=@description,
-        //  [IsHidden]=@isHidden,
-        //  [IsNew]=@isNew,
-        //  [HasImage]=@hasImage
-        //WHERE [Id]=@id;
-        //";
-        //        Feature result;
-
-        //        using var db = await GetDbConnection();
-        //        using var transaction = await db.BeginTransactionAsync();
-
-        //        if (feature.Id == default)
-        //        {
-        //            var parameters = new
-        //            {
-        //                ts = TimeProvider.System.GetUtcNow().ToTimestampString(),
-        //                repositoryId = feature.RepositoryId,
-        //                parentId = feature.ParentId,
-        //                name = feature.Name,
-        //                shortDescription = feature.ShortDescription,
-        //                description = feature.Description,
-        //                isHidden = feature.IsHidden,
-        //                isNew = feature.IsNew,
-        //                hasImage = feature.HasImage,
-        //            };
-        //            var id = await db.ExecuteAsync(insertSql, parameters, transaction);
-        //            result = feature with { Id = id };
-        //        }
-        //        else
-        //        {
-        //            var parameters = new
-        //            {
-        //                ts = TimeProvider.System.GetUtcNow().ToTimestampString(),
-        //                repositoryId = feature.RepositoryId,
-        //                parentId = feature.ParentId,
-        //                name = feature.Name,
-        //                shortDescription = feature.ShortDescription,
-        //                description = feature.Description,
-        //                isHidden = feature.IsHidden,
-        //                isNew = feature.IsNew,
-        //                hasImage = feature.HasImage,
-        //                id = feature.Id
-        //            };
-        //            await db.ExecuteAsync(updateSql, parameters, transaction);
-        //            result = feature;
-        //        }
-
-        //        var trx = Stopwatch.StartNew();
-        //        await transaction.CommitAsync();
-        //        trx.Stop();
-        //        Logger.LogInformation(nameof(SaveFeature) + " | Transaction committed | ⏱️ {elapsed}", trx.Elapsed);
-        //        return result;
     }
 
     public async Task CreateAsync(IEnumerable<TagGraph> tags, RepositoryId repositoryId)

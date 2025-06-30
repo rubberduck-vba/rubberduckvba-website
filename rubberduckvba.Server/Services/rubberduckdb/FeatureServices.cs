@@ -11,12 +11,14 @@ public class FeatureServices(
     IRepository<QuickFixEntity> quickfixRepository,
     IRepository<AnnotationEntity> annotationRepository)
 {
-    public int GetId(string name) => featureRepository.GetId(name);
+    public int? GetId(string name) => featureRepository.TryGetId(name, out var id) ? id : null;
     public IEnumerable<Feature> Get(bool topLevelOnly = true)
     {
-        return featureRepository.GetAll()
-            .Where(e => !topLevelOnly || e.FeatureId is null)
-            .Select(e => new Feature(e));
+        var features = featureRepository.GetAll();
+        return features
+            .Where(e => e.ParentId == null || !topLevelOnly)
+            .Select(e => new Feature(e))
+            .ToList();
     }
 
     public Inspection GetInspection(string name)
@@ -35,15 +37,15 @@ public class FeatureServices(
         return new QuickFix(quickfixRepository.GetById(id));
     }
 
-    public FeatureGraph Get(string name)
+    public FeatureGraph Get(string name, bool formatMarkdown = false)
     {
         var id = featureRepository.GetId(name);
         var feature = featureRepository.GetById(id);
         var children = featureRepository.GetAll(parentId: id).Select(e =>
             new Feature(e with
             {
-                Description = markdown.FormatMarkdownDocument(e.Description, withSyntaxHighlighting: true),
-                ShortDescription = markdown.FormatMarkdownDocument(e.ShortDescription),
+                Description = formatMarkdown ? markdown.FormatMarkdownDocument(e.Description, withSyntaxHighlighting: true) : e.Description,
+                ShortDescription = formatMarkdown ? markdown.FormatMarkdownDocument(e.ShortDescription) : e.ShortDescription,
             })).ToList();
 
         IEnumerable<Inspection> inspections = [];
@@ -72,8 +74,8 @@ public class FeatureServices(
         return new FeatureGraph(
             feature with
             {
-                Description = markdown.FormatMarkdownDocument(feature.Description, withSyntaxHighlighting: true),
-                ShortDescription = markdown.FormatMarkdownDocument(feature.ShortDescription),
+                Description = formatMarkdown ? markdown.FormatMarkdownDocument(feature.Description, withSyntaxHighlighting: true) : feature.Description,
+                ShortDescription = formatMarkdown ? markdown.FormatMarkdownDocument(feature.ShortDescription) : feature.ShortDescription,
             })
         {
             Features = children,
@@ -94,4 +96,6 @@ public class FeatureServices(
     public void Insert(IEnumerable<Inspection> inspections) => inspectionRepository.Insert(inspections.Select(inspection => inspection.ToEntity()));
     public void Insert(IEnumerable<QuickFix> quickFixes) => quickfixRepository.Insert(quickFixes.Select(quickfix => quickfix.ToEntity()));
     public void Insert(IEnumerable<Annotation> annotations) => annotationRepository.Insert(annotations.Select(annotation => annotation.ToEntity()));
+
+    public void DeleteFeature(int id) => featureRepository.Delete(id);
 }

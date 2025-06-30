@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
 import { LatestTags, Tag } from "../model/tags.model";
-import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, UserViewModel, XmlDocOrFeatureViewModel } from "../model/feature.model";
+import { AnnotationViewModel, AnnotationViewModelClass, AnnotationsFeatureViewModel, AnnotationsFeatureViewModelClass, FeatureViewModel, FeatureViewModelClass, InspectionViewModel, InspectionViewModelClass, InspectionsFeatureViewModel, InspectionsFeatureViewModelClass, MarkdownContent, PendingAuditsViewModel, QuickFixViewModel, QuickFixViewModelClass, QuickFixesFeatureViewModel, QuickFixesFeatureViewModelClass, SubFeatureViewModel, SubFeatureViewModelClass, UserActivityItem, UserActivityType, XmlDocOrFeatureViewModel } from "../model/feature.model";
 import { DownloadInfo } from "../model/downloads.model";
 import { DataService } from "./data.service";
 import { environment } from "../../environments/environment.prod";
 import { Observable, map } from "rxjs";
-import { IndenterVersionViewModelClass, IndenterViewModel, IndenterViewModelClass } from "../model/indenter.model";
+import { IndenterViewModel, IndenterViewModelClass } from "../model/indenter.model";
 
 @Injectable()
 export class ApiClientService {
@@ -81,5 +81,55 @@ export class ApiClientService {
       model.indentedCode = lines.join('\n');
       return model;
     }));
+  }
+
+  public getUserActivity(): Observable<UserActivityItem[]> {
+    const url = `${environment.apiBaseUrl}profile/activity`;
+    return this.data.getAsync<UserActivityItem[]>(url);
+  }
+
+  public createFeature(model: SubFeatureViewModel): Observable<SubFeatureViewModel> {
+    const url = `${environment.apiBaseUrl}features/create`;
+    return this.data.postAsync<SubFeatureViewModel, SubFeatureViewModel>(url, model).pipe(map(result => new SubFeatureViewModelClass(result as SubFeatureViewModel)));
+  }
+
+  public saveFeature(model: SubFeatureViewModel): Observable<SubFeatureViewModel> {
+    const url = `${environment.apiBaseUrl}features/update`;
+    return this.data.postAsync<SubFeatureViewModel, SubFeatureViewModel>(url, model).pipe(map(result => new SubFeatureViewModelClass(result as SubFeatureViewModel)));
+  }
+
+  public deleteFeature(model: SubFeatureViewModel): Observable<SubFeatureViewModel> {
+    const url = `${environment.apiBaseUrl}features/delete`;
+    return this.data.postAsync<SubFeatureViewModel, undefined>(url, model).pipe(map(() => model));
+  }
+
+  public getAudit(id: number, type: UserActivityType): Observable<PendingAuditsViewModel> {
+    const url = `${environment.apiBaseUrl}admin/audits/${id}?type=${type}`;
+    return this.data.getAsync<PendingAuditsViewModel>(url);
+  }
+  public getPendingAudits(featureId: number): Observable<PendingAuditsViewModel> {
+    const url = `${environment.apiBaseUrl}admin/audits/feature/${featureId}`;
+    return this.data.getAsync<PendingAuditsViewModel>(url);
+  }
+  public getAllPendingAudits(): Observable<PendingAuditsViewModel> {
+    const url = `${environment.apiBaseUrl}admin/audits/pending`;
+    return this.data.getAsync<PendingAuditsViewModel>(url);
+  }
+
+  public approvePendingAudit(auditId: number): Observable<void> {
+    const url = `${environment.apiBaseUrl}admin/audits/approve/${auditId}`;
+    return this.data.postAsync(url);
+  }
+  public rejectPendingAudit(auditId: number): Observable<void> {
+    const url = `${environment.apiBaseUrl}admin/audits/reject/${auditId}`;
+    return this.data.postAsync(url);
+  }
+
+  public formatMarkdown(raw: string): Observable<MarkdownContent> {
+    const url = `${environment.apiBaseUrl}markdown/format`;
+    const content: MarkdownContent = {
+      content: raw
+    };
+    return this.data.postAsync<MarkdownContent, MarkdownContent>(url, content);
   }
 }
