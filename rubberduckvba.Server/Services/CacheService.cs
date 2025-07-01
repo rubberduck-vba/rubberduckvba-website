@@ -4,6 +4,8 @@ using rubberduckvba.Server.Api.Features;
 using rubberduckvba.Server.Api.Tags;
 using rubberduckvba.Server.Data;
 using rubberduckvba.Server.Model;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace rubberduckvba.Server.Services;
 
@@ -40,6 +42,9 @@ public class CacheService
         TagsJobState = state.TryGetValue(TagsJobName, out var tagsJobState) ? tagsJobState : null;
         XmldocJobState = state.TryGetValue(XmldocJobName, out var xmldocsJobState) ? xmldocsJobState : null;
     }
+
+    public bool TryGetHtml(string markdown, out string? cached) => TryReadFromCache($"md:{Encoding.UTF8.GetString(SHA256.HashData(Encoding.UTF8.GetBytes(markdown)))}", out cached);
+    public void CacheHtml(string markdown, string html) => Write($"md:{Encoding.UTF8.GetString(SHA256.HashData(Encoding.UTF8.GetBytes(markdown)))}", html);
 
     public bool TryGetLatestTags(out LatestTagsViewModel? cached) => TryReadFromTagsCache("tags/latest", out cached);
     public bool TryGetAvailableDownloads(out AvailableDownload[]? cached) => TryReadFromTagsCache("downloads", out cached);
@@ -175,6 +180,12 @@ public class CacheService
         var result = _cache.TryGetValue(key, out cached);
         _logger.LogDebug("XmldocCache hit: '{key}' (valid: {result})", key, result);
 
+        return result;
+    }
+
+    private bool TryReadFromCache(string key, out string? cached)
+    {
+        var result = _cache.TryGetValue(key, out cached);
         return result;
     }
 }

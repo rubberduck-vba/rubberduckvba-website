@@ -43,11 +43,16 @@ export class FeatureBoxComponent implements OnInit {
   @Input()
   public set pendingAudits(value: PendingAuditsViewModel) {
     this._audits = value;
-    this._edits.next(value.edits?.filter(e => this.feature && e.featureId == this.feature.id?.toString()));
+    this._edits.next(value.edits?.filter(e => this.feature && e.featureName == this.feature.name));
     this._ops.next(value.other?.filter(e => this.feature && e.featureName == this.feature.name));
 
     if (this.pendingEdit) {
-      this.api.formatMarkdown(this.pendingEdit.valueAfter).subscribe(e => this._pendingSummaryHtml = e.content);
+      if (this.pendingEdit.fieldName == 'ShortDescription') {
+        this.api.formatMarkdown(this.pendingEdit.valueAfter).subscribe(e => this._pendingSummaryHtml = e.content);
+      }
+      else if (this.pendingEdit.fieldName == 'Description') {
+        this.api.formatMarkdown(this.pendingEdit.valueAfter).subscribe(e => this._pendingDescriptionHtml = e.content);
+      }
     }
   };
 
@@ -63,6 +68,7 @@ export class FeatureBoxComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.api.formatMarkdown(this.feature?.description ?? '').subscribe(e => this._descriptionHtml = e.content);
   }
 
   public get isProtected(): boolean {
@@ -84,6 +90,7 @@ export class FeatureBoxComponent implements OnInit {
     if (value != null) {
       this._info.next(value);
       this.api.formatMarkdown(value.shortDescription).subscribe(e => this._summaryHtml = e.content);
+      this.api.formatMarkdown(value.description).subscribe(e => this._descriptionHtml = e.content);
     }
   }
 
@@ -98,7 +105,7 @@ export class FeatureBoxComponent implements OnInit {
   }
 
   public get pendingEdits(): FeatureEditViewModel[] {
-    return this._edits.getValue();
+    return this._edits.getValue().filter(e => e.fieldName == 'ShortDescription' || e.fieldName == 'Description');
   }
 
   public get pendingOperations(): FeatureOperationViewModel[] {
@@ -106,11 +113,11 @@ export class FeatureBoxComponent implements OnInit {
   }
 
   public get hasPendingEdits(): boolean {
-    return this._edits.getValue().length > 0;
+    return this.pendingEdits.length > 0;
   }
 
   public get pendingEdit(): FeatureEditViewModel {
-    return this._edits.getValue()[0];
+    return this.pendingEdits[0];
   }
 
   public get hasPendingDelete(): boolean {
@@ -172,9 +179,18 @@ export class FeatureBoxComponent implements OnInit {
   private _summaryHtml: string = '';
 
   public get summaryHtml(): string {
-    return this.showPendingEdit && this.canToggleShowPendingEdit
+    return this.showPendingEdit && this.canToggleShowPendingEdit && this.pendingEdit.fieldName == 'ShortDescription'
       ? this._pendingSummaryHtml
       : this._summaryHtml;
+  }
+
+  private _pendingDescriptionHtml: string = '';
+
+  private _descriptionHtml: string = '';
+  public get descriptionHtml(): string {
+    return this.showPendingEdit && this.canToggleShowPendingEdit && this.pendingEdit.fieldName == 'Description'
+      ? this._pendingDescriptionHtml
+      : this._descriptionHtml;
   }
 
   public applyChanges(model: any): void {

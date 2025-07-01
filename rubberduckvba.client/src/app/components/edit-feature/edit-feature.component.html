@@ -10,6 +10,12 @@
     </span>
 </button>
 
+<button *ngIf="action == 'links'" type="button" class="btn btn-outline-secondary rounded-pill mx-1" (click)="doAction()" [disabled]="disabled">
+    <span>
+        <fa-icon [icon]="'link'"></fa-icon>&nbsp;Edit Links
+    </span>
+</button>
+
 <button *ngIf="action == 'create'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
     <span>
         <fa-icon [icon]="'plus-circle'"></fa-icon>&nbsp;Add Feature
@@ -30,13 +36,25 @@
         </div>
         <div class="modal-body my-2 mx-4">
             <div class="row">
-                <h6>Edit {{action == 'edit' ? 'description' : 'summary'}}</h6>
+                <h6>Edit {{action == 'edit' ? 'description' : (action == 'summary' ? 'summary' : 'links')}}</h6>
             </div>
             <div class="row">
+
                 <textarea *ngIf="action == 'edit'" [(ngModel)]="feature.description" type="text" maxlength="8000" rows="10" class="font-monospace text-nowrap p-1">
                 </textarea>
+
                 <textarea *ngIf="action == 'summary'" [(ngModel)]="feature.shortDescription" type="text" maxlength="1023" rows="5" class="font-monospace p-1">
                 </textarea>
+
+                <div *ngIf="action == 'links'">
+                    <div *ngFor="let link of feature.links">
+                        <edit-blog-link [blogLink]="link" (removeLink)="onRemoveLink(link)"></edit-blog-link>
+                    </div>
+                    <div class="text-end">
+                        <button class="btn btn-outline-success" (click)="onAddLink()"><fa-icon [icon]="['fas', 'plus-circle']"></fa-icon>&nbsp;Add</button>
+                    </div>
+                </div>
+
             </div>
             <div class="row">
                 <span *ngIf="action == 'edit'" class="text-small text-muted text-end">{{feature.description.length}}</span>

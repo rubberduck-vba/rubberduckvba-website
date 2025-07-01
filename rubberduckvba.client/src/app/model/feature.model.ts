@@ -51,7 +51,7 @@ export interface FeatureOperationViewModel extends AuditRecordViewModel {
   isNew: boolean | null;
   isHidden: boolean | null;
   hasImage: boolean | null;
-  links: BlogLink[] | null;
+  links: BlogLink[];
 }
 
 export interface PendingAuditsViewModel {
@@ -67,6 +67,8 @@ export interface SubFeatureViewModel extends ViewModel {
   title: string;
   description: string;
   shortDescription: string;
+
+  links: BlogLink[];
 }
 
 export interface XmlDocViewModel extends SubFeatureViewModel {
@@ -318,6 +320,8 @@ export class SubFeatureViewModelClass extends ViewModelBase implements SubFeatur
   description: string;
   shortDescription: string;
 
+  links: BlogLink[];
+
   constructor(model: SubFeatureViewModel) {
     super(model);
     this.title = model.title;
@@ -326,6 +330,7 @@ export class SubFeatureViewModelClass extends ViewModelBase implements SubFeatur
     this.isDetailsCollapsed = true;
     this.featureId = model.featureId;
     this.featureName = model.featureName;
+    this.links = model.links;
   }
 }
 

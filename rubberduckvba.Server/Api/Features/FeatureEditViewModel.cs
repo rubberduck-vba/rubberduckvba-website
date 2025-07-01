@@ -1,4 +1,5 @@
 ﻿using rubberduckvba.Server.Model;
+using rubberduckvba.Server.Model.Entity;
 using rubberduckvba.Server.Services;
 
 namespace rubberduckvba.Server.Api.Features;
@@ -36,7 +37,8 @@ public class FeatureEditViewModel
             ShortDescription = ShortDescription,
             Description = Description,
             IsHidden = IsHidden,
-            IsNew = IsNew
+            IsNew = IsNew,
+            Links = Links
         };
     }
 
@@ -56,6 +58,8 @@ public class FeatureEditViewModel
 
         Features = features;
         Repositories = repositories;
+
+        Links = model.Links;
     }
 
     public int? Id { get; init; }
@@ -72,4 +76,6 @@ public class FeatureEditViewModel
 
     public FeatureOptionViewModel[] Features { get; init; } = [];
     public RepositoryOptionViewModel[] Repositories { get; init; } = [];
+
+    public BlogLink[] Links { get; init; } = [];
 }

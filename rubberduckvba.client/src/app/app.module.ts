@@ -48,6 +48,7 @@ import { AuditFeatureDeleteComponent } from './components/audits/feature-delete.
 import { UserProfileComponent } from './routes/profile/user-profile.component';
 import { AuditItemComponent } from './routes/audits/audit-item/audit-item.component';
 import { AuthService } from './services/auth.service';
+import { EditBlogLinkComponent } from './components/edit-feature/edit-bloglink/edit-bloglink.component';
 
 /**
  * https://stackoverflow.com/a/39560520
@@ -96,7 +97,8 @@ export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     AnnotationComponent,
     QuickFixComponent,
     AboutComponent,
-    EditFeatureComponent
+    EditFeatureComponent,
+    EditBlogLinkComponent
   ],
   bootstrap: [AppComponent],
   imports: [
