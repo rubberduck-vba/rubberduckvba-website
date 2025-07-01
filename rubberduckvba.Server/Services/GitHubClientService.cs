@@ -42,51 +42,52 @@ public class GitHubClientService(IOptions<GitHubSettings> configuration, ILogger
         var credentials = new Credentials(token);
         var client = new GitHubClient(new ProductHeaderValue(config.UserAgent), new InMemoryCredentialStore(credentials));
 
-        var user = await client.User.Current();
-        var orgs = await client.Organization.GetAllForCurrent();
-
-        var org = orgs.SingleOrDefault(e => e.Id == RDConstants.Org.OrganisationId);
-        var isOrgMember = org is Organization rdOrg;
-
+        var (name, role) = await DetermineUserRole(client);
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Name, user.Login),
+            new(ClaimTypes.Name, name),
+            new(ClaimTypes.Role, role),
             new(ClaimTypes.Authentication, token),
             new("access_token", token)
         };
 
-        if (isOrgMember && !user.Suspended)
-        {
-            var teams = await client.Organization.Team.GetAllForCurrent();
+        return new ClaimsPrincipal(new ClaimsIdentity(claims, "github"));
+    }
 
-            var adminTeam = teams.SingleOrDefault(e => e.Name == RDConstants.Org.WebAdminTeam);
-            if (adminTeam is not null)
+    private static async Task<(string name, string role)> DetermineUserRole(GitHubClient client)
+    {
+        var role = RDConstants.Roles.ReaderRole;
+
+        var user = await client.User.Current();
+        if (!user.Suspended)
+        {
+            // only authenticated GitHub users in good standing can submit edits
+            role = RDConstants.Roles.WriterRole;
+
+            var orgs = await client.Organization.GetAllForCurrent();
+            if (orgs.SingleOrDefault(e => e.Id == RDConstants.Org.OrganisationId) is not null)
             {
-                // authenticated members of the org who are in the admin team can manage the site and approve their own changes
-                claims.Add(new Claim(ClaimTypes.Role, RDConstants.Roles.AdminRole));
-            }
-            else
-            {
-                var contributorsTeam = teams.SingleOrDefault(e => e.Name == RDConstants.Org.ContributorsTeam);
-                if (contributorsTeam is not null)
+                var teams = await client.Organization.Team.GetAllForCurrent();
+
+                // members of the Rubberduck organization are welcome to review/approve/reject suggested changes
+                // NOTE: opportunity for eventual distinction between members and contributors
+                role = RDConstants.Roles.ReviewerRole;
+
+                //// members of the contributors team can review/approve/reject suggested changes
+                //if (teams.SingleOrDefault(e => e.Name == RDConstants.Org.ContributorsTeam) is not null)
+                //{
+                //    role = RDConstants.Roles.ReviewerRole;
+                //}
+
+                // authenticated org members in the WebAdmin team can manage the site and approve their own changes
+                if (teams.SingleOrDefault(e => e.Name == RDConstants.Org.WebAdminTeam) is not null)
                 {
-                    // members of the contributors team can review/approve/reject suggested changes
-                    claims.Add(new Claim(ClaimTypes.Role, RDConstants.Roles.ReviewerRole));
-                }
-                else
-                {
-                    // authenticated members of the org can submit edits
-                    claims.Add(new Claim(ClaimTypes.Role, RDConstants.Roles.WriterRole));
+                    role = RDConstants.Roles.AdminRole;
                 }
             }
         }
-        else
-        {
-            claims.Add(new Claim(ClaimTypes.Role, RDConstants.Roles.ReaderRole));
-        }
 
-        var identity = new ClaimsIdentity(claims, "github");
-        return new ClaimsPrincipal(identity);
+        return (user.Login, role);
     }
 
     public async Task<IEnumerable<TagGraph>> GetAllTagsAsync()

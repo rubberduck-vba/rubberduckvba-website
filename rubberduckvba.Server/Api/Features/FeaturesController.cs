@@ -244,11 +244,13 @@ public class FeaturesController : RubberduckApiController
     public MarkdownContentViewModel FormatMarkdown([FromBody] MarkdownContentViewModel model)
     {
         var markdown = model.Content;
-        var formatted = markdownService.FormatMarkdownDocument(markdown, withSyntaxHighlighting: true);
-        return new MarkdownContentViewModel
+        if (!cache.TryGetHtml(markdown, out var html))
         {
-            Content = formatted
-        };
+            html = markdownService.FormatMarkdownDocument(markdown, withSyntaxHighlighting: true);
+            cache.CacheHtml(markdown, html);
+        }
+
+        return new MarkdownContentViewModel { Content = html! };
     }
 
     private InspectionsFeatureViewModel GetInspections()

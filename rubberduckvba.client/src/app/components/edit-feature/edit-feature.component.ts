@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, TemplateRef, ViewChild, inject, input } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
-import { EditSubFeatureViewModelClass, MarkdownContent, SubFeatureViewModel, SubFeatureViewModelClass, UserViewModel } from "../../model/feature.model";
+import { BlogLink, BlogLinkViewModelClass, EditSubFeatureViewModelClass, MarkdownContent, SubFeatureViewModel, SubFeatureViewModelClass, UserViewModel } from "../../model/feature.model";
 import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
@@ -9,6 +9,7 @@ import { ApiClientService } from "../../services/api-client.service";
 export enum AdminAction {
   Edit = 'edit',
   EditSummary = 'summary',
+  EditLinks = 'links',
   Create = 'create',
   Delete = 'delete',
 }
@@ -98,6 +99,7 @@ export class EditFeatureComponent implements OnInit {
         featureTitle: parentTitle,
         isCollapsed: false,
         isDetailsCollapsed: true,
+        links: []
       });
     }
 
@@ -105,7 +107,7 @@ export class EditFeatureComponent implements OnInit {
   }
 
   public onConfirmChanges(): void {
-    this.modal.dismissAll();
+    this.modal.dismissAll();    
     this.api.saveFeature(this.feature).subscribe(saved => {
       window.location.reload();
     });
@@ -137,5 +139,18 @@ export class EditFeatureComponent implements OnInit {
     this.api.deleteFeature(this.feature).subscribe(() => {
       window.location.reload();
     });
+  }
+
+  public onRemoveLink(link: BlogLink): void {
+    this.feature.links = this.feature.links!.filter(e => e.name.length > 0 && e.url.length > 0 && (e.name != link.name || e.url != link.url));
+  }
+
+  public onAddLink(): void {
+    this.feature.links.push(new BlogLinkViewModelClass({
+      name: 'Title',
+      author: 'Author',
+      published: new Date().toISOString().substring(0, 10),
+      url: 'https://rubberduckvba.blog/...'
+    }));
   }
 }

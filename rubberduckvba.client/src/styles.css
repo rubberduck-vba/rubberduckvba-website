@@ -37,7 +37,10 @@ p {
 }
 
 .document-img {
-    width: 40%;
+  width: 40%;
+  border: solid;
+  border-width: 1px;
+  border-color: black;
 }
 
 .modal-featurebox {

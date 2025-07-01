@@ -14,7 +14,8 @@
             </div>
 
             <div class="row my-3" *ngIf="!hasOwnDetailsPage">
-                <div class="col-12 text-center">
+                <div class="col-1"></div>
+                <div class="col-10 text-center">
                     <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureBoxDetailsBody" aria-controls="featureBoxDetailsBody" (click)="feature.isDetailsCollapsed = !feature.isDetailsCollapsed">
                         <div *ngIf="feature.isDetailsCollapsed">
                             Show more ▾
@@ -23,10 +24,13 @@
                             Show less ▴
                         </div>
                     </button>
-                    <div id="featureBoxDetailsBody" class="collapse" [ngClass]="{'show': !feature.isDetailsCollapsed}">
-                        <div [innerHtml]="feature.description"></div>
+                    <div id="featureBoxDetailsBody" class="collapse mt-3 text-start p-2" [ngClass]="{'show': !feature.isDetailsCollapsed}">
+                        <div class="card">
+                            <div class="card-body" [innerHtml]="descriptionHtml"></div>
+                        </div>
                     </div>
                 </div>
+                <div class="col-1"></div>
             </div>
         </div>
         <div *ngIf="feature && user.isReviewer" class="card-footer">

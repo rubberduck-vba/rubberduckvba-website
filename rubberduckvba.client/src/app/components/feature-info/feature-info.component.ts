@@ -17,6 +17,7 @@ export class FeatureInfoComponent implements OnInit {
   private readonly _audits: BehaviorSubject<PendingAuditsViewModel> = new BehaviorSubject<PendingAuditsViewModel>(null!);
 
   public editAction: AdminAction = AdminAction.Edit;
+  public editLinksAction: AdminAction = AdminAction.EditLinks;
   public createAction: AdminAction = AdminAction.Create;
   public deleteAction: AdminAction = AdminAction.Delete;
 

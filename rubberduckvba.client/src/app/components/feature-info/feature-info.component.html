@@ -13,13 +13,18 @@
             <!-- subfeatures -->
             <div *ngIf="user && feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0">
                 <div *ngFor="let subFeature of subfeatures">
-                    <feature-box *ngIf="!feature.isHidden && (subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [hasOwnDetailsPage]="true" [user]="user"></feature-box>
+                    <feature-box *ngIf="!feature.isHidden && (subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [hasOwnDetailsPage]="true" [user]="user" [pendingAudits]="audits"></feature-box>
                 </div>
             </div>
 
-            <div *ngIf="links && links.length != 0" class="my-5">
-                <div *ngFor="let link of links">
-                    <blog-link-box [link]="link"></blog-link-box>
+            <div *ngIf="links && links.length != 0">
+                <div class="mt-5">
+                    <div *ngFor="let link of links">
+                        <blog-link-box [link]="link"></blog-link-box>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <edit-feature [feature]="feature" [action]="editLinksAction"></edit-feature>
                 </div>
             </div>
         </div>
@@ -39,7 +44,7 @@
     <div *ngIf="feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0" class="col-12">
         <edit-feature *ngIf="!feature.featureId && user?.isAdmin" [feature]="feature" [action]="createAction"></edit-feature>
         <div *ngFor="let subFeature of subfeatures">
-            <feature-box *ngIf="!feature.isHidden && !(subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [user]="user" [hasOwnDetailsPage]="false"></feature-box>
+            <feature-box *ngIf="!feature.isHidden && !(subFeature.name=='Inspections' || subFeature.name=='QuickFixes' || subFeature.name=='Annotations')" [parentFeatureName]="feature.name" [feature]="subFeature" [user]="user" [hasOwnDetailsPage]="false" [pendingAudits]="audits"></feature-box>
         </div>
     </div>
 
