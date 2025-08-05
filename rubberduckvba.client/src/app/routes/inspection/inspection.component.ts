@@ -28,10 +28,10 @@ export class InspectionComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap.pipe(
-      switchMap(params => {
+      switchMap((params :any) => {
         const name = params.get('name')!;
         return this.api.getInspection(name);
-      })).subscribe(e => {
+      })).subscribe((e :any) => {
         console.log(e);
         this.info = <InspectionViewModel>e;
       });
