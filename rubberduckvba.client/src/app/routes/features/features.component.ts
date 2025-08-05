@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiClientService } from "../../services/api-client.service";
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import { fas } from '@fortawesome/free-solid-svg-icons';
 import { BehaviorSubject } from 'rxjs';
-import { FeatureViewModel, PendingAuditsViewModel, QuickFixViewModel, UserViewModel } from '../../model/feature.model';
+import { FeatureViewModel, PendingAuditsViewModel, UserViewModel } from '../../model/feature.model';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -36,8 +34,7 @@ export class FeaturesComponent implements OnInit {
     };
   }
 
-  constructor(private api: ApiClientService, private auth: AuthService, private fa: FaIconLibrary) {
-    fa.addIconPacks(fas);
+  constructor(private api: ApiClientService, private auth: AuthService) {
   }
 
   ngOnInit(): void {

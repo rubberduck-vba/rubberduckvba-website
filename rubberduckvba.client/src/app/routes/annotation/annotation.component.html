@@ -1,6 +1,6 @@
 @if (info) {
   <div>
-    @if ((info?.featureId) && info?.featureId != 0) {
+    @if (info.featureId && info.featureId != 0) {
       <p><a href="/">Home</a>▸<a href="/features">Features</a>▸<a href="/features/commentannotations">CommentAnnotations</a>▸<a href="/features/annotations">Annotations</a>▸</p>
     }
     <h1>{{info.title}}</h1>

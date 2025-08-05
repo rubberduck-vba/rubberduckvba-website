@@ -1,6 +1,4 @@
 import { Component, OnInit } from "@angular/core";
-import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
-import { fas } from "@fortawesome/free-solid-svg-icons";
 import { IndenterViewModel, IndenterViewModelClass } from "../../model/indenter.model";
 import { ApiClientService } from "../../services/api-client.service";
 import { environment } from "../../../environments/environment";
@@ -26,8 +24,7 @@ export class IndenterComponent implements OnInit, IndenterOptionGroups {
   public wasTemplateCopied: boolean = false;
 
 
-  constructor(fa: FaIconLibrary, private service: ApiClientService) {
-    fa.addIconPacks(fas);
+  constructor(private service: ApiClientService) {
   }
 
   ngOnInit(): void {

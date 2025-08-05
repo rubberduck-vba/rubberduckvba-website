@@ -8,7 +8,7 @@
     }
     <div [ngClass]="(feature?.name != 'CodeInspections' && feature?.name != 'CommentAnnotations') && (!links || links.length == 0) ? 'col-12' : 'col-lg-8'">
       <h2>{{feature?.title}}</h2>
-      @if (feature && user?.isAdmin) {
+      @if (feature && user.isAdmin) {
         <div>
           <edit-feature [feature]="feature" [action]="editAction"></edit-feature>
         </div>
@@ -17,7 +17,7 @@
     </div>
     <div [ngClass]="(feature?.name != 'CodeInspections' && feature?.name != 'CommentAnnotations') && (!links || links.length == 0) ? 'col-12' : 'col-lg-4'">
       <!-- subfeatures -->
-      @if (user && feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0) {
+      @if (user && feature != null && subfeatures != null && subfeatures.length > 0) {
         <div>
           @for (subFeature of subfeatures; track subFeature) {
             <div>
@@ -49,7 +49,7 @@
 
 <loading-content [show]="!feature"></loading-content>
 
-@if (subfeatures && (subfeatures.length ?? 0) > 0 || (inspectionItems.length ?? 0) > 0) {
+@if ((subfeatures && subfeatures.length > 0) || (inspectionItems && inspectionItems.length > 0)) {
   <section class="row text-center mb-3">
     <div class="col-12">
       <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
@@ -59,9 +59,9 @@
 @if (user && feature) {
   <section class="row">
     <!-- subfeatures -->
-    @if (feature != null && subfeatures != null && (subfeatures.length ?? 0) > 0) {
+    @if (feature != null && subfeatures != null && subfeatures.length > 0) {
       <div class="col-12">
-        @if (!feature.featureId && user?.isAdmin) {
+        @if (!feature.featureId && user.isAdmin) {
           <edit-feature [feature]="feature" [action]="createAction"></edit-feature>
         }
         @for (subFeature of subfeatures; track subFeature) {
@@ -83,21 +83,21 @@
       </div>
     }
     <!-- xmldoc items -->
-    @if ((inspectionItems.length ?? 0) > 0 || (annotationItems.length ?? 0) > 0 || (quickfixItems.length ?? 0) > 0) {
+    @if (inspectionItems.length > 0 || annotationItems.length > 0 || quickfixItems.length > 0) {
       <div class="col-12">
         <h3>Search &amp; Filter</h3>
-        @if (feature?.name == 'Inspections' && filteredItems.length != inspectionItems.length) {
+        @if (feature.name == 'Inspections' && filteredItems.length != inspectionItems.length) {
           <small class="small text-black-50">Showing {{filteredItems.length}} of {{inspectionItems.length}} items</small>
         }
-        @if (feature?.name == 'Annotations' && filteredItems.length != annotationItems.length) {
+        @if (feature.name == 'Annotations' && filteredItems.length != annotationItems.length) {
           <small class="small text-black-50">Showing {{filteredItems.length}} of {{annotationItems.length}} items</small>
         }
-        @if (feature?.name == 'QuickFixes' && filteredItems.length != quickfixItems.length) {
+        @if (feature.name == 'QuickFixes' && filteredItems.length != quickfixItems.length) {
           <small class="small text-black-50">Showing {{filteredItems.length}} of {{quickfixItems.length}} items</small>
         }
         <div class="row my-3">
           <div class="col-8">
-            @if (feature?.name == 'Inspections') {
+            @if (feature.name == 'Inspections') {
               <div class="text-start">
                 <div class="row my-1">
                   <div class="col">
@@ -132,7 +132,7 @@
             </div>
           </div>
         </div>
-        @if (feature?.name == 'Inspections') {
+        @if (feature.name == 'Inspections') {
           <div class="row">
             <div class="card-columns">
               @for (item of filteredItems; track item) {
@@ -145,7 +145,7 @@
             </div>
           </div>
         }
-        @if (feature?.name == 'Annotations') {
+        @if (feature.name == 'Annotations') {
           <div class="row">
             <div class="card-columns">
               @for (item of filteredItems; track item) {
@@ -158,7 +158,7 @@
             </div>
           </div>
         }
-        @if (feature?.name == 'QuickFixes') {
+        @if (feature.name == 'QuickFixes') {
           <div class="row">
             <div class="card-columns">
               @for (item of filteredItems; track item) {

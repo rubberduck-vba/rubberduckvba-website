@@ -1,8 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ApiClientService } from "../../services/api-client.service";
-import { FeatureEditViewModel, FeatureOperation, FeatureOperationViewModel, PendingAuditsViewModel } from "../../model/feature.model";
-import { Change, diffWords } from "diff";
-import { encode } from "html-entities";
+import { FeatureOperation, PendingAuditsViewModel } from "../../model/feature.model";
 
 @Component({
     selector: 'app-audits',

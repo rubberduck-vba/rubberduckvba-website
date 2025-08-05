@@ -1,7 +1,5 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
-import { fas } from "@fortawesome/free-solid-svg-icons";
 import { BehaviorSubject, switchMap } from "rxjs";
 import { AnnotationViewModel } from "../../model/feature.model";
 import { ApiClientService } from "../../services/api-client.service";
@@ -22,13 +20,12 @@ export class AnnotationComponent implements OnInit {
     return this._info.getValue();
   }
 
-  constructor(private api: ApiClientService, private fa: FaIconLibrary, private route: ActivatedRoute) {
-    fa.addIconPacks(fas);
+  constructor(private api: ApiClientService, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
     this.route.paramMap.pipe(
-      switchMap(params => {
+      switchMap((params :any) => {
         const name = params.get('name')!;
         return this.api.getAnnotation(name);
       })).subscribe(e => {
