@@ -5,6 +5,9 @@ namespace rubberduckvba.Server;
 public record class ApiSettings
 {
     public string SymetricKey { get; set; } = default!;
+
+    public string Audience { get; set; } = default!;
+    public string Issuer { get; set; } = default!;
 }
 
 public record class ConnectionSettings

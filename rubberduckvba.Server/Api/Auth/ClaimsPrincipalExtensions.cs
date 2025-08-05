@@ -8,13 +8,19 @@ namespace rubberduckvba.Server.Api.Auth;
 
 public static class ClaimsPrincipalExtensions
 {
-    public static string AsJWT(this ClaimsPrincipal principal, string secret, string issuer, string audience)
+    public static ClaimsPrincipal ToClaimsPrincipal(this JwtPayload payload)
+    {
+        var identity = new ClaimsIdentity(payload.Claims, "github");
+        return new ClaimsPrincipal(identity);
+    }
+
+    public static string ToJWT(this ClaimsPrincipal principal, string secret, string issuer, string audience, int expirationMinutes = 60)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var token = new JwtSecurityToken(issuer, audience,
             claims: principal?.Claims,
             notBefore: new DateTimeOffset(DateTime.UtcNow).UtcDateTime,
-            expires: new DateTimeOffset(DateTime.UtcNow.AddMinutes(60)).UtcDateTime,
+            expires: new DateTimeOffset(DateTime.UtcNow.AddMinutes(expirationMinutes)).UtcDateTime,
             signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
 
         return new JwtSecurityTokenHandler().WriteToken(token);
