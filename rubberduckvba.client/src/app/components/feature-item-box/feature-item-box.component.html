@@ -1,40 +1,49 @@
-<div *ngIf="item" class="card mb-2">
+@if (item) {
+  <div class="card mb-2">
     <div class="card-body" id="featureItemBoxHeading">
-        <div class="row">
-            <div *ngIf="item.isNew || item.isDiscontinued">
-                <div *ngIf="item.isNew" title="This feature is currently only available in pre-release builds">
-                    <div class="btn-ducky bg-success rounded-pill text-uppercase">NEW!</div>
-                </div>
-                <div *ngIf="item.isDiscontinued" title="The {{item.name}} inspection is no longer present in the latest pre-release build">
-                    <div class="btn-ducky rounded-pill">Discontinued</div>
-                </div>
-                <div class="small text-start text-muted mb-3">
-                    <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
-                </div>
+      <div class="row">
+        @if (item.isNew || item.isDiscontinued) {
+          <div>
+            @if (item.isNew) {
+              <div title="This feature is currently only available in pre-release builds">
+                <div class="btn-ducky bg-success rounded-pill text-uppercase">NEW!</div>
+              </div>
+            }
+            @if (item.isDiscontinued) {
+              <div title="The {{item.name}} inspection is no longer present in the latest pre-release build">
+                <div class="btn-ducky rounded-pill">Discontinued</div>
+              </div>
+            }
+            <div class="small text-start text-muted mb-3">
+              <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
             </div>
+          </div>
+        }
+      </div>
+      <button class="btn btn-link text-dark text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="item.isCollapsed = !item.isCollapsed">
+        <div>
+          <h4 class="text-wrap">{{item.title}}</h4>
+          <p class="text-wrap text-black-50 mt-3" [innerHtml]="item.summary"></p>
         </div>
-        <button class="btn btn-link text-dark text-nowrap text-decoration-none w-100" role="button" data-toggle="collapse" data-target="#featureItemBoxCollapseBody" aria-controls="featureItemBoxCollapseBody" (click)="item.isCollapsed = !item.isCollapsed">
-            <div>
-                <h4 class="text-wrap">{{item.title}}</h4>
-                <p class="text-wrap text-black-50 mt-3" [innerHtml]="item.summary"></p>
-            </div>
-        </button>
+      </button>
     </div>
-</div>
+  </div>
+}
 
 <ng-template #content let-modal>
-    <div *ngIf="quickFixVM != null" class="modal-fullscreen-sm-down">
-        <div class="modal-header align-content-center">
-            <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{quickFixVM.title}}</h4>
-            <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
-        </div>
-        <div class="modal-body">
-            <p [innerHTML]="quickFixVM.summary"></p>
-            <p [innerHTML]="quickFixVM.remarks"></p>
-
-        </div>
-        <div class="modal-footer align-content-end">
-            <button type="button" ngbAutofocus class="btn btn-ducky btn-outline-dark" (click)="modal.dismiss('close')">Close</button>
-        </div>
+  @if (quickFixVM != null) {
+    <div class="modal-fullscreen-sm-down">
+      <div class="modal-header align-content-center">
+        <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{quickFixVM.title}}</h4>
+        <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+      </div>
+      <div class="modal-body">
+        <p [innerHTML]="quickFixVM.summary"></p>
+        <p [innerHTML]="quickFixVM.remarks"></p>
+      </div>
+      <div class="modal-footer align-content-end">
+        <button type="button" ngbAutofocus class="btn btn-ducky btn-outline-dark" (click)="modal.dismiss('close')">Close</button>
+      </div>
     </div>
+  }
 </ng-template>

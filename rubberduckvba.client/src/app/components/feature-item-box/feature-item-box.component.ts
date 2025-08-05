@@ -6,8 +6,9 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'feature-item-box',
-  templateUrl: './feature-item-box.component.html'
+    selector: 'feature-item-box',
+    templateUrl: './feature-item-box.component.html',
+    standalone: false
 })
 export class FeatureItemBoxComponent implements OnInit, OnChanges {
 

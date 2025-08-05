@@ -7,8 +7,9 @@ import { AdminAction } from '../edit-feature/edit-feature.component';
 import { ApiClientService } from '../../services/api-client.service';
 
 @Component({
-  selector: 'feature-info',
-  templateUrl: './feature-info.component.html',
+    selector: 'feature-info',
+    templateUrl: './feature-info.component.html',
+    standalone: false
 })
 export class FeatureInfoComponent implements OnInit {
 

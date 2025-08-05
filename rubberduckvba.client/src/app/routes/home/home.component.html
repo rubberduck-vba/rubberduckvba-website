@@ -1,108 +1,111 @@
 <section class="row text-center">
 
-    <!-- ducky -->
+  <!-- ducky -->
 
-    <div class="col-lg-8 col-sm-12 mt-3 align-content-center">
-        <img class="ducky" alt="Rubberduck outline logo" src="../../assets/vector-ducky-dark.svg" />
+  <div class="col-lg-8 col-sm-12 mt-3 align-content-center">
+    <img class="ducky" alt="Rubberduck outline logo" src="../../assets/vector-ducky-dark.svg" />
+    <div class="row">
+      <div class="col-12 mt-2">
+        <h3><em>The open-source Visual Basic Editor add-in</em></h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- downloads / tag metadata -->
+
+  @if (main && next) {
+    <div class="col-lg-4 col-sm-12">
+      <tag-download [tag]="main" [text]="'Download the installer for the latest official release:'"></tag-download>
+      <tag-download [tag]="next" [text]="'Try all the new/upcoming features and fixes with the latest pre-release version:'"></tag-download>
+      @if (main != null) {
         <div class="row">
-            <div class="col-12 mt-2">
-                <h3><em>The open-source Visual Basic Editor add-in</em></h3>
+          <div class="col-12">
+            <div class="bg-light rounded-pill card py-1 mb-3">
+              <span class="small text-nowrap text-muted">
+                <fa-icon class="mx-1" [icon]="['fas', 'clock']"></fa-icon>
+                Tag/release metadata updated
+              </span>
+              <span class="text-nowrap">{{tagTimestamp}}</span>
             </div>
+          </div>
+          <div class="col-12">
+            <ul class="list-unstyled text-start">
+              <li>
+                <span class="small"><fa-icon class="float-start mx-1" [icon]="['fas', 'screwdriver-wrench']"></fa-icon><strong>Rubberduck is NOT an Office add-in</strong>; it extends the VBIDE in all VBA host applications.</span>
+              </li>
+              <li>
+                <span class="small"><fa-icon class="float-start mx-1" [icon]="['fas', 'user-check']"></fa-icon><strong>Installs without elevation for the current Windows user</strong>. Administrative privileges only required for machine-wide installation.</span>
+              </li>
+            </ul>
+          </div>
         </div>
+      }
     </div>
-
-    <!-- downloads / tag metadata -->
-
-    <div *ngIf="main && next" class="col-lg-4 col-sm-12">
-        <tag-download [tag]="main" [text]="'Download the installer for the latest official release:'"></tag-download>
-        <tag-download [tag]="next" [text]="'Try all the new/upcoming features and fixes with the latest pre-release version:'"></tag-download>
-
-        <div *ngIf="main != null" class="row">
-            <div class="col-12">
-                <div class="bg-light rounded-pill card py-1 mb-3">
-                    <span class="small text-nowrap text-muted">
-                        <fa-icon class="mx-1" [icon]="['fas', 'clock']"></fa-icon>
-                        Tag/release metadata updated
-                    </span>
-                    <span class="text-nowrap">{{tagTimestamp}}</span>
-                </div>
-            </div>
-            <div class="col-12">
-                <ul class="list-unstyled text-start">
-                    <li>
-                        <span class="small"><fa-icon class="float-start mx-1" [icon]="['fas', 'screwdriver-wrench']"></fa-icon><strong>Rubberduck is NOT an Office add-in</strong>; it extends the VBIDE in all VBA host applications.</span>
-                    </li>
-                    <li>
-                        <span class="small"><fa-icon class="float-start mx-1" [icon]="['fas', 'user-check']"></fa-icon><strong>Installs without elevation for the current Windows user</strong>. Administrative privileges only required for machine-wide installation.</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
+  }
 </section>
 
 <!-- banner -->
 
 <section class="row text-center">
-    <div class="col-12 mt-5">
-        <img alt="Rubberduck" src="../../assets/rubberduck.png" />
-    </div>
-    <div class="col-12 text-end">
-        <span class="fw-bold">Free and open-source since 2014</span>
-    </div>
+  <div class="col-12 mt-5">
+    <img alt="Rubberduck" src="../../assets/rubberduck.png" />
+  </div>
+  <div class="col-12 text-end">
+    <span class="fw-bold">Free and open-source since 2014</span>
+  </div>
 </section>
 
 <!-- links -->
 
 <section class="row text-center my-5">
-    <div class="col-md-3">
-        <div class="row">
-            <div class="col-12 col-sm-6 col-md-12 mt-1">
-                <a role="button" class="btn btn-outline-dark rounded-pill w-100" href="https://github.com/rubberduck-vba/Rubberduck">
-                    <span><fa-icon class="mx-1" [icon]="['fab', 'github']"></fa-icon>GitHub</span>
-                </a>
-            </div>
-            <div class="col-12 col-sm-6 col-md-12 mt-1">
-                <a role="button" class="btn btn-outline-dark rounded-pill w-100" href="https://hacktoberfest.com">
-                    <span><fa-icon class="mx-1" [icon]="['fab', 'digital-ocean']"></fa-icon>Hacktoberfest</span>
-                </a>
-            </div>
-        </div>
+  <div class="col-md-3">
+    <div class="row">
+      <div class="col-12 col-sm-6 col-md-12 mt-1">
+        <a role="button" class="btn btn-outline-dark rounded-pill w-100" href="https://github.com/rubberduck-vba/Rubberduck">
+          <span><fa-icon class="mx-1" [icon]="['fab', 'github']"></fa-icon>GitHub</span>
+        </a>
+      </div>
+      <div class="col-12 col-sm-6 col-md-12 mt-1">
+        <a role="button" class="btn btn-outline-dark rounded-pill w-100" href="https://hacktoberfest.com">
+          <span><fa-icon class="mx-1" [icon]="['fab', 'digital-ocean']"></fa-icon>Hacktoberfest</span>
+        </a>
+      </div>
     </div>
-    <div class="col-md-3">
-        <div class="row">
-            <div class="col-12 col-sm-6 col-md-12 mt-1">
-                <a role="button" class="btn btn-outline-dark rounded-pill w-100" href="https://stackoverflow.com/tags/rubberduck">
-                    <span><fa-icon class="mx-1" [icon]="['fab', 'stack-overflow']"></fa-icon>Stack&nbsp;Overflow</span>
-                </a>
-            </div>
-            <div class="col-12 col-sm-6 col-md-12 mt-1">
-                <a role="button" class="btn btn-outline-dark rounded-pill w-100" href="https://paypal.me/rubberduckvba">
-                    <span><fa-icon class="mx-1" [icon]="['fab', 'paypal']"></fa-icon>Paypal</span>
-                </a>
-            </div>
-        </div>
+  </div>
+  <div class="col-md-3">
+    <div class="row">
+      <div class="col-12 col-sm-6 col-md-12 mt-1">
+        <a role="button" class="btn btn-outline-dark rounded-pill w-100" href="https://stackoverflow.com/tags/rubberduck">
+          <span><fa-icon class="mx-1" [icon]="['fab', 'stack-overflow']"></fa-icon>Stack&nbsp;Overflow</span>
+        </a>
+      </div>
+      <div class="col-12 col-sm-6 col-md-12 mt-1">
+        <a role="button" class="btn btn-outline-dark rounded-pill w-100" href="https://paypal.me/rubberduckvba">
+          <span><fa-icon class="mx-1" [icon]="['fab', 'paypal']"></fa-icon>Paypal</span>
+        </a>
+      </div>
     </div>
-    <div class="col-md-3 px-3">
-        <div class="row">
-            <div class="col-12 col-sm-6 col-md-12 mt-1">
-                <a role="button" href="https://discord.gg/MYX9RECenJ" class="btn btn-outline-dark rounded-pill w-100"><fa-icon class="mx-1" [icon]="['fab', 'discord']"></fa-icon>Discord</a>
-            </div>
-            <div class="col-12 col-sm-6 col-md-12 mt-1">
-                <a role="button" href="mailto:rubberduckvba@gmail.com" class="btn btn-outline-dark rounded-pill w-100"><span><fa-icon class="mx-1" [icon]="['fas', 'at']"></fa-icon>Email</span></a>
-            </div>
-        </div>
+  </div>
+  <div class="col-md-3 px-3">
+    <div class="row">
+      <div class="col-12 col-sm-6 col-md-12 mt-1">
+        <a role="button" href="https://discord.gg/MYX9RECenJ" class="btn btn-outline-dark rounded-pill w-100"><fa-icon class="mx-1" [icon]="['fab', 'discord']"></fa-icon>Discord</a>
+      </div>
+      <div class="col-12 col-sm-6 col-md-12 mt-1">
+        <a role="button" href="mailto:rubberduckvba@gmail.com" class="btn btn-outline-dark rounded-pill w-100"><span><fa-icon class="mx-1" [icon]="['fas', 'at']"></fa-icon>Email</span></a>
+      </div>
     </div>
-    <div class="col-md-3 px-3">
-        <div class="row">
-            <div class="col-12 col-sm-6 col-md-12 mt-1">
-                <a role="button" href="https://bsky.app/profile/rubberduckvba.bsky.social" class="btn btn-outline-dark rounded-pill w-100"><span><fa-icon class="mx-1" [icon]="['fab', 'bluesky']"></fa-icon>BlueSky</span></a>
-            </div>
-            <div class="col-12 col-sm-6 col-md-12 mt-1">
-                <a role="button" href="https://reddit.com/u/rubberduck-vba" class="btn btn-outline-dark rounded-pill w-100"><span><fa-icon class="mx-1" [icon]="['fab', 'reddit-alien']"></fa-icon>Reddit</span></a>
-            </div>
-        </div>
+  </div>
+  <div class="col-md-3 px-3">
+    <div class="row">
+      <div class="col-12 col-sm-6 col-md-12 mt-1">
+        <a role="button" href="https://bsky.app/profile/rubberduckvba.bsky.social" class="btn btn-outline-dark rounded-pill w-100"><span><fa-icon class="mx-1" [icon]="['fab', 'bluesky']"></fa-icon>BlueSky</span></a>
+      </div>
+      <div class="col-12 col-sm-6 col-md-12 mt-1">
+        <a role="button" href="https://reddit.com/u/rubberduck-vba" class="btn btn-outline-dark rounded-pill w-100"><span><fa-icon class="mx-1" [icon]="['fab', 'reddit-alien']"></fa-icon>Reddit</span></a>
+      </div>
     </div>
+  </div>
 </section>
 
 <hr />
@@ -110,54 +113,56 @@
 <!-- featured links -->
 
 <section class="row text-center my-3">
-    <div class="col-md-6">
-        <div class="row my-2">
-            <div class="card">
-                <div class="card-body">
-                    <div>
-                        <h1>Features</h1>
-                    </div>
-                    <p class="my-2">
-                        Discover how Rubberduck changes your life as a VBA developer with what can only ever be a quick summary.
-                    </p>
-                </div>
-                <div>
-                    <a class="btn-ducky btn btn-dark rounded-pill mb-3" role="button" href="/features">Browse</a>
-                </div>
-            </div>
+  <div class="col-md-6">
+    <div class="row my-2">
+      <div class="card">
+        <div class="card-body">
+          <div>
+            <h1>Features</h1>
+          </div>
+          <p class="my-2">
+            Discover how Rubberduck changes your life as a VBA developer with what can only ever be a quick summary.
+          </p>
         </div>
-        <div class="row my-2">
-            <div class="card">
-                <div class="card-body">
-                    <div>
-                        <h1>Style Guide</h1>
-                    </div>
-                    <p class="my-2">
-                        Enhance your VBA programming with this comprehensive VBA coding style guide. 70+ pages covering everything from naming and parameterization to design patterns and object-oriented programming principles.
-                    </p>
-                </div>
-                <div>
-                    <a class="btn-ducky btn btn-dark rounded-pill mb-3" role="button" href="https://ko-fi.com/s/d91bfd610c"><fa-icon class="mx-1" [icon]="['fas', 'download']"></fa-icon>Free (pay what you want) download</a>
-                </div>
-            </div>
+        <div>
+          <a class="btn-ducky btn btn-dark rounded-pill mb-3" role="button" href="/features">Browse</a>
         </div>
-        <div class="row my-2">
-            <div class="card">
-                <div class="card-body">
-                    <div>
-                        <h1>Resources</h1>
-                        <p class="my-2">
-                            Featured articles from the project blog:
-                        </p>
-                    </div>
-                    <div *ngFor="let link of blogPosts">
-                        <blog-link-box [link]="link"></blog-link-box>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-    <div class="col-md-6">
-        <iframe id='kofiframe' src='https://ko-fi.com/rubberduckvba/?hidefeed=true&widget=true&embed=true&preview=true' style='border:none;width:100%;padding:4px;background:#f9f9f9;' height='600' title='rubberduckvba'></iframe>
+    <div class="row my-2">
+      <div class="card">
+        <div class="card-body">
+          <div>
+            <h1>Style Guide</h1>
+          </div>
+          <p class="my-2">
+            Enhance your VBA programming with this comprehensive VBA coding style guide. 70+ pages covering everything from naming and parameterization to design patterns and object-oriented programming principles.
+          </p>
+        </div>
+        <div>
+          <a class="btn-ducky btn btn-dark rounded-pill mb-3" role="button" href="https://ko-fi.com/s/d91bfd610c"><fa-icon class="mx-1" [icon]="['fas', 'download']"></fa-icon>Free (pay what you want) download</a>
+        </div>
+      </div>
     </div>
+    <div class="row my-2">
+      <div class="card">
+        <div class="card-body">
+          <div>
+            <h1>Resources</h1>
+            <p class="my-2">
+              Featured articles from the project blog:
+            </p>
+          </div>
+          @for (link of blogPosts; track link) {
+            <div>
+              <blog-link-box [link]="link"></blog-link-box>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <iframe id='kofiframe' src='https://ko-fi.com/rubberduckvba/?hidefeed=true&widget=true&embed=true&preview=true' style='border:none;width:100%;padding:4px;background:#f9f9f9;' height='600' title='rubberduckvba'></iframe>
+  </div>
 </section>

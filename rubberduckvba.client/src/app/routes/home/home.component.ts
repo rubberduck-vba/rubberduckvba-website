@@ -1,15 +1,14 @@
 import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ApiClientService } from "../../services/api-client.service";
 import { Tag } from '../../model/tags.model';
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import { fas } from '@fortawesome/free-solid-svg-icons';
 import { BehaviorSubject } from 'rxjs';
 import { BlogLink, BlogLinkViewModelClass } from '../../model/feature.model';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.css'],
+    standalone: false
 })
 export class HomeComponent implements OnInit, OnChanges {
 
@@ -37,8 +36,7 @@ export class HomeComponent implements OnInit, OnChanges {
     ]
   }
 
-  constructor(private api: ApiClientService, private fa: FaIconLibrary) {
-    fa.addIconPacks(fas);
+  constructor(private api: ApiClientService) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {

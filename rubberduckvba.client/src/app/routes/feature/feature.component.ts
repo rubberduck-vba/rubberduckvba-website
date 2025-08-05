@@ -1,20 +1,16 @@
-import { Component, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApiClientService } from "../../services/api-client.service";
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import { fas } from '@fortawesome/free-solid-svg-icons';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { PendingAuditsViewModel, UserViewModel, XmlDocOrFeatureViewModel } from '../../model/feature.model';
 import { ActivatedRoute } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-feature',
-  templateUrl: './feature.component.html',
+    selector: 'app-feature',
+    templateUrl: './feature.component.html',
+    standalone: false
 })
 export class FeatureComponent implements OnInit {
-
-  public modal = inject(NgbModal);
 
   private readonly _feature: BehaviorSubject<XmlDocOrFeatureViewModel> = new BehaviorSubject<XmlDocOrFeatureViewModel>(null!);
   public get feature(): XmlDocOrFeatureViewModel {
@@ -31,16 +27,15 @@ export class FeatureComponent implements OnInit {
     return this._audits.getValue();
   }
 
-  constructor(private auth: AuthService, private api: ApiClientService, private fa: FaIconLibrary, private route: ActivatedRoute) {
-    fa.addIconPacks(fas);
+  constructor(private auth: AuthService, private api: ApiClientService, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
     this.route.paramMap.pipe(
-      switchMap(params => {
+      switchMap((params :any) => {
         const name = params.get('name')!;
         return this.api.getFeature(name);
-      })).subscribe(e => {
+      })).subscribe((e :any) => {
         this._feature.next(e);
       });
 

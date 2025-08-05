@@ -1,108 +1,128 @@
-<div *ngIf="item" class="card mb-2">
+@if (item) {
+  <div class="card mb-2">
     <div class="card-body" id="featureItemBoxHeading">
-        <button class="btn btn-link text-dark text-nowrap text-decoration-none w-100" role="button" (click)="showDetailsModal()">
-            <div class="row">
-                <div *ngIf="item.isNew || item.isDiscontinued">
-                    <div *ngIf="item.isDiscontinued" title="This feature is no longer present in the latest pre-release build">
-                        <div class="btn-ducky bg-danger rounded-pill">Discontinued</div>
-                        <div class="small text-start mb-3">
-                            <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="text-start border-top border-bottom p-1 bg-light-subtle">
-                    <h6 class="d-inline text-wrap">&nbsp;{{annotationInfo.title}}</h6>
-                </div>
-                <p class="text-wrap text-black-50 mt-3" [innerHtml]="annotationInfo.summary"></p>
-            </div>
-
-            <div *ngIf="item.isNew" title="This feature is currently only available in pre-release builds">
-                <div class="btn-ducky rounded-pill">New!</div>
-                <div class="small text-start mb-3">
+      <button class="btn btn-link text-dark text-nowrap text-decoration-none w-100" role="button" (click)="showDetailsModal()">
+        <div class="row">
+          @if (item.isNew || item.isDiscontinued) {
+            <div>
+              @if (item.isDiscontinued) {
+                <div title="This feature is no longer present in the latest pre-release build">
+                  <div class="btn-ducky bg-danger rounded-pill">Discontinued</div>
+                  <div class="small text-start mb-3">
                     <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
+                  </div>
                 </div>
+              }
             </div>
-        </button>
+          }
+        </div>
+        <div class="row">
+          <div class="text-start border-top border-bottom p-1 bg-light-subtle">
+            <h6 class="d-inline text-wrap">&nbsp;{{annotationInfo.title}}</h6>
+          </div>
+          <p class="text-wrap text-black-50 mt-3" [innerHtml]="annotationInfo.summary"></p>
+        </div>
+        @if (item.isNew) {
+          <div title="This feature is currently only available in pre-release builds">
+            <div class="btn-ducky rounded-pill">New!</div>
+            <div class="small text-start mb-3">
+              <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
+            </div>
+          </div>
+        }
+      </button>
     </div>
-</div>
+  </div>
+}
 
 <ng-template #annotationDetails let-modal>
-    <div class="modal-xl">
-        <div class="modal-content">
-            <div class="modal-header align-content-center">
-                <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{annotationInfo.title}}</h4>
-                <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="p-2">
-                        <p [innerHtml]="annotationInfo.summary"></p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div *ngIf="annotationInfo.remarks && annotationInfo.remarks.length > 0" class="row">
-                        <div class="alert alert-info bg-light-subtle mt-2 col-12">
-                            <h5>Remarks</h5>
-                            <p [innerHtml]="annotationInfo.remarks"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div *ngIf="annotationInfo.parameters && annotationInfo.parameters.length > 0" class="row mt-3">
-                    <h5>Parameters</h5>
-                    <div class="col-12">
-                        <table class="table">
-                            <thead class="fw-bold">
-                                <tr>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let parameter of annotationInfo.parameters">
-                                    <td><code>{{parameter.name}}</code><p class="small text-black-50">{{parameter.type}}</p></td>
-                                    <td>{{parameter.description}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div *ngIf="annotationInfo.examples && annotationInfo.examples.length > 0" class="row my-3">
-                    <div class="text-center">
-                        <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureItemBoxDetailsBody" aria-controls="featureItemBoxDetailsBody" (click)="item.isDetailsCollapsed = !item.isDetailsCollapsed">
-                            <div *ngIf="item && item.isDetailsCollapsed">
-                                Show examples ▾
-                            </div>
-                            <div *ngIf="item && !item.isDetailsCollapsed">
-                                Hide examples ▴
-                            </div>
-                        </button>
-                    </div>
-                </div>
-                <div id="featureItemBoxDetailsBody" class="collapse" [ngClass]="{'show': !item.isDetailsCollapsed}">
-                    <div class="row">
-                        <div>
-                            <div id="annotationInfoBody">
-                                <div *ngFor="let example of annotationInfo.examples">
-                                    <example-box [annotationExample]="example"></example-box>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <div class="small text-muted text-center">
-                    <a href="{{annotationInfo.getGitHubViewLink()}}">View</a> | <a href="{{annotationInfo.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
-                </div>
-                <a href="/annotations/{{annotationInfo.name}}" class="btn btn-expand" title="Expand to page"><fa-icon [icon]="['fas', 'expand']"></fa-icon>&nbsp;View page</a>
-            </div>
+  <div class="modal-xl">
+    <div class="modal-content">
+      <div class="modal-header align-content-center">
+        <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{annotationInfo.title}}</h4>
+        <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="p-2">
+            <p [innerHtml]="annotationInfo.summary"></p>
+          </div>
         </div>
+
+        <div class="row">
+          @if (annotationInfo.remarks && annotationInfo.remarks.length > 0) {
+            <div class="row">
+              <div class="alert alert-info bg-light-subtle mt-2 col-12">
+                <h5>Remarks</h5>
+                <p [innerHtml]="annotationInfo.remarks"></p>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (annotationInfo.parameters && annotationInfo.parameters.length > 0) {
+          <div class="row mt-3">
+            <h5>Parameters</h5>
+            <div class="col-12">
+              <table class="table">
+                <thead class="fw-bold">
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (parameter of annotationInfo.parameters; track parameter) {
+                    <tr>
+                      <td><code>{{parameter.name}}</code><p class="small text-black-50">{{parameter.type}}</p></td>
+                      <td>{{parameter.description}}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        @if (annotationInfo.examples && annotationInfo.examples.length > 0) {
+          <div class="row my-3">
+            <div class="text-center">
+              <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureItemBoxDetailsBody" aria-controls="featureItemBoxDetailsBody" (click)="item.isDetailsCollapsed = !item.isDetailsCollapsed">
+                @if (item && item.isDetailsCollapsed) {
+                  <div>
+                    Show examples ▾
+                  </div>
+                }
+                @if (item && !item.isDetailsCollapsed) {
+                  <div>
+                    Hide examples ▴
+                  </div>
+                }
+              </button>
+            </div>
+          </div>
+        }
+        <div id="featureItemBoxDetailsBody" class="collapse" [ngClass]="{'show': !item.isDetailsCollapsed}">
+          <div class="row">
+            <div>
+              <div id="annotationInfoBody">
+                @for (example of annotationInfo.examples; track example) {
+                  <div>
+                    <example-box [annotationExample]="example"></example-box>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <div class="small text-muted text-center">
+          <a href="{{annotationInfo.getGitHubViewLink()}}">View</a> | <a href="{{annotationInfo.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
+        </div>
+        <a href="/annotations/{{annotationInfo.name}}" class="btn btn-expand" title="Expand to page"><fa-icon [icon]="['fas', 'expand']"></fa-icon>&nbsp;View page</a>
+      </div>
     </div>
+  </div>
 </ng-template>

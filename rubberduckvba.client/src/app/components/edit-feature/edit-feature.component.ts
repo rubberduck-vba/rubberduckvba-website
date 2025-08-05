@@ -15,8 +15,9 @@ export enum AdminAction {
 }
 
 @Component({
-  selector: 'edit-feature',
-  templateUrl: './edit-feature.component.html'
+    selector: 'edit-feature',
+    templateUrl: './edit-feature.component.html',
+    standalone: false
 })
 export class EditFeatureComponent implements OnInit {
   private readonly _feature: BehaviorSubject<EditSubFeatureViewModelClass> = new BehaviorSubject<EditSubFeatureViewModelClass>(null!);

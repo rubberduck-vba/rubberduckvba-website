@@ -1,14 +1,13 @@
 import { Component, OnInit } from "@angular/core";
 import { ApiClientService } from "../../../services/api-client.service";
 import { ActivatedRoute } from "@angular/router";
-import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
-import { fas } from "@fortawesome/free-solid-svg-icons";
 import { BehaviorSubject, switchMap } from "rxjs";
 import { AuditRecordViewModel, FeatureEditViewModel, FeatureOperationViewModel, UserActivityType } from "../../../model/feature.model";
 
 @Component({
-  selector: 'app-audit-item',
-  templateUrl: './audit-item.component.html',
+    selector: 'app-audit-item',
+    templateUrl: './audit-item.component.html',
+    standalone: false
 })
 export class AuditItemComponent implements OnInit {
 
@@ -18,14 +17,13 @@ export class AuditItemComponent implements OnInit {
 
   private _isEdit: boolean = false;
 
-  constructor(private fa: FaIconLibrary, private api: ApiClientService, private route: ActivatedRoute) {
-    fa.addIconPacks(fas);
+  constructor(private api: ApiClientService, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
     const route = this.route;
     route.paramMap.pipe(
-      switchMap(params => {
+      switchMap((params :any) => {
         const id = Number.parseInt(params.get('id')!);
         if (route.routeConfig?.path?.includes('/edit')) {
           return this.api.getAudit(id, UserActivityType.SubmitEdit);
@@ -35,7 +33,7 @@ export class AuditItemComponent implements OnInit {
         //}
         return this.api.getAudit(id, UserActivityType.SubmitCreate);
       })
-    ).subscribe(e => {
+    ).subscribe((e :any) => {
       if (e.edits.length > 0) {
         const edit = e.edits[0];
         this._item.next(edit);

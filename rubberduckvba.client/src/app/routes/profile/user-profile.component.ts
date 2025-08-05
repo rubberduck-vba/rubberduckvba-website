@@ -2,21 +2,20 @@ import { Component, OnInit } from "@angular/core";
 import { UserActivityItem, UserActivityItemClass, UserActivityType, UserViewModel } from "../../model/feature.model";
 import { AuthService } from "../../services/auth.service";
 import { BehaviorSubject } from "rxjs";
-import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
-import { IconDefinition, fas } from "@fortawesome/free-solid-svg-icons";
+import { IconDefinition, faSquareMinus, faSquarePen, faSquarePlus, faUserMinus, faUserPen, faUserPlus, faUserXmark } from "@fortawesome/free-solid-svg-icons";
 import { ApiClientService } from "../../services/api-client.service";
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './user-profile.component.html',
+    selector: 'app-profile',
+    templateUrl: './user-profile.component.html',
+    standalone: false
 })
 export class UserProfileComponent implements OnInit {
 
   private _user: BehaviorSubject<UserViewModel> = new BehaviorSubject<UserViewModel>(null!);
   private _activity: BehaviorSubject<UserActivityItemClass[]> = new BehaviorSubject<UserActivityItemClass[]>([]);
 
-  constructor(private fa: FaIconLibrary, private auth: AuthService, private api: ApiClientService) {
-    fa.addIconPacks(fas);
+  constructor(private auth: AuthService, private api: ApiClientService) {
     this.auth.getUser().subscribe(user => {
       if (user) {
         this._user.next(user);
@@ -93,21 +92,21 @@ export class UserProfileComponent implements OnInit {
   public getActivityIcon(activity: UserActivityType) : IconDefinition {
     switch (activity) {
       case UserActivityType.SubmitEdit:
-        return this.fa.getIconDefinition('fas', 'square-pen')!;
+        return faSquarePen;
       case UserActivityType.SubmitCreate:
-        return this.fa.getIconDefinition('fas', 'square-plus')!;
+        return faSquarePlus;
       case UserActivityType.SubmitDelete:
-        return this.fa.getIconDefinition('fas', 'square-minus')!;
+        return faSquareMinus;
       case UserActivityType.ApproveEdit:
-        return this.fa.getIconDefinition('fas', 'user-pen')!;
+        return faUserPen;
       case UserActivityType.ApproveCreate:
-        return this.fa.getIconDefinition('fas', 'user-plus')!;
+        return faUserPlus;
       case UserActivityType.ApproveDelete:
-        return this.fa.getIconDefinition('fas', 'user-minus')!;
+        return faUserMinus;
       case UserActivityType.RejectEdit:
       case UserActivityType.RejectCreate:
       case UserActivityType.RejectDelete:
-        return this.fa.getIconDefinition('fas', 'user-xmark')!;
+        return faUserXmark;
       default:
         return null!;
     }

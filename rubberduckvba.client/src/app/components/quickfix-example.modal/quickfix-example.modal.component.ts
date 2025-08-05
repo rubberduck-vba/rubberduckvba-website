@@ -6,8 +6,9 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'quickfix-example',
-  templateUrl: './quickfix-example.modal.component.html'
+    selector: 'quickfix-example',
+    templateUrl: './quickfix-example.modal.component.html',
+    standalone: false
 })
 export class FeatureItemExampleComponent implements OnInit, OnChanges {
 

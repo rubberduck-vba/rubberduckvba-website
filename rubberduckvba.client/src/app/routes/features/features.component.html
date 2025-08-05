@@ -1,33 +1,35 @@
 <loading-content [show]="!features"></loading-content>
-<section *ngIf="features" class="row text-center my-3">
+@if (features) {
+  <section class="row text-center my-3">
     <div>
-        <h1>Features</h1>
+      <h1>Features</h1>
     </div>
-
     <div class="row">
-        <div class="col-1"></div>
-        <div class="col-10">
-            <p>Rubberduck takes inspiration from modern-day IDE features to <em>bring the VBE into this century</em> with game-changing tooling for all skill levels.</p>
-        </div>
+      <div class="col-1"></div>
+      <div class="col-10">
+        <p>Rubberduck takes inspiration from modern-day IDE features to <em>bring the VBE into this century</em> with game-changing tooling for all skill levels.</p>
+      </div>
     </div>
-
     <div class="row">
-        <div class="col-12">
-            <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
-        </div>
+      <div class="col-12">
+        <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+      </div>
     </div>
-
     <div class="row">
-        <h2>Your IDE is incomplete without...</h2>
+      <h2>Your IDE is incomplete without...</h2>
     </div>
-
-    <div *ngIf="features && features.length > 0">
+    @if (features && features.length > 0) {
+      <div>
         <div class="row">
-            <ul class="navbar-nav">
-                <li class="nav-item" *ngFor="let feature of features">
-                    <feature-box [feature]="feature" [user]="user" [pendingAudits]="audits" [hasOwnDetailsPage]="true"></feature-box>
-                </li>
-            </ul>
+          <ul class="navbar-nav">
+            @for (feature of features; track feature) {
+              <li class="nav-item">
+                <feature-box [feature]="feature" [user]="user" [pendingAudits]="audits" [hasOwnDetailsPage]="true"></feature-box>
+              </li>
+            }
+          </ul>
         </div>
-    </div>
-</section>
+      </div>
+    }
+  </section>
+}

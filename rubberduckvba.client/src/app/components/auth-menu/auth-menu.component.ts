@@ -11,8 +11,9 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { far } from "@fortawesome/free-regular-svg-icons";
 
 @Component({
-  selector: 'auth-menu',
-  templateUrl: './auth-menu.component.html'
+    selector: 'auth-menu',
+    templateUrl: './auth-menu.component.html',
+    standalone: false
 })
 export class AuthMenuComponent implements OnInit {
 

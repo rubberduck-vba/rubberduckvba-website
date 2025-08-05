@@ -1,94 +1,122 @@
-<p *ngIf="(info?.featureId) && info?.featureId != 0"><a href="/">Home</a>▸<a href="/features">Features</a>▸<a href="/features/codeinspections">CodeInspections</a>▸<a href="/features/inspections">Inspections</a>▸</p>
-<h1 *ngIf="info">{{info.title}}</h1>
-<p *ngIf="info" class="fw-medium" [innerHtml]="info.summary"></p>
-<div *ngIf="info" class="row">
+@if (info.featureId && info.featureId != 0) {
+  <p><a href="/">Home</a>▸<a href="/features">Features</a>▸<a href="/features/codeinspections">CodeInspections</a>▸<a href="/features/inspections">Inspections</a>▸</p>
+}
+@if (info) {
+  <h1>{{info.title}}</h1>
+}
+@if (info) {
+  <p class="fw-medium" [innerHtml]="info.summary"></p>
+}
+@if (info) {
+  <div class="row">
     <div class="text-start">
-        <div class="row">
-            <div>
-                <div *ngIf="info.isDiscontinued" title="This feature is no longer present in the latest pre-release build">
-                    <div class="btn-ducky bg-danger rounded-pill">Discontinued</div>
-                    <div class="small text-start mb-3">
-                        <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{info.tagName}}
-                    </div>
-                </div>
-                <div *ngIf="info.isNew" title="This feature is currently only available in pre-release builds">
-                    <div class="btn-ducky rounded-pill">&nbsp;New!&nbsp;</div>
-                    <div class="small text-start mb-3">
-                        <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{info.tagName}}
-                    </div>
-                </div>
-                <h6>
-                    <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{info.inspectionType}}
-                </h6>
-                <p class="small text-black-50">{{inspectionTypeTitle}}</p>
+      <div class="row">
+        <div>
+          @if (info.isDiscontinued) {
+            <div title="This feature is no longer present in the latest pre-release build">
+              <div class="btn-ducky bg-danger rounded-pill">Discontinued</div>
+              <div class="small text-start mb-3">
+                <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{info.tagName}}
+              </div>
             </div>
-        </div>
-        <div class="row">
-            <div>
-                Default Severity: <strong>{{info.defaultSeverity}}</strong>&nbsp;<span ngClass="{{severityIconClass}}"></span>
-                <p class="small text-black-50">{{severityTitle}}</p>
+          }
+          @if (info.isNew) {
+            <div title="This feature is currently only available in pre-release builds">
+              <div class="btn-ducky rounded-pill">&nbsp;New!&nbsp;</div>
+              <div class="small text-start mb-3">
+                <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{info.tagName}}
+              </div>
             </div>
+          }
+          <h6>
+            <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{info.inspectionType}}
+          </h6>
+          <p class="small text-black-50">{{inspectionTypeTitle}}</p>
         </div>
+      </div>
+      <div class="row">
+        <div>
+          Default Severity: <strong>{{info.defaultSeverity}}</strong>&nbsp;<span ngClass="{{severityIconClass}}"></span>
+          <p class="small text-black-50">{{severityTitle}}</p>
+        </div>
+      </div>
+      <div class="row">
+        <hr />
+        <div class="col-11 ms-2">
+          <p [innerHtml]="info.reasoning"></p>
+        </div>
+      </div>
+      @if ((info.hostApp?.length ?? 0) > 0) {
         <div class="row">
+          <div>
+            <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when hosted in <strong>{{info.hostApp}}</strong>.</p>
+          </div>
+        </div>
+      }
+      @if (info.references.length == 1) {
+        <div class="row">
+          <div>
+            <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when the <strong>{{info.references[0]}}</strong> library is referenced.</p>
+          </div>
+        </div>
+      }
+      @if (info.references.length > 1) {
+        <div class="row">
+          <div>
+            <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when any of the following libraries is referenced:</p>
+            <ul>
+              @for (library of this.info.references; track library) {
+                <li>{{library}}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
+      @if (info.remarks && info.remarks.length > 0) {
+        <div>
+          <div class="alert alert-info bg-light-subtle mt-2 col-12">
+            <h5>Remarks</h5>
+            <div [innerHtml]="info.remarks"></div>
+          </div>
+        </div>
+      }
+      <div class="row">
+        @if (info.quickFixes.length > 0) {
+          <div>
             <hr />
-            <div class="col-11 ms-2">
-                <p [innerHtml]="info.reasoning"></p>
-            </div>
-        </div>
-        <div *ngIf="(info.hostApp?.length ?? 0) > 0" class="row">
-            <div>
-                <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when hosted in <strong>{{info.hostApp}}</strong>.</p>
-            </div>
-        </div>
-        <div *ngIf="info.references.length == 1" class="row">
-            <div>
-                <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when the <strong>{{info.references[0]}}</strong> library is referenced.</p>
-            </div>
-        </div>
-        <div *ngIf="info.references.length > 1" class="row">
-            <div>
-                <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when any of the following libraries is referenced:</p>
-                <ul>
-                    <li *ngFor="let library of this.info.references">{{library}}</li>
-                </ul>
-            </div>
-        </div>
-        <div *ngIf="info.remarks && info.remarks.length > 0">
-            <div class="alert alert-info bg-light-subtle mt-2 col-12">
-                <h5>Remarks</h5>
-                <div [innerHtml]="info.remarks"></div>
-            </div>
-        </div>
-        <div class="row">
-            <div *ngIf="info.quickFixes.length > 0">
-                <hr />
-                <h6>
-                    <fa-icon [icon]="'wand-magic-sparkles'"></fa-icon>&nbsp;QuickFixes
-                </h6>
-                <p class="small">This inspection offers the following fixes:</p>
-                <ul class="list-unstyled ms-2">
-                    <li *ngFor="let fix of this.info.quickFixes" class="my-1">
-                        <a class="text-decoration-none" href="/quickfixes/{{fix.name}}">
-                            <div class="card-highlight rounded-4 p-2">
-                                <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.name}}</h6>
-                                <p class="text-black-50 small mx-2">{{fix.summary}}</p>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+            <h6>
+              <fa-icon [icon]="'wand-magic-sparkles'"></fa-icon>&nbsp;QuickFixes
+            </h6>
+            <p class="small">This inspection offers the following fixes:</p>
+            <ul class="list-unstyled ms-2">
+              @for (fix of this.info.quickFixes; track fix) {
+                <li class="my-1">
+                  <a class="text-decoration-none" href="/quickfixes/{{fix.name}}">
+                    <div class="card-highlight rounded-4 p-2">
+                      <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.name}}</h6>
+                      <p class="text-black-50 small mx-2">{{fix.summary}}</p>
+                    </div>
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
     </div>
+  </div>
+}
+
+<div class="row">
+  @for (example of info.examples; track example) {
+    <div>
+      <example-box [inspectionExample]="example"></example-box>
+    </div>
+  }
 </div>
 
 <div class="row">
-    <div *ngFor="let example of info.examples">
-        <example-box [inspectionExample]="example"></example-box>
-    </div>
-</div>
-
-<div class="row">
-    <div class="small text-muted text-center">
-        <a href="{{info.getGitHubViewLink()}}">View</a> | <a href="{{info.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
-    </div>
+  <div class="small text-muted text-center">
+    <a href="{{info.getGitHubViewLink()}}">View</a> | <a href="{{info.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
+  </div>
 </div>

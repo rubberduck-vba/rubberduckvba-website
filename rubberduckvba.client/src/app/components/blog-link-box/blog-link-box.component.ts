@@ -6,8 +6,9 @@ import { fab } from "@fortawesome/free-brands-svg-icons";
 import { BehaviorSubject } from "rxjs";
 
 @Component({
-  selector: 'blog-link-box',
-  templateUrl: './blog-link-box.component.html',
+    selector: 'blog-link-box',
+    templateUrl: './blog-link-box.component.html',
+    standalone: false
 })
 export class BlogLinkBoxComponent implements OnInit {
 

@@ -6,8 +6,9 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'annotation-item-box',
-  templateUrl: './annotation-item-box.component.html'
+    selector: 'annotation-item-box',
+    templateUrl: './annotation-item-box.component.html',
+    standalone: false
 })
 export class AnnotationItemBoxComponent implements OnInit, OnChanges {
 

@@ -14,13 +14,13 @@
     "sourceMap": true,
     "declaration": false,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
-    "target": "ES2022",
-    "module": "ES2022",
+    "target": "es2024",
+    "module": "es2022",
     "useDefineForClassFields": false,
     "lib": [
-      "ES2022",
+      "es2022",
       "dom"
     ],
     "skipLibCheck": true

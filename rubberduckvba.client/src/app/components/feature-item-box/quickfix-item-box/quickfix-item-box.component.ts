@@ -6,8 +6,9 @@ import { BehaviorSubject } from "rxjs";
 import { XmlDocItemViewModel, QuickFixViewModel, QuickFixViewModelClass } from "../../../model/feature.model";
 
 @Component({
-  selector: 'quickfix-item-box',
-  templateUrl: './quickfix-item-box.component.html'
+    selector: 'quickfix-item-box',
+    templateUrl: './quickfix-item-box.component.html',
+    standalone: false
 })
 export class QuickFixItemBoxComponent implements OnInit, OnChanges {
 

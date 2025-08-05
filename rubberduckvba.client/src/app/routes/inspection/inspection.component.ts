@@ -1,14 +1,13 @@
 import { Component, OnInit } from "@angular/core";
 import { InspectionViewModel } from "../../model/feature.model";
-import { ActivatedRoute, Router } from "@angular/router";
-import { FaIconLibrary } from "@fortawesome/angular-fontawesome";
-import { fas } from "@fortawesome/free-solid-svg-icons";
+import { ActivatedRoute } from "@angular/router";
 import { BehaviorSubject, switchMap } from "rxjs";
 import { ApiClientService } from "../../services/api-client.service";
 
 @Component({
-  selector: 'app-inspection',
-  templateUrl: './inspection.component.html',
+    selector: 'app-inspection',
+    templateUrl: './inspection.component.html',
+    standalone: false
 })
 export class InspectionComponent implements OnInit {
 
@@ -21,16 +20,15 @@ export class InspectionComponent implements OnInit {
     return this._info.getValue();
   }
 
-  constructor(private api: ApiClientService, private fa: FaIconLibrary, private route: ActivatedRoute, private router: Router) {
-    fa.addIconPacks(fas);
+  constructor(private api: ApiClientService, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
     this.route.paramMap.pipe(
-      switchMap(params => {
+      switchMap((params :any) => {
         const name = params.get('name')!;
         return this.api.getInspection(name);
-      })).subscribe(e => {
+      })).subscribe((e :any) => {
         console.log(e);
         this.info = <InspectionViewModel>e;
       });
