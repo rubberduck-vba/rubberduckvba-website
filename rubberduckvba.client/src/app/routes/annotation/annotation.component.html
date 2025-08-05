@@ -1,68 +1,82 @@
-<div *ngIf="info">
-    <p *ngIf="(info?.featureId) && info?.featureId != 0"><a href="/">Home</a>▸<a href="/features">Features</a>▸<a href="/features/commentannotations">CommentAnnotations</a>▸<a href="/features/annotations">Annotations</a>▸</p>
+@if (info) {
+  <div>
+    @if ((info?.featureId) && info?.featureId != 0) {
+      <p><a href="/">Home</a>▸<a href="/features">Features</a>▸<a href="/features/commentannotations">CommentAnnotations</a>▸<a href="/features/annotations">Annotations</a>▸</p>
+    }
     <h1>{{info.title}}</h1>
     <div class="row">
-        <div class="p-2">
-            <p [innerHtml]="info.summary"></p>
-        </div>
+      <div class="p-2">
+        <p [innerHtml]="info.summary"></p>
+      </div>
     </div>
-
     <div class="row">
-        <div *ngIf="info.remarks && info.remarks.length > 0" class="row">
-            <div class="alert alert-info bg-light-subtle mt-2 col-12">
-                <h5>Remarks</h5>
-                <p [innerHtml]="info.remarks"></p>
-            </div>
+      @if (info.remarks && info.remarks.length > 0) {
+        <div class="row">
+          <div class="alert alert-info bg-light-subtle mt-2 col-12">
+            <h5>Remarks</h5>
+            <p [innerHtml]="info.remarks"></p>
+          </div>
         </div>
+      }
     </div>
-
-    <div *ngIf="info.parameters && info.parameters.length > 0" class="row mt-3">
+    @if (info.parameters && info.parameters.length > 0) {
+      <div class="row mt-3">
         <h5>Parameters</h5>
         <div class="col-12">
-            <table class="table">
-                <thead class="fw-bold">
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let parameter of info.parameters">
-                        <td><code>{{parameter.name}}</code><p class="small text-black-50">{{parameter.type}}</p></td>
-                        <td>{{parameter.description}}</td>
-                    </tr>
-                </tbody>
-            </table>
+          <table class="table">
+            <thead class="fw-bold">
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (parameter of info.parameters; track parameter) {
+                <tr>
+                  <td><code>{{parameter.name}}</code><p class="small text-black-50">{{parameter.type}}</p></td>
+                  <td>{{parameter.description}}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
-    </div>
-
-    <div *ngIf="info.examples && info.examples.length > 0" class="row my-3">
+      </div>
+    }
+    @if (info.examples && info.examples.length > 0) {
+      <div class="row my-3">
         <div class="text-center">
-            <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureItemBoxDetailsBody" aria-controls="featureItemBoxDetailsBody" (click)="info.isDetailsCollapsed = !info.isDetailsCollapsed">
-                <div *ngIf="info && info.isDetailsCollapsed">
-                    Show examples ▾
-                </div>
-                <div *ngIf="info && !info.isDetailsCollapsed">
-                    Hide examples ▴
-                </div>
-            </button>
+          <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureItemBoxDetailsBody" aria-controls="featureItemBoxDetailsBody" (click)="info.isDetailsCollapsed = !info.isDetailsCollapsed">
+            @if (info && info.isDetailsCollapsed) {
+              <div>
+                Show examples ▾
+              </div>
+            }
+            @if (info && !info.isDetailsCollapsed) {
+              <div>
+                Hide examples ▴
+              </div>
+            }
+          </button>
         </div>
-    </div>
+      </div>
+    }
     <div id="featureItemBoxDetailsBody" class="collapse" [ngClass]="{'show': !info.isDetailsCollapsed}">
-        <div class="row">
-            <div>
-                <div id="infoBody">
-                    <div *ngFor="let example of info.examples">
-                        <example-box [annotationExample]="example"></example-box>
-                    </div>
-                </div>
-            </div>
+      <div class="row">
+        <div>
+          <div id="infoBody">
+            @for (example of info.examples; track example) {
+              <div>
+                <example-box [annotationExample]="example"></example-box>
+              </div>
+            }
+          </div>
         </div>
+      </div>
     </div>
-
     <div class="row">
-        <div class="small text-muted text-center">
-            <a href="{{info.getGitHubViewLink()}}">View</a> | <a href="{{info.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
-        </div>
+      <div class="small text-muted text-center">
+        <a href="{{info.getGitHubViewLink()}}">View</a> | <a href="{{info.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
+      </div>
     </div>
-</div>
+  </div>
+}

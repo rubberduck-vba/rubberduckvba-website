@@ -1,8 +1,10 @@
-<div *ngIf="link" class="card mb-2">
+@if (link) {
+  <div class="card mb-2">
     <div class="card-body" id="blogLinkBoxHeading">
-        <div>
-            <h6><a href="{{link.url}}">{{link.name}}</a></h6>
-            <fa-icon class="mx-1" [icon]="['fab', 'wordpress']"></fa-icon><span class="small text-black-50">Published {{link.published}}</span>
-        </div>
+      <div>
+        <h6><a href="{{link.url}}">{{link.name}}</a></h6>
+        <fa-icon class="mx-1" [icon]="['fab', 'wordpress']"></fa-icon><span class="small text-black-50">Published {{link.published}}</span>
+      </div>
     </div>
-</div>
+  </div>
+}

@@ -1,186 +1,207 @@
-<button *ngIf="action == 'edit'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
+@if (action == 'edit') {
+  <button type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
     <span>
-        <fa-icon [icon]="'edit'"></fa-icon>&nbsp;Edit Description
+      <fa-icon [icon]="'edit'"></fa-icon>&nbsp;Edit Description
     </span>
-</button>
+  </button>
+}
 
-<button *ngIf="action == 'summary'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
+@if (action == 'summary') {
+  <button type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
     <span>
-        <fa-icon [icon]="'edit'"></fa-icon>&nbsp;Edit Summary
+      <fa-icon [icon]="'edit'"></fa-icon>&nbsp;Edit Summary
     </span>
-</button>
+  </button>
+}
 
-<button *ngIf="action == 'links'" type="button" class="btn btn-outline-secondary rounded-pill mx-1" (click)="doAction()" [disabled]="disabled">
+@if (action == 'links') {
+  <button type="button" class="btn btn-outline-secondary rounded-pill mx-1" (click)="doAction()" [disabled]="disabled">
     <span>
-        <fa-icon [icon]="'link'"></fa-icon>&nbsp;Edit Links
+      <fa-icon [icon]="'link'"></fa-icon>&nbsp;Edit Links
     </span>
-</button>
+  </button>
+}
 
-<button *ngIf="action == 'create'" type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
+@if (action == 'create') {
+  <button type="button" class="btn btn-outline-secondary rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
     <span>
-        <fa-icon [icon]="'plus-circle'"></fa-icon>&nbsp;Add Feature
+      <fa-icon [icon]="'plus-circle'"></fa-icon>&nbsp;Add Feature
     </span>
-</button>
+  </button>
+}
 
-<button *ngIf="action == 'delete'" type="button" class="btn btn-outline-danger rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
+@if (action == 'delete') {
+  <button type="button" class="btn btn-outline-danger rounded-pill m-1" (click)="doAction()" [disabled]="disabled">
     <span>
-        <fa-icon [icon]="'trash-can'"></fa-icon>&nbsp;Delete
+      <fa-icon [icon]="'trash-can'"></fa-icon>&nbsp;Delete
     </span>
-</button>
+  </button>
+}
 
 <ng-template #editModal let-modal>
-    <div *ngIf="feature">
-        <div class="modal-header align-content-center">
-            <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{feature.title}}</h4>
-            <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+  @if (feature) {
+    <div>
+      <div class="modal-header align-content-center">
+        <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{feature.title}}</h4>
+        <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+      </div>
+      <div class="modal-body my-2 mx-4">
+        <div class="row">
+          <h6>Edit {{action == 'edit' ? 'description' : (action == 'summary' ? 'summary' : 'links')}}</h6>
         </div>
-        <div class="modal-body my-2 mx-4">
-            <div class="row">
-                <h6>Edit {{action == 'edit' ? 'description' : (action == 'summary' ? 'summary' : 'links')}}</h6>
-            </div>
-            <div class="row">
-
-                <textarea *ngIf="action == 'edit'" [(ngModel)]="feature.description" type="text" maxlength="8000" rows="10" class="font-monospace text-nowrap p-1">
-                </textarea>
-
-                <textarea *ngIf="action == 'summary'" [(ngModel)]="feature.shortDescription" type="text" maxlength="1023" rows="5" class="font-monospace p-1">
-                </textarea>
-
-                <div *ngIf="action == 'links'">
-                    <div *ngFor="let link of feature.links">
-                        <edit-blog-link [blogLink]="link" (removeLink)="onRemoveLink(link)"></edit-blog-link>
-                    </div>
-                    <div class="text-end">
-                        <button class="btn btn-outline-success" (click)="onAddLink()"><fa-icon [icon]="['fas', 'plus-circle']"></fa-icon>&nbsp;Add</button>
-                    </div>
+        <div class="row">
+          @if (action == 'edit') {
+            <textarea [(ngModel)]="feature.description" type="text" maxlength="8000" rows="10" class="font-monospace text-nowrap p-1">
+            </textarea>
+          }
+          @if (action == 'summary') {
+            <textarea [(ngModel)]="feature.shortDescription" type="text" maxlength="1023" rows="5" class="font-monospace p-1">
+            </textarea>
+          }
+          @if (action == 'links') {
+            <div>
+              @for (link of feature.links; track link) {
+                <div>
+                  <edit-blog-link [blogLink]="link" (removeLink)="onRemoveLink(link)"></edit-blog-link>
                 </div>
-
+              }
+              <div class="text-end">
+                <button class="btn btn-outline-success" (click)="onAddLink()"><fa-icon [icon]="['fas', 'plus-circle']"></fa-icon>&nbsp;Add</button>
+              </div>
             </div>
-            <div class="row">
-                <span *ngIf="action == 'edit'" class="text-small text-muted text-end">{{feature.description.length}}</span>
-                <span *ngIf="action == 'summary'" class="text-small text-muted text-end">{{feature.shortDescription.length}}</span>
-            </div>
-            <div *ngIf="action == 'edit'">
-                <hr />
-                <button type="button" class="btn btn-outline-secondary mb-2" (click)="onPreviewDescription()">
-                    <span><fa-icon [icon]="'refresh'"></fa-icon>&nbsp;Preview</span>
-                </button>
-                <div class="card">
-                    <div class="card-header">
-                        <h4>{{feature.title}}</h4>
-                    </div>
-                    <div class="card-body">
-                        <p [innerHTML]="feature.descriptionPreview"></p>
-                    </div>
-                </div>
-            </div>
+          }
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline-primary" (click)="modal.dismiss('x')">Cancel</button>
-            <button type="button" class="btn btn-success" (click)="onConfirmChanges()">Confirm</button>
+        <div class="row">
+          @if (action == 'edit') {
+            <span class="text-small text-muted text-end">{{feature.description.length}}</span>
+          }
+          @if (action == 'summary') {
+            <span class="text-small text-muted text-end">{{feature.shortDescription.length}}</span>
+          }
         </div>
+        @if (action == 'edit') {
+          <div>
+            <hr />
+            <button type="button" class="btn btn-outline-secondary mb-2" (click)="onPreviewDescription()">
+              <span><fa-icon [icon]="'refresh'"></fa-icon>&nbsp;Preview</span>
+            </button>
+            <div class="card">
+              <div class="card-header">
+                <h4>{{feature.title}}</h4>
+              </div>
+              <div class="card-body">
+                <p [innerHTML]="feature.descriptionPreview"></p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-primary" (click)="modal.dismiss('x')">Cancel</button>
+        <button type="button" class="btn btn-success" (click)="onConfirmChanges()">Confirm</button>
+      </div>
     </div>
+  }
 </ng-template>
 
 <ng-template #createModal let-modal>
-    <div *ngIf="feature">
-        <div class="modal-header">
-            <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;New {{subfeature.featureName}} Feature</h4>
-            <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
-        </div>
-        <div class="modal-body">
+  @if (feature) {
+    <div>
+      <div class="modal-header">
+        <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;New {{subfeature.featureName}} Feature</h4>
+        <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-6">
             <div class="row">
-                <div class="col-lg-6">
-
-                    <div class="row">
-                        <label class="form-text fw-bold d-inline-block" for="nameBox">Name</label>
-                        <div>
-                            <small class="text-muted form-text">The name of the feature. Must be unique.</small>
-                        </div>
-                        <span class="m-2">
-                            <input id="nameBox" type="text" [(ngModel)]="subfeature.name" maxlength="255" [required]="true" class="p-1" />
-                        </span>
-                    </div>
-
-                    <div class="row">
-                        <label class="form-text fw-bold d-inline-block" for="titleBox">Title</label>
-                        <div>
-                            <small class="text-muted form-text">The display name of the feature</small>
-                        </div>
-                        <span class="m-2">
-                            <input id="titleBox" type="text" [(ngModel)]="subfeature.title" maxlength="255" [required]="true" class="p-1" />
-                        </span>
-                    </div>
-
-                    <div class="row">
-                        <label class="form-text fw-bold d-inline-block" for="isnewBox">
-                            <input id="isnewBox" type="checkbox" [(ngModel)]="subfeature.isNew" />
-                            New
-                        </label>
-                        <div>
-                            <small class="text-muted form-text">Whether the feature should have a 'new feature' marker on the site</small>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <label class="form-text fw-bold d-inline-block" for="summaryBox">Summary</label>
-                        <div>
-                            <small class="text-muted form-text">A short description of the feature.</small>
-                        </div>
-                        <span class="m-2">
-                            <textarea [(ngModel)]="subfeature.shortDescription" type="text" maxlength="1023" rows="5" class="font-monospace p-1 w-100"></textarea>
-                        </span>
-                    </div>
-
-                    <div class="row">
-                        <label class="form-text fw-bold d-inline-block" for="summaryBox">Description</label>
-                        <div>
-                            <small class="text-muted form-text">A markdown document describing the feature in details.</small>
-                        </div>
-                        <span class="m-2">
-                            <textarea [(ngModel)]="subfeature.description" type="text" maxlength="8000" rows="5" class="font-monospace p-1 w-100"></textarea>
-                        </span>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <button type="button" class="btn btn-outline-secondary mb-2" (click)="onPreviewDescription()">
-                        <span><fa-icon [icon]="'refresh'"></fa-icon>&nbsp;Preview</span>
-                    </button>
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 [innerText]="subfeature.title"></h4>
-                        </div>
-                        <div class="card-body">
-                            <p [innerHTML]="subfeature.descriptionPreview"></p>
-                        </div>
-                    </div>
-                </div>
+              <label class="form-text fw-bold d-inline-block" for="nameBox">Name</label>
+              <div>
+                <small class="text-muted form-text">The name of the feature. Must be unique.</small>
+              </div>
+              <span class="m-2">
+                <input id="nameBox" type="text" [(ngModel)]="subfeature.name" maxlength="255" [required]="true" class="p-1" />
+              </span>
             </div>
+            <div class="row">
+              <label class="form-text fw-bold d-inline-block" for="titleBox">Title</label>
+              <div>
+                <small class="text-muted form-text">The display name of the feature</small>
+              </div>
+              <span class="m-2">
+                <input id="titleBox" type="text" [(ngModel)]="subfeature.title" maxlength="255" [required]="true" class="p-1" />
+              </span>
+            </div>
+            <div class="row">
+              <label class="form-text fw-bold d-inline-block" for="isnewBox">
+                <input id="isnewBox" type="checkbox" [(ngModel)]="subfeature.isNew" />
+                New
+              </label>
+              <div>
+                <small class="text-muted form-text">Whether the feature should have a 'new feature' marker on the site</small>
+              </div>
+            </div>
+            <div class="row">
+              <label class="form-text fw-bold d-inline-block" for="summaryBox">Summary</label>
+              <div>
+                <small class="text-muted form-text">A short description of the feature.</small>
+              </div>
+              <span class="m-2">
+                <textarea [(ngModel)]="subfeature.shortDescription" type="text" maxlength="1023" rows="5" class="font-monospace p-1 w-100"></textarea>
+              </span>
+            </div>
+            <div class="row">
+              <label class="form-text fw-bold d-inline-block" for="summaryBox">Description</label>
+              <div>
+                <small class="text-muted form-text">A markdown document describing the feature in details.</small>
+              </div>
+              <span class="m-2">
+                <textarea [(ngModel)]="subfeature.description" type="text" maxlength="8000" rows="5" class="font-monospace p-1 w-100"></textarea>
+              </span>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <button type="button" class="btn btn-outline-secondary mb-2" (click)="onPreviewDescription()">
+              <span><fa-icon [icon]="'refresh'"></fa-icon>&nbsp;Preview</span>
+            </button>
+            <div class="card">
+              <div class="card-header">
+                <h4 [innerText]="subfeature.title"></h4>
+              </div>
+              <div class="card-body">
+                <p [innerHTML]="subfeature.descriptionPreview"></p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline-primary" (click)="modal.dismiss('x')">Cancel</button>
-            <button type="button" class="btn btn-success" (click)="onConfirmCreate()">Confirm</button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-primary" (click)="modal.dismiss('x')">Cancel</button>
+        <button type="button" class="btn btn-success" (click)="onConfirmCreate()">Confirm</button>
+      </div>
     </div>
+  }
 </ng-template>
 
 <ng-template #deleteModal let-modal>
-    <div *ngIf="feature">
-        <div class="modal-header align-content-center">
-            <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;Confirmation</h4>
-            <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+  @if (feature) {
+    <div>
+      <div class="modal-header align-content-center">
+        <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;Confirmation</h4>
+        <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+      </div>
+      <div class="modal-body my-2 mx-4">
+        <div class="row">
+          <h5>Delete Feature</h5>
+          <p>The record for feature <strong>{{feature.name}}</strong> will only be deleted after an explicit approval. Proceed?</p>
+          <hr />
+          <p class="small text-muted"><fa-icon [icon]="'triangle-exclamation'"></fa-icon> This action will be logged and associated to your login.</p>
         </div>
-        <div class="modal-body my-2 mx-4">
-            <div class="row">
-                <h5>Delete Feature</h5>
-                <p>The record for feature <strong>{{feature.name}}</strong> will only be deleted after an explicit approval. Proceed?</p>
-                <hr />
-                <p class="small text-muted"><fa-icon [icon]="'triangle-exclamation'"></fa-icon> This action will be logged and associated to your login.</p>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline-primary" (click)="modal.dismiss('x')">Cancel</button>
-            <button type="button" class="btn btn-danger" (click)="onDeleteFeature()">Confirm</button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-primary" (click)="modal.dismiss('x')">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="onDeleteFeature()">Confirm</button>
+      </div>
     </div>
+  }
 </ng-template>

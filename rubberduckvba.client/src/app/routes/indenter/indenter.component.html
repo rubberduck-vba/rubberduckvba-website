@@ -1,472 +1,491 @@
-<section *ngIf="model" class="row text-center my-3">
+@if (model) {
+  <section class="row text-center my-3">
     <div>
-        <h1>Online Indenter</h1>
-        <p>
-            Consistent identation is one of the most fundemntal qualities of code that is clean and clear.
-            Rubberduck makes indenting a procedure, module, or even an entire project, quick and simple.
-        </p>
-        <p>
-            With all the functionalities of the legendary 32-bit <strong><a href="/about#attributions">Smart Indenter</a></strong> add-in, and then some,
-            Rubberduck lets you configure <em>many</em> indenting options: feel free to use this page to experiment with them.
-        </p>
+      <h1>Online Indenter</h1>
+      <p>
+        Consistent identation is one of the most fundemntal qualities of code that is clean and clear.
+        Rubberduck makes indenting a procedure, module, or even an entire project, quick and simple.
+      </p>
+      <p>
+        With all the functionalities of the legendary 32-bit <strong><a href="/about#attributions">Smart Indenter</a></strong> add-in, and then some,
+        Rubberduck lets you configure <em>many</em> indenting options: feel free to use this page to experiment with them.
+      </p>
     </div>
-</section>
+  </section>
+}
 
-<section *ngIf="model" class="row my-3">
+@if (model) {
+  <section class="row my-3">
     <div class="col-lg-6 my-1 accordion">
-
-        <!-- Indent Options -->
-        <div class="card my-2">
-            <div class="card-header bg-light-subtle">
-                <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_IndentationOptions" aria-controls="group_IndentationOptions" (click)="isIndentOptionsExpanded = !isIndentOptionsExpanded">
-                    <div class="row">
-                        <div class="col-11 text-start">
-                            <h3>Indentation Options</h3>
-                        </div>
-                        <div class="col-1 text-end">
-                            <div class="float-end">
-                                <h4>
-                                    <fa-icon *ngIf="isIndentOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
-                                    <fa-icon *ngIf="!isIndentOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
+      <!-- Indent Options -->
+      <div class="card my-2">
+        <div class="card-header bg-light-subtle">
+          <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_IndentationOptions" aria-controls="group_IndentationOptions" (click)="isIndentOptionsExpanded = !isIndentOptionsExpanded">
+            <div class="row">
+              <div class="col-11 text-start">
+                <h3>Indentation Options</h3>
+              </div>
+              <div class="col-1 text-end">
+                <div class="float-end">
+                  <h4>
+                    @if (isIndentOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                    }
+                    @if (!isIndentOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                    }
+                  </h4>
                 </div>
+              </div>
             </div>
-            <div id="group_IdentationOptions" class="collapse card-body" [ngClass]="{ show: isIndentOptionsExpanded }">
-                <div class="form-group form-check">
-                    <label class="form-text fw-bold d-inline-block" for="indentSpacesBox">Indent spaces</label>
-                    <span class="m-2">
-                        <input id="indentSpacesBox" type="number" [(ngModel)]="model.indentSpaces" min="1" max="9" [required]="true" class="text-center p-1" />
-                    </span>
-                    <div>
-                        <small class="text-muted form-text">The size (in spaces) of an indentation level</small>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group form-check">
-                    <label class="form-text fw-bold d-inline-block" for="indentEmptyLinesHandlingBox">Empty lines</label>
-                    <span class="m-2">
-                        <select id="indentEmptyLinesHandlingBox" [(ngModel)]="model.emptyLineHandlingMethod" class="text-center p-1">
-                            <option value="0">Ignore</option>
-                            <option value="1">Remove</option>
-                            <option value="2">Indent</option>
-                        </select>
-                    </span>
-                    <div>
-                        <small id="empty-line-handling-description" class="form-text text-muted">Specifies whether and how to handle empty lines</small>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="indentProcBodyBox">
-                            <input id="indentProcBodyBox" type="checkbox" [(ngModel)]="model.indentEntireProcedureBody" />
-                            Indent procedure body
-                        </label>
-                        <div>
-                            <small class="text-muted form-text">If checked, procedure scopes add an indentation level</small>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="indentFirstDeclBlockBox">
-                            <input id="indentFirstDeclBlockBox" type="checkbox" [(ngModel)]="model.indentFirstDeclarationBlock" />
-                            Indent first declaration block
-                        </label>
-                        <small class="text-muted form-text">If checked, a block of declarations at the top of a procedure adds an indentation level</small>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="indentFirstCommentBlockBox">
-                            <input id="indentFirstCommentBlockBox" type="checkbox" [(ngModel)]="model.indentFirstCommentBlock" />
-                            Indent first comment block
-                        </label>
-                        <small class="text-muted form-text">If checked, a block of comments at the top of a procedure adds an indentation level</small>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label id="indent-ignore-firstblock-emptylines-label" class="form-check-label" for="ignoreEmptyLinesBox">
-                            <input id="ignoreEmptyLinesBox" type="checkbox" [(ngModel)]="model.ignoreEmptyLinesInFirstBlock" />
-                            Ignore empty lines in first block comments
-                        </label>
-                        <small id="indent-ignore-firstblock-emptylines-help" class="text-muted form-text">If checked, the first block of comments can include empty lines</small>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="indentEnumBox">
-                            <input id="indentEnumBox" type="checkbox" [(ngModel)]="model.indentEnumTypeAsProcedure" />
-                            Indent Enum members
-                        </label>
-                        <div>
-                            <small class="text-muted form-text">If checked, <code>Enum</code> members add an indentation level</small>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="indentCaseBox">
-                            <input id="indentCaseBox" type="checkbox" [(ngModel)]="model.indentCase" />
-                            Indent Case
-                        </label>
-                        <div>
-                            <small class="text-muted form-text">If checked, <code>Case</code> blocks add an indentation level</small>
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
+          </div>
         </div>
-
-        <!-- Outdent Options -->
-        <div class="card my-2">
-            <div class="card-header bg-light-subtle">
-                <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_OutdentingOptions" aria-controls="group_OutdentingOptions" (click)="isOutdentOptionsExpanded = !isOutdentOptionsExpanded">
-                    <div class="row">
-                        <div class="col-11 text-start">
-                            <h3>Outdent Options</h3>
-                        </div>
-                        <div class="col-1 text-end">
-                            <div class="float-end">
-                                <h4>
-                                    <fa-icon *ngIf="isOutdentOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
-                                    <fa-icon *ngIf="!isOutdentOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div id="group_IdentationOptions" class="collapse card-body" [ngClass]="{ show: isIndentOptionsExpanded }">
+          <div class="form-group form-check">
+            <label class="form-text fw-bold d-inline-block" for="indentSpacesBox">Indent spaces</label>
+            <span class="m-2">
+              <input id="indentSpacesBox" type="number" [(ngModel)]="model.indentSpaces" min="1" max="9" [required]="true" class="text-center p-1" />
+            </span>
+            <div>
+              <small class="text-muted form-text">The size (in spaces) of an indentation level</small>
             </div>
-            <div id="group_OutdentingOptions" class="collapse card-body" [ngClass]="{ show: isOutdentOptionsExpanded }">
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="outdentPrecompilerBox">
-                            <input id="outdentPrecompilerBox" type="checkbox" [(ngModel)]="model.forceCompilerDirectivesInColumn1" />
-                            Outdent precompiler directives
-                        </label>
-                        <div>
-                            <small class="text-muted form-text">Forces precompiler directives into column 1 regardless of current indentation level</small>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="outdentDebugPrintBox">
-                            <input id="outdentDebugPrintBox" type="checkbox" [(ngModel)]="model.forceDebugPrintInColumn1" />
-                            Outdent Debug.Print statements
-                        </label>
-                        <div>
-                            <small class="text-muted form-text">Forces <code>Debug.Print</code> statements into column 1 regardless of current indentation level</small>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="outdentDebugAssertBox">
-                            <input id="outdentDebugAssertBox" type="checkbox" [(ngModel)]="model.forceDebugAssertInColumn1" />
-                            Outdent Debug.Assert statements
-                        </label>
-                        <div>
-                            <small class="text-muted form-text">Forces <code>Debug.Assert</code> statements into column 1 regardless of current indentation level</small>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="outdentStopBox">
-                            <input id="outdentStopBox" type="checkbox" [(ngModel)]="model.forceStopInColumn1" />
-                            Outdent Stop statements
-                        </label>
-                        <div>
-                            <small class="text-muted form-text">Forces <code>Stop</code> statements into column 1 regardless of current indentation level</small>
-                        </div>
-                    </div>
-                </div>
+          </div>
+          <hr />
+          <div class="form-group form-check">
+            <label class="form-text fw-bold d-inline-block" for="indentEmptyLinesHandlingBox">Empty lines</label>
+            <span class="m-2">
+              <select id="indentEmptyLinesHandlingBox" [(ngModel)]="model.emptyLineHandlingMethod" class="text-center p-1">
+                <option value="0">Ignore</option>
+                <option value="1">Remove</option>
+                <option value="2">Indent</option>
+              </select>
+            </span>
+            <div>
+              <small id="empty-line-handling-description" class="form-text text-muted">Specifies whether and how to handle empty lines</small>
             </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="indentProcBodyBox">
+                <input id="indentProcBodyBox" type="checkbox" [(ngModel)]="model.indentEntireProcedureBody" />
+                Indent procedure body
+              </label>
+              <div>
+                <small class="text-muted form-text">If checked, procedure scopes add an indentation level</small>
+              </div>
+            </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="indentFirstDeclBlockBox">
+                <input id="indentFirstDeclBlockBox" type="checkbox" [(ngModel)]="model.indentFirstDeclarationBlock" />
+                Indent first declaration block
+              </label>
+              <small class="text-muted form-text">If checked, a block of declarations at the top of a procedure adds an indentation level</small>
+            </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="indentFirstCommentBlockBox">
+                <input id="indentFirstCommentBlockBox" type="checkbox" [(ngModel)]="model.indentFirstCommentBlock" />
+                Indent first comment block
+              </label>
+              <small class="text-muted form-text">If checked, a block of comments at the top of a procedure adds an indentation level</small>
+            </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label id="indent-ignore-firstblock-emptylines-label" class="form-check-label" for="ignoreEmptyLinesBox">
+                <input id="ignoreEmptyLinesBox" type="checkbox" [(ngModel)]="model.ignoreEmptyLinesInFirstBlock" />
+                Ignore empty lines in first block comments
+              </label>
+              <small id="indent-ignore-firstblock-emptylines-help" class="text-muted form-text">If checked, the first block of comments can include empty lines</small>
+            </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="indentEnumBox">
+                <input id="indentEnumBox" type="checkbox" [(ngModel)]="model.indentEnumTypeAsProcedure" />
+                Indent Enum members
+              </label>
+              <div>
+                <small class="text-muted form-text">If checked, <code>Enum</code> members add an indentation level</small>
+              </div>
+            </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="indentCaseBox">
+                <input id="indentCaseBox" type="checkbox" [(ngModel)]="model.indentCase" />
+                Indent Case
+              </label>
+              <div>
+                <small class="text-muted form-text">If checked, <code>Case</code> blocks add an indentation level</small>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <!-- Align Options -->
-        <div class="card my-2">
-            <div class="card-header bg-light-subtle">
-                <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_AlignmentOptions" aria-controls="group_AlignmentOptions" (click)="isAlignmentOptionsExpanded = !isAlignmentOptionsExpanded">
-                    <div class="row">
-                        <div class="col-11 text-start">
-                            <h3>Alignment Options</h3>
-                        </div>
-                        <div class="col-1 text-end">
-                            <div class="float-end">
-                                <h4>
-                                    <fa-icon *ngIf="isAlignmentOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
-                                    <fa-icon *ngIf="!isAlignmentOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
+      </div>
+      <!-- Outdent Options -->
+      <div class="card my-2">
+        <div class="card-header bg-light-subtle">
+          <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_OutdentingOptions" aria-controls="group_OutdentingOptions" (click)="isOutdentOptionsExpanded = !isOutdentOptionsExpanded">
+            <div class="row">
+              <div class="col-11 text-start">
+                <h3>Outdent Options</h3>
+              </div>
+              <div class="col-1 text-end">
+                <div class="float-end">
+                  <h4>
+                    @if (isOutdentOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                    }
+                    @if (!isOutdentOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                    }
+                  </h4>
                 </div>
+              </div>
             </div>
-            <div id="group_AlignmentOptions" class="collapse card-body" [ngClass]="{ show: isAlignmentOptionsExpanded }">
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="alignContinuationsBox">
-                            <input id="alignContinuationsBox" type="checkbox" [(ngModel)]="model.alignContinuations" />
-                            Align continuations
-                        </label>
-                        <div>
-                            <small class="text-muted form-text"></small>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="ignoreOperatorsBox">
-                            <input id="ignoreOperatorsBox" type="checkbox" [(ngModel)]="model.ignoreOperatorsInContinuations" [disabled]="!model.alignContinuations" />
-                            Ignore operators in continuations
-                        </label>
-                        <div>
-                            <small class="text-muted form-text"></small>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="alignDimsBox">
-                            <input id="alignDimsBox" type="checkbox" [(ngModel)]="model.alignDims" />
-                            Align Dim statements into column
-                        </label>
-                        <div>
-                            <small class="text-muted form-text"></small>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="dimsColumnBox">
-                            <input id="dimsColumnBox" type="number" [(ngModel)]="model.alignDimColumn" min="1" max="99" [required]="true" [disabled]="!model.alignDims" />
-                        </label>
-                        <div>
-                            <small class="text-muted form-text"></small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-
-        <!-- Comment Options -->
-        <div class="card my-2">
-            <div class="card-header bg-light-subtle">
-                <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_CommentOptions" aria-controls="group_CommentOptions" (click)="isCommentOptionsExpanded = !isCommentOptionsExpanded">
-                    <div class="row">
-                        <div class="col-11 text-start">
-                            <h3>Comment Options</h3>
-                        </div>
-                        <div class="col-1 text-end">
-                            <div class="float-end">
-                                <h4>
-                                    <fa-icon *ngIf="isCommentOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
-                                    <fa-icon *ngIf="!isCommentOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div id="group_OutdentingOptions" class="collapse card-body" [ngClass]="{ show: isOutdentOptionsExpanded }">
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="outdentPrecompilerBox">
+                <input id="outdentPrecompilerBox" type="checkbox" [(ngModel)]="model.forceCompilerDirectivesInColumn1" />
+                Outdent precompiler directives
+              </label>
+              <div>
+                <small class="text-muted form-text">Forces precompiler directives into column 1 regardless of current indentation level</small>
+              </div>
             </div>
-            <div id="group_CommentOptions" class="collapse card-body" [ngClass]="{ show: isCommentOptionsExpanded }">
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="alignCommentsBox">
-                            <input id="alignCommentsBox" type="checkbox" [(ngModel)]="model.alignCommentsWithCode" />
-                            Align comments with code
-                        </label>
-                        <div>
-                            <small id="align-comments-help" class="form-text text-muted">If checked, comment lines will be made to follow indentation levels</small>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="eolCommentsBox">
-                            End-of-line comments
-                            <select [(ngModel)]="model.endOfLineCommentStyle">
-                                <option value="0">Absolute</option>
-                                <option value="1">Same gap</option>
-                                <option value="2">Standard gap</option>
-                                <option value="3">Aligned</option>
-                            </select>
-                        </label>
-                        <div>
-                            <small id="line-ending-comments-help" class="form-text text-muted"></small>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group" *ngIf="model.endOfLineCommentStyle == 3">
-                    <div class="form-check">
-                        <label class="form-check-label" for="eolCommentsColumnBox">
-                            Column:
-                            <input id="eolCommentsColumnBox" class="text-center" type="number" [(ngModel)]="model.endOfLineCommentColumnSpaceAlignment" min="1" max="99" [required]="true" [disabled]="!model.endOfLineCommentColumnSpaceAlignment" />
-                        </label>
-                        <div>
-                            <small id="line-ending-comment-column-help" class="form-text text-muted">End-of-line comments will begin at that column whenever possible</small>
-                        </div>
-                    </div>
-                </div>
-
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="outdentDebugPrintBox">
+                <input id="outdentDebugPrintBox" type="checkbox" [(ngModel)]="model.forceDebugPrintInColumn1" />
+                Outdent Debug.Print statements
+              </label>
+              <div>
+                <small class="text-muted form-text">Forces <code>Debug.Print</code> statements into column 1 regardless of current indentation level</small>
+              </div>
             </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="outdentDebugAssertBox">
+                <input id="outdentDebugAssertBox" type="checkbox" [(ngModel)]="model.forceDebugAssertInColumn1" />
+                Outdent Debug.Assert statements
+              </label>
+              <div>
+                <small class="text-muted form-text">Forces <code>Debug.Assert</code> statements into column 1 regardless of current indentation level</small>
+              </div>
+            </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="outdentStopBox">
+                <input id="outdentStopBox" type="checkbox" [(ngModel)]="model.forceStopInColumn1" />
+                Outdent Stop statements
+              </label>
+              <div>
+                <small class="text-muted form-text">Forces <code>Stop</code> statements into column 1 regardless of current indentation level</small>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <!-- Vertical Options -->
-        <div class="card my-2">
-            <div class="card-header bg-light-subtle">
-                <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_VerticalSpacingOptions" aria-controls="group_VerticalSpacingOptions" (click)="isVerticalOptionsExpanded = !isVerticalOptionsExpanded">
-                    <div class="row">
-                        <div class="col-11 text-start">
-                            <h3>Vertical Spacing Options</h3>
-                        </div>
-                        <div class="col-1 text-end">
-                            <div class="float-end">
-                                <h4>
-                                    <fa-icon *ngIf="isVerticalOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
-                                    <fa-icon *ngIf="!isVerticalOptionsExpanded" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
+      </div>
+      <!-- Align Options -->
+      <div class="card my-2">
+        <div class="card-header bg-light-subtle">
+          <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_AlignmentOptions" aria-controls="group_AlignmentOptions" (click)="isAlignmentOptionsExpanded = !isAlignmentOptionsExpanded">
+            <div class="row">
+              <div class="col-11 text-start">
+                <h3>Alignment Options</h3>
+              </div>
+              <div class="col-1 text-end">
+                <div class="float-end">
+                  <h4>
+                    @if (isAlignmentOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                    }
+                    @if (!isAlignmentOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                    }
+                  </h4>
                 </div>
+              </div>
             </div>
-            <div id="group_VerticalSpacingOptions" class="collapse card-body" [ngClass]="{ show: isVerticalOptionsExpanded }">
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="groupPropertiesBox">
-                            <input id="groupPropertiesBox" type="checkbox" [(ngModel)]="model.groupRelatedProperties" />
-                            Regroup same-name property members
-                        </label>
-                        <div>
-                            <small class="form-text text-muted">Removes all spaces between <code>Get</code>, <code>Let</code>, and <code>Set</code> accessors of Property members</small>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="form-check">
-                        <label class="form-check-label" for="vspaceBox">
-                            <input id="vspaceBox" type="checkbox" [(ngModel)]="model.verticallySpaceProcedures" />
-                            Maintain vertical space between procedures
-                        </label>
-                        <div>
-                            <small class="form-text text-muted">Consistently keeps the specified number of empty lines between the members of a module</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group" *ngIf="model.verticallySpaceProcedures">
-                    <div class="form-check">
-                        <label class="form-check-label" for="vspaceLinesBox">
-                            Lines:
-                            <input id="vspaceLinesBox" class="text-center" type="number" [(ngModel)]="model.endOfLineCommentColumnSpaceAlignment" min="1" max="2" [required]="true" [disabled]="!model.linesBetweenProcedures" />
-                        </label>
-                        <div>
-                            <small id="vertical-spacing-lines-help" class="form-text text-muted">The number of empty lines to maintain between procedures</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-
-        <!-- API Info -->
-        <div class="card my-2">
-            <div class="card-header bg-light-subtle">
-                <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_ApiOptions" aria-controls="group_ApiOptions" (click)="isApiAboutBoxExpanded = !isApiAboutBoxExpanded">
-                    <div class="row">
-                        <div class="col-11 text-start">
-                            <h3>API</h3>
-                        </div>
-                        <div class="col-1 text-end">
-                            <div class="float-end">
-                                <h4>
-                                    <fa-icon *ngIf="isApiAboutBoxExpanded" class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
-                                    <fa-icon *ngIf="!isApiAboutBoxExpanded" class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div id="group_AlignmentOptions" class="collapse card-body" [ngClass]="{ show: isAlignmentOptionsExpanded }">
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="alignContinuationsBox">
+                <input id="alignContinuationsBox" type="checkbox" [(ngModel)]="model.alignContinuations" />
+                Align continuations
+              </label>
+              <div>
+                <small class="text-muted form-text"></small>
+              </div>
             </div>
-            <div id="group_VerticalSpacingOptions" class="collapse card-body" [ngClass]="{ show: isApiAboutBoxExpanded }">
-                <h4 class="card-title">Looking for a programmatic approach?</h4>
-                <div class="card-body">
-                    Try the API:
-                    <ol>
-                        <li>Request (GET) <code>{{apiBaseUrl}}indenter/defaults</code> to get a JSON object for the model (or copy it from below);</li>
-                        <li>Provide the code to be indented in the 'Code' property; use <code>\n</code> for newline characters;</li>
-                        <li>Post (POST) the JSON object to <code>{{apiBaseUrl}}indenter/indent</code> to get the indented code back as an array of strings.</li>
-                    </ol>
-                    <textarea id="template-json" class="code-area form-control font-monospace" rows="15" readonly [innerHTML]="asJson"></textarea>
-                </div>
-
-                <div class="card-footer">
-                    <button id="copy-template" class="btn mx-1" [ngClass]="wasTemplateCopied ? 'btn-success' : 'btn-secondary'" type="button" (click)="copyTemplate()">
-                        <span><fa-icon [icon]="wasTemplateCopied ? 'check' : 'clipboard'"></fa-icon>&nbsp;{{wasTemplateCopied ? 'Copied!' : 'Copy'}}</span>
-                    </button>
-                </div>
+          </div>
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="ignoreOperatorsBox">
+                <input id="ignoreOperatorsBox" type="checkbox" [(ngModel)]="model.ignoreOperatorsInContinuations" [disabled]="!model.alignContinuations" />
+                Ignore operators in continuations
+              </label>
+              <div>
+                <small class="text-muted form-text"></small>
+              </div>
             </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="alignDimsBox">
+                <input id="alignDimsBox" type="checkbox" [(ngModel)]="model.alignDims" />
+                Align Dim statements into column
+              </label>
+              <div>
+                <small class="text-muted form-text"></small>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="dimsColumnBox">
+                <input id="dimsColumnBox" type="number" [(ngModel)]="model.alignDimColumn" min="1" max="99" [required]="true" [disabled]="!model.alignDims" />
+              </label>
+              <div>
+                <small class="text-muted form-text"></small>
+              </div>
+            </div>
+          </div>
         </div>
-
+      </div>
+      <!-- Comment Options -->
+      <div class="card my-2">
+        <div class="card-header bg-light-subtle">
+          <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_CommentOptions" aria-controls="group_CommentOptions" (click)="isCommentOptionsExpanded = !isCommentOptionsExpanded">
+            <div class="row">
+              <div class="col-11 text-start">
+                <h3>Comment Options</h3>
+              </div>
+              <div class="col-1 text-end">
+                <div class="float-end">
+                  <h4>
+                    @if (isCommentOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                    }
+                    @if (!isCommentOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                    }
+                  </h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="group_CommentOptions" class="collapse card-body" [ngClass]="{ show: isCommentOptionsExpanded }">
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="alignCommentsBox">
+                <input id="alignCommentsBox" type="checkbox" [(ngModel)]="model.alignCommentsWithCode" />
+                Align comments with code
+              </label>
+              <div>
+                <small id="align-comments-help" class="form-text text-muted">If checked, comment lines will be made to follow indentation levels</small>
+              </div>
+            </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="eolCommentsBox">
+                End-of-line comments
+                <select [(ngModel)]="model.endOfLineCommentStyle">
+                  <option value="0">Absolute</option>
+                  <option value="1">Same gap</option>
+                  <option value="2">Standard gap</option>
+                  <option value="3">Aligned</option>
+                </select>
+              </label>
+              <div>
+                <small id="line-ending-comments-help" class="form-text text-muted"></small>
+              </div>
+            </div>
+          </div>
+          @if (model.endOfLineCommentStyle == 3) {
+            <div class="form-group">
+              <div class="form-check">
+                <label class="form-check-label" for="eolCommentsColumnBox">
+                  Column:
+                  <input id="eolCommentsColumnBox" class="text-center" type="number" [(ngModel)]="model.endOfLineCommentColumnSpaceAlignment" min="1" max="99" [required]="true" [disabled]="!model.endOfLineCommentColumnSpaceAlignment" />
+                </label>
+                <div>
+                  <small id="line-ending-comment-column-help" class="form-text text-muted">End-of-line comments will begin at that column whenever possible</small>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+      <!-- Vertical Options -->
+      <div class="card my-2">
+        <div class="card-header bg-light-subtle">
+          <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_VerticalSpacingOptions" aria-controls="group_VerticalSpacingOptions" (click)="isVerticalOptionsExpanded = !isVerticalOptionsExpanded">
+            <div class="row">
+              <div class="col-11 text-start">
+                <h3>Vertical Spacing Options</h3>
+              </div>
+              <div class="col-1 text-end">
+                <div class="float-end">
+                  <h4>
+                    @if (isVerticalOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                    }
+                    @if (!isVerticalOptionsExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                    }
+                  </h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="group_VerticalSpacingOptions" class="collapse card-body" [ngClass]="{ show: isVerticalOptionsExpanded }">
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="groupPropertiesBox">
+                <input id="groupPropertiesBox" type="checkbox" [(ngModel)]="model.groupRelatedProperties" />
+                Regroup same-name property members
+              </label>
+              <div>
+                <small class="form-text text-muted">Removes all spaces between <code>Get</code>, <code>Let</code>, and <code>Set</code> accessors of Property members</small>
+              </div>
+            </div>
+          </div>
+          <hr />
+          <div class="form-group">
+            <div class="form-check">
+              <label class="form-check-label" for="vspaceBox">
+                <input id="vspaceBox" type="checkbox" [(ngModel)]="model.verticallySpaceProcedures" />
+                Maintain vertical space between procedures
+              </label>
+              <div>
+                <small class="form-text text-muted">Consistently keeps the specified number of empty lines between the members of a module</small>
+              </div>
+            </div>
+          </div>
+          @if (model.verticallySpaceProcedures) {
+            <div class="form-group">
+              <div class="form-check">
+                <label class="form-check-label" for="vspaceLinesBox">
+                  Lines:
+                  <input id="vspaceLinesBox" class="text-center" type="number" [(ngModel)]="model.endOfLineCommentColumnSpaceAlignment" min="1" max="2" [required]="true" [disabled]="!model.linesBetweenProcedures" />
+                </label>
+                <div>
+                  <small id="vertical-spacing-lines-help" class="form-text text-muted">The number of empty lines to maintain between procedures</small>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+      <!-- API Info -->
+      <div class="card my-2">
+        <div class="card-header bg-light-subtle">
+          <div role="button" class="btn btn-link text-nowrap text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#group_ApiOptions" aria-controls="group_ApiOptions" (click)="isApiAboutBoxExpanded = !isApiAboutBoxExpanded">
+            <div class="row">
+              <div class="col-11 text-start">
+                <h3>API</h3>
+              </div>
+              <div class="col-1 text-end">
+                <div class="float-end">
+                  <h4>
+                    @if (isApiAboutBoxExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-up']"></fa-icon>
+                    }
+                    @if (!isApiAboutBoxExpanded) {
+                      <fa-icon class="mt-2" [icon]="['fas', 'chevron-down']"></fa-icon>
+                    }
+                  </h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="group_VerticalSpacingOptions" class="collapse card-body" [ngClass]="{ show: isApiAboutBoxExpanded }">
+          <h4 class="card-title">Looking for a programmatic approach?</h4>
+          <div class="card-body">
+            Try the API:
+            <ol>
+              <li>Request (GET) <code>{{apiBaseUrl}}indenter/defaults</code> to get a JSON object for the model (or copy it from below);</li>
+              <li>Provide the code to be indented in the 'Code' property; use <code>\n</code> for newline characters;</li>
+              <li>Post (POST) the JSON object to <code>{{apiBaseUrl}}indenter/indent</code> to get the indented code back as an array of strings.</li>
+            </ol>
+            <textarea id="template-json" class="code-area form-control font-monospace" rows="15" readonly [innerHTML]="asJson"></textarea>
+          </div>
+          <div class="card-footer">
+            <button id="copy-template" class="btn mx-1" [ngClass]="wasTemplateCopied ? 'btn-success' : 'btn-secondary'" type="button" (click)="copyTemplate()">
+              <span><fa-icon [icon]="wasTemplateCopied ? 'check' : 'clipboard'"></fa-icon>&nbsp;{{wasTemplateCopied ? 'Copied!' : 'Copy'}}</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-
     <div class="col-lg-6 my-1">
-        <div class="card">
-            <div class="card-header">
-                <h4>Try it right here!</h4>
-                <small class="card-text text-muted">Rubberduck.SmartIndenter.dll version: {{model.indenterVersion}}</small>
-            </div>
-            <div class="card-body">
-                <label class="form-text" for="indent-code"><fa-icon [icon]="'paste'"></fa-icon>&nbsp;Paste code to indent here:</label>
-                <textarea [(ngModel)]="model.code" (ngModelChange)="onModelChanged($event)" id="indentCode" class="code-area form-control font-monospace text-nowrap mt-2" rows="20" contenteditable="true"></textarea>
-            </div>
-            <div class="card-footer">
-                <button type="button" id="indent-button" class="btn btn-primary mx-1" (click)="indent()" [disabled]="model.code.length == 0">
-                    <span [hidden]="!isIndenterBusy" id="indent-busy-indicator" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span id="indent-button-text">Indent</span>
-                </button>
-                <button id="copy-code" class="btn mx-1" [ngClass]="wasCopied ? 'btn-success' : 'btn-secondary'" type="button" [disabled]="model.code.length == 0" (click)="copy()">
-                    <span><fa-icon [icon]="wasCopied ? 'check' : 'clipboard'"></fa-icon>&nbsp;{{wasCopied ? 'Copied!' : 'Copy'}}</span>
-                </button>
-            </div>
+      <div class="card">
+        <div class="card-header">
+          <h4>Try it right here!</h4>
+          <small class="card-text text-muted">Rubberduck.SmartIndenter.dll version: {{model.indenterVersion}}</small>
         </div>
+        <div class="card-body">
+          <label class="form-text" for="indent-code"><fa-icon [icon]="'paste'"></fa-icon>&nbsp;Paste code to indent here:</label>
+          <textarea [(ngModel)]="model.code" (ngModelChange)="onModelChanged($event)" id="indentCode" class="code-area form-control font-monospace text-nowrap mt-2" rows="20" contenteditable="true"></textarea>
+        </div>
+        <div class="card-footer">
+          <button type="button" id="indent-button" class="btn btn-primary mx-1" (click)="indent()" [disabled]="model.code.length == 0">
+            <span [hidden]="!isIndenterBusy" id="indent-busy-indicator" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span id="indent-button-text">Indent</span>
+          </button>
+          <button id="copy-code" class="btn mx-1" [ngClass]="wasCopied ? 'btn-success' : 'btn-secondary'" type="button" [disabled]="model.code.length == 0" (click)="copy()">
+            <span><fa-icon [icon]="wasCopied ? 'check' : 'clipboard'"></fa-icon>&nbsp;{{wasCopied ? 'Copied!' : 'Copy'}}</span>
+          </button>
+        </div>
+      </div>
     </div>
-
     <hr />
     <div class="row">
-        <div class="form-group col-6">
-            <div role="button" class="btn btn-primary" (click)="getDefaults()"><fa-icon [icon]="'rotate-left'"></fa-icon>&nbsp;Reset to defaults</div>
+      <div class="form-group col-6">
+        <div role="button" class="btn btn-primary" (click)="getDefaults()"><fa-icon [icon]="'rotate-left'"></fa-icon>&nbsp;Reset to defaults</div>
+      </div>
+      <div class="form-group col-6">
+        <div class="form-check">
+          <label class="form-check-label" for="vspaceBox">
+            <input id="localstorageBox" type="checkbox" [(ngModel)]="isLocalStorageOK" />
+            Remember configuration
+          </label>
         </div>
-        <div class="form-group col-6">
-            <div class="form-check">
-                <label class="form-check-label" for="vspaceBox">
-                    <input id="localstorageBox" type="checkbox" [(ngModel)]="isLocalStorageOK" />
-                    Remember configuration
-                </label>
-            </div>
-        </div>
+      </div>
     </div>
-</section>
+  </section>
+}
 
 <section class="row my-3 text-center">
-    <div class="col-12">
-        <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
-    </div>
+  <div class="col-12">
+    <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+  </div>
 </section>

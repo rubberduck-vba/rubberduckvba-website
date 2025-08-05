@@ -1,8 +1,10 @@
-<div class="row text-center my-3" *ngIf="show">
+@if (show) {
+  <div class="row text-center my-3">
     <div class="col-12">
-        <img class="ducky my-2 w-10" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+      <img class="ducky my-2 w-10" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
     </div>
     <div class="col-12">
-        <h3><span class="spinner-border text-primary"></span> {{label}}</h3>
+      <h3><span class="spinner-border text-primary"></span> {{label}}</h3>
     </div>
-</div>
+  </div>
+}

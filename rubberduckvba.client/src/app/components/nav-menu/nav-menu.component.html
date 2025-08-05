@@ -1,73 +1,85 @@
 <header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container">
-            <a class="navbar-brand" [routerLink]="['/']">
-                <span>
-                    <img src="../../assets/vector-ducky-dark.svg" alt="Rubberduck logo" width="32" />
-                    <img alt="Rubberduck" height="24" class="mx-2" src="../../assets/rubberduck.png" />
-                </span>
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-label="Toggle navigation" [attr.aria-expanded]="isExpanded" (click)="toggle()">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end" [ngClass]="{ show: isExpanded }">
-                <ul class="navbar-nav flex-grow">
-                    <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
-                        <a class="nav-link text-dark" [class.fw-bold]="isHomePage" [routerLink]="['/']">Home</a>
-                    </li>
-                    <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
-                        <a class="nav-link text-dark" [class.fw-bold]="isAboutPage" href="/about">About</a>
-                    </li>
-                    <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
-                        <a class="nav-link text-dark" [class.fw-bold]="isIndenterPage" href="/indenter">Indenter</a>
-                    </li>
-                    <li *ngIf="tagDownloads.length > 0" class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
-                        <!-- if API failed, features page will just hang -->
-                        <a class="nav-link text-dark" [class.fw-bold]="isFeaturesPage" href="/features">Features</a>
-                    </li>
-                    <li *ngIf="tagDownloads.length > 0" class="nav-item">
-                        <div ngbDropdown class="text-center">
-                            <button ngbDropdownToggle class="nav-link" id="downloadsMenu">Downloads</button>
-                            <div ngbDropdownMenu="downloadsMenu">
-                                <h6 class="dropdown-header">Download Rubberduck</h6>
-                                <div *ngIf="canDownload">
-                                    <div *ngFor="let item of tagDownloads" ngbDropdownItem>
-                                        <download-item [info]="item"></download-item>
-                                        <!--<span>
+  <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <div class="container">
+      <a class="navbar-brand" [routerLink]="['/']">
+        <span>
+          <img src="../../assets/vector-ducky-dark.svg" alt="Rubberduck logo" width="32" />
+          <img alt="Rubberduck" height="24" class="mx-2" src="../../assets/rubberduck.png" />
+        </span>
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-label="Toggle navigation" [attr.aria-expanded]="isExpanded" (click)="toggle()">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end" [ngClass]="{ show: isExpanded }">
+        <ul class="navbar-nav flex-grow">
+          <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
+            <a class="nav-link text-dark" [class.fw-bold]="isHomePage" [routerLink]="['/']">Home</a>
+          </li>
+          <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
+            <a class="nav-link text-dark" [class.fw-bold]="isAboutPage" href="/about">About</a>
+          </li>
+          <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
+            <a class="nav-link text-dark" [class.fw-bold]="isIndenterPage" href="/indenter">Indenter</a>
+          </li>
+          @if (tagDownloads.length > 0) {
+            <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
+              <!-- if API failed, features page will just hang -->
+              <a class="nav-link text-dark" [class.fw-bold]="isFeaturesPage" href="/features">Features</a>
+            </li>
+          }
+          @if (tagDownloads.length > 0) {
+            <li class="nav-item">
+              <div ngbDropdown class="text-center">
+                <button ngbDropdownToggle class="nav-link" id="downloadsMenu">Downloads</button>
+                <div ngbDropdownMenu="downloadsMenu">
+                  <h6 class="dropdown-header">Download Rubberduck</h6>
+                  @if (canDownload) {
+                    <div>
+                      @for (item of tagDownloads; track item) {
+                        <div ngbDropdownItem>
+                          <download-item [info]="item"></download-item>
+                          <!--<span>
                           <fa-icon class="mx-2" [icon]="['fas', 'tag']"></fa-icon>
                           <a [href]="item.downloadUrl" [title]="item.title" [innerHtml]="item.name"></a>
                         </span>-->
-                                    </div>
-                                </div>
-                                <div *ngIf="!canDownload">
-                                    <div class="mx-3">
-                                        <span class="text-muted">
-                                            <fa-icon class="mx-2" [icon]="['fas', 'ban']"></fa-icon>Windows desktop only :)
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                <h6 class="dropdown-header">Other Downloads</h6>
-                                <div *ngFor="let item of pdfDownloads" ngbDropdownItem>
-                                    <span>
-                                        <fa-icon class="mx-2" [icon]="['fas', 'file-pdf']"></fa-icon>
-                                        <a [href]="item.downloadUrl" [title]="item.title" [innerHtml]="item.name"></a>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
-                        <a class="nav-link text-dark" href="https://rubberduckvba.blog"><fa-icon class="mx-1" [icon]="['fab', 'wordpress']"></fa-icon>Blog</a>
-                    </li>
-                    <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
-                        <a class="nav-link text-dark" href="https://ko-fi.com/rubberduckvba"><fa-icon class="mx-1" [icon]="['fas', 'shopping-cart']"></fa-icon>Shop</a>
-                    </li>
-                    <li class="nav-item">
-                        <auth-menu></auth-menu>
-                    </li>
-                </ul>
+                      </div>
+                    }
+                  </div>
+                }
+                @if (!canDownload) {
+                  <div>
+                    <div class="mx-3">
+                      <span class="text-muted">
+                        <fa-icon class="mx-2" [icon]="['fas', 'ban']"></fa-icon>Windows desktop only :)
+                      </span>
+                    </div>
+                  </div>
+                }
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Other Downloads</h6>
+                @for (item of pdfDownloads; track item) {
+                  <div ngbDropdownItem>
+                    <span>
+                      <fa-icon class="mx-2" [icon]="['fas', 'file-pdf']"></fa-icon>
+                      <a [href]="item.downloadUrl" [title]="item.title" [innerHtml]="item.name"></a>
+                    </span>
+                  </div>
+                }
+              </div>
             </div>
-        </div>
-    </nav>
+          </li>
+        }
+        <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
+          <a class="nav-link text-dark" href="https://rubberduckvba.blog"><fa-icon class="mx-1" [icon]="['fab', 'wordpress']"></fa-icon>Blog</a>
+        </li>
+        <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
+          <a class="nav-link text-dark" href="https://ko-fi.com/rubberduckvba"><fa-icon class="mx-1" [icon]="['fas', 'shopping-cart']"></fa-icon>Shop</a>
+        </li>
+        <li class="nav-item">
+          <auth-menu></auth-menu>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
 </header>

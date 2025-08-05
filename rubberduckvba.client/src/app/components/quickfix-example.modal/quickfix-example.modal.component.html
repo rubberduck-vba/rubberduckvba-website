@@ -1,23 +1,27 @@
-<div *ngIf="quickFix" class="row">
+@if (quickFix) {
+  <div class="row">
     <div class="col">
-        <button type="button" role="button" class="btn btn-link btn-ducky rounded-pill" (click)="showModal()">
-            <span>{{quickFix.title}}</span>
-        </button>
+      <button type="button" role="button" class="btn btn-link btn-ducky rounded-pill" (click)="showModal()">
+        <span>{{quickFix.title}}</span>
+      </button>
     </div>
-</div>
+  </div>
+}
 
 <ng-template #content let-modal>
-    <div *ngIf="quickFix != null" class="modal-fullscreen-sm-down">
-        <div class="modal-header align-content-center">
-            <h2><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{quickFix.title}}</h2>
-            <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
-        </div>
-        <div class="modal-body">
-            <p>{{quickFix.summary}}</p>
-            <!--TODO show quickfix before/after examples here-->
-        </div>
-        <div class="modal-footer align-content-end">
-            <button type="button" ngbAutofocus class="btn btn-ducky btn-outline-dark" (click)="modal.dismiss('close')">Close</button>
-        </div>
+  @if (quickFix != null) {
+    <div class="modal-fullscreen-sm-down">
+      <div class="modal-header align-content-center">
+        <h2><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{quickFix.title}}</h2>
+        <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+      </div>
+      <div class="modal-body">
+        <p>{{quickFix.summary}}</p>
+        <!--TODO show quickfix before/after examples here-->
+      </div>
+      <div class="modal-footer align-content-end">
+        <button type="button" ngbAutofocus class="btn btn-ducky btn-outline-dark" (click)="modal.dismiss('close')">Close</button>
+      </div>
     </div>
+  }
 </ng-template>

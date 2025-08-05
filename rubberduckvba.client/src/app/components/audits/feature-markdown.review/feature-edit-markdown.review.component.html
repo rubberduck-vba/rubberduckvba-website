@@ -1,47 +1,49 @@
 <div class="card-body">
-    <div class="row">
-        <div class="col-lg-6">
-            <div>
-                <div class="form-check">
-                    <h4>
-                        <input class="form-check-input" type="checkbox" id="showBeforeBox" [(ngModel)]="showBefore">
-                        <label class="form-check-label" for="showBeforeBox">
-                            Initial value (unformatted):
-                        </label>
-                    </h4>
-                    <p class="small text-muted">Show/hide the modified field's initial value.</p>
-                </div>
-                <div *ngIf="showBefore" class="vbe-mock-debugger">
-                    <div class="code-area">
-                        <div class="code p-2" [innerText]="audit.valueBefore"></div>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <h4>Submitted value (unformatted):</h4>
-                <div class="vbe-mock-debugger">
-                    <div class="code-area">
-                        <div class="code p-2" [innerText]="audit.valueAfter"></div>
-                    </div>
-                </div>
-            </div>
+  <div class="row">
+    <div class="col-lg-6">
+      <div>
+        <div class="form-check">
+          <h4>
+            <input class="form-check-input" type="checkbox" id="showBeforeBox" [(ngModel)]="showBefore">
+            <label class="form-check-label" for="showBeforeBox">
+              Initial value (unformatted):
+            </label>
+          </h4>
+          <p class="small text-muted">Show/hide the modified field's initial value.</p>
         </div>
-        <div class="col-lg-6">
-            <h4>Formatted:</h4>
-            <div class="card">
-                <div class="card-body">
-                    <p [innerHTML]="htmlPreview"></p>
-                </div>
+        @if (showBefore) {
+          <div class="vbe-mock-debugger">
+            <div class="code-area">
+              <div class="code p-2" [innerText]="audit.valueBefore"></div>
             </div>
-            <div class="card-footer">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="showDiffBox" [(ngModel)]="showDiff">
-                    <label class="form-check-label" for="showDiffBox">
-                        Show diff
-                    </label>
-                    <p class="small text-muted">Diffed preview may be distorted if the input contains HTML tags.</p>
-                </div>
-            </div>
+          </div>
+        }
+      </div>
+      <div>
+        <h4>Submitted value (unformatted):</h4>
+        <div class="vbe-mock-debugger">
+          <div class="code-area">
+            <div class="code p-2" [innerText]="audit.valueAfter"></div>
+          </div>
         </div>
+      </div>
     </div>
+    <div class="col-lg-6">
+      <h4>Formatted:</h4>
+      <div class="card">
+        <div class="card-body">
+          <p [innerHTML]="htmlPreview"></p>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="showDiffBox" [(ngModel)]="showDiff">
+          <label class="form-check-label" for="showDiffBox">
+            Show diff
+          </label>
+          <p class="small text-muted">Diffed preview may be distorted if the input contains HTML tags.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

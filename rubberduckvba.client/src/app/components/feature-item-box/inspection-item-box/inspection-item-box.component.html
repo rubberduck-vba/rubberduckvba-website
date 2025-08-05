@@ -1,138 +1,168 @@
-<div *ngIf="item" class="card mb-2">
-        <div class="card-body" id="featureItemBoxHeading">
-            <button class="btn btn-link text-dark text-nowrap text-decoration-none w-100" role="button" (click)="showDetailsModal()">
-                <div class="row">
-                    <div *ngIf="item.isNew || item.isDiscontinued">
-                        <div *ngIf="item.isDiscontinued" title="This feature is no longer present in the latest pre-release build">
-                            <div class="btn-ducky bg-danger rounded-pill">Discontinued</div>
-                            <div class="small text-start mb-3">
-                                <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
-                            </div>
-                        </div>
-                    </div>
+@if (item) {
+  <div class="card mb-2">
+    <div class="card-body" id="featureItemBoxHeading">
+      <button class="btn btn-link text-dark text-nowrap text-decoration-none w-100" role="button" (click)="showDetailsModal()">
+        <div class="row">
+          @if (item.isNew || item.isDiscontinued) {
+            <div>
+              @if (item.isDiscontinued) {
+                <div title="This feature is no longer present in the latest pre-release build">
+                  <div class="btn-ducky bg-danger rounded-pill">Discontinued</div>
+                  <div class="small text-start mb-3">
+                    <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
+                  </div>
                 </div>
-                <div class="row">
-                    <div class="text-start border-top border-bottom p-1 bg-light-subtle">
-                        <span ngClass="{{severityIconClass}}" title="{{inspectionInfo.defaultSeverity}}"></span>
-                        <h6 class="d-inline text-wrap">&nbsp;{{inspectionInfo.title}}</h6>
-                    </div>
-                    <p class="text-wrap text-black-50 mt-3" [innerHtml]="inspectionInfo.summary"></p>
-                </div>
-                <div *ngIf="item.isNew" title="This feature is currently only available in pre-release builds">
-                    <div class="btn-ducky rounded-pill">New!</div>
-                    <div class="small text-start mb-3">
-                        <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
-                    </div>
-                </div>
-            </button>
+              }
+            </div>
+          }
         </div>
- </div>
+        <div class="row">
+          <div class="text-start border-top border-bottom p-1 bg-light-subtle">
+            <span ngClass="{{severityIconClass}}" title="{{inspectionInfo.defaultSeverity}}"></span>
+            <h6 class="d-inline text-wrap">&nbsp;{{inspectionInfo.title}}</h6>
+          </div>
+          <p class="text-wrap text-black-50 mt-3" [innerHtml]="inspectionInfo.summary"></p>
+        </div>
+        @if (item.isNew) {
+          <div title="This feature is currently only available in pre-release builds">
+            <div class="btn-ducky rounded-pill">New!</div>
+            <div class="small text-start mb-3">
+              <fa-icon [icon]="'code-merge'"></fa-icon>&nbsp;{{item.tagName}}
+            </div>
+          </div>
+        }
+      </button>
+    </div>
+  </div>
+}
 
 <ng-template #inspectionDetails let-modal>
-    <div class="modal-header align-content-center">
-        <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{inspectionInfo.title}}</h4>
-        <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
-    </div>
-    <div class="modal-body my-2 mx-4">
-        <div class="row text-start">
-                <div class="col-6">
-                    <div class="">
-                        <strong class="fw-medium" [innerHtml]="inspectionInfo.summary"></strong>
-                        <h6>Reasoning</h6>
-                        <p [innerHtml]="inspectionInfo.reasoning"></p>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div>
-                        <h6>Inspection Type</h6>
-                        <strong>
-                            <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{inspectionInfo.inspectionType}}
-                        </strong>
-                        <p class="small text-black-50">{{inspectionTypeTitle}}</p>
-                    </div>
-                    <hr />
-                    <div>
-                        <h6>Default Severity</h6>
-                        <span ngClass="{{severityIconClass}}"></span>&nbsp;<strong>{{inspectionInfo.defaultSeverity}}</strong>
-                        <p class="small text-black-50">{{severityTitle}}</p>
-                    </div>
-                    <hr />
-                </div>
-                <div *ngIf="(inspectionInfo.hostApp?.length ?? 0) > 0" class="row">
-                    <div>
-                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when hosted in <strong>{{inspectionInfo.hostApp}}</strong>.</p>
-                    </div>
-                </div>
-                <div *ngIf="inspectionInfo.references.length == 1" class="row">
-                    <div>
-                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when the <strong>{{inspectionInfo.references[0]}}</strong> library is referenced.</p>
-                    </div>
-                </div>
-                <div *ngIf="inspectionInfo.references.length > 1" class="row">
-                    <div>
-                        <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when any of the following libraries is referenced:</p>
-                        <ul>
-                            <li *ngFor="let library of this.inspectionInfo.references">{{library}}</li>
-                        </ul>
-                    </div>
-                </div>
-                <div *ngIf="inspectionInfo.remarks && inspectionInfo.remarks.length > 0">
-                    <div class="alert alert-info bg-light-subtle mt-2 col-12">
-                        <h5>Remarks</h5>
-                        <div [innerHtml]="inspectionInfo.remarks"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div *ngIf="inspectionInfo.quickFixes.length > 0">
-                        <hr />
-                        <h6>
-                            <fa-icon [icon]="'wand-magic-sparkles'"></fa-icon>&nbsp;QuickFixes
-                        </h6>
-                        <p class="small">This inspection offers the following fixes:</p>
-                        <ul class="list-unstyled ms-2">
-                            <li *ngFor="let fix of this.inspectionInfo.quickFixes" class="my-1">
-                                <a class="text-decoration-none" href="/quickfixes/{{fix.name}}">
-                                    <div class="card-highlight rounded-4 p-2">
-                                        <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.name}}</h6>
-                                        <p class="text-black-50 small" [innerHTML]="fix.summary"></p>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+  <div class="modal-header align-content-center">
+    <h4><img src="../../assets/vector-ducky-540.png" height="32">&nbsp;{{inspectionInfo.title}}</h4>
+    <button type="button" class="btn-close" aria-label="close" (click)="modal.dismiss('x')"></button>
+  </div>
+  <div class="modal-body my-2 mx-4">
+    <div class="row text-start">
+      <div class="col-6">
+        <div class="">
+          <strong class="fw-medium" [innerHtml]="inspectionInfo.summary"></strong>
+          <h6>Reasoning</h6>
+          <p [innerHtml]="inspectionInfo.reasoning"></p>
         </div>
+      </div>
+      <div class="col-6">
+        <div>
+          <h6>Inspection Type</h6>
+          <strong>
+            <fa-icon [icon]="'lightbulb'"></fa-icon>&nbsp;{{inspectionInfo.inspectionType}}
+          </strong>
+          <p class="small text-black-50">{{inspectionTypeTitle}}</p>
+        </div>
+        <hr />
+        <div>
+          <h6>Default Severity</h6>
+          <span ngClass="{{severityIconClass}}"></span>&nbsp;<strong>{{inspectionInfo.defaultSeverity}}</strong>
+          <p class="small text-black-50">{{severityTitle}}</p>
+        </div>
+        <hr />
+      </div>
+      @if ((inspectionInfo.hostApp?.length ?? 0) > 0) {
+        <div class="row">
+          <div>
+            <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when hosted in <strong>{{inspectionInfo.hostApp}}</strong>.</p>
+          </div>
+        </div>
+      }
+      @if (inspectionInfo.references.length == 1) {
+        <div class="row">
+          <div>
+            <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when the <strong>{{inspectionInfo.references[0]}}</strong> library is referenced.</p>
+          </div>
+        </div>
+      }
+      @if (inspectionInfo.references.length > 1) {
+        <div class="row">
+          <div>
+            <p><fa-icon [icon]="'gears'"></fa-icon>&nbsp;This inspection only runs when any of the following libraries is referenced:</p>
+            <ul>
+              @for (library of this.inspectionInfo.references; track library) {
+                <li>{{library}}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
+      @if (inspectionInfo.remarks && inspectionInfo.remarks.length > 0) {
+        <div>
+          <div class="alert alert-info bg-light-subtle mt-2 col-12">
+            <h5>Remarks</h5>
+            <div [innerHtml]="inspectionInfo.remarks"></div>
+          </div>
+        </div>
+      }
+      <div class="row">
+        @if (inspectionInfo.quickFixes.length > 0) {
+          <div>
+            <hr />
+            <h6>
+              <fa-icon [icon]="'wand-magic-sparkles'"></fa-icon>&nbsp;QuickFixes
+            </h6>
+            <p class="small">This inspection offers the following fixes:</p>
+            <ul class="list-unstyled ms-2">
+              @for (fix of this.inspectionInfo.quickFixes; track fix) {
+                <li class="my-1">
+                  <a class="text-decoration-none" href="/quickfixes/{{fix.name}}">
+                    <div class="card-highlight rounded-4 p-2">
+                      <h6><fa-icon [icon]="'circle-check'"></fa-icon>&nbsp;{{fix.name}}</h6>
+                      <p class="text-black-50 small" [innerHTML]="fix.summary"></p>
+                    </div>
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    </div>
 
-        <div *ngIf="inspectionInfo.examples && inspectionInfo.examples.length > 0"
-             class="row my-3">
-            <div class="text-center">
-                <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureItemBoxDetailsBody" aria-controls="featureItemBoxDetailsBody" (click)="item.isDetailsCollapsed = !item.isDetailsCollapsed">
-                    <div *ngIf="item && item.isDetailsCollapsed">
-                        Show examples ▾
-                    </div>
-                    <div *ngIf="item && !item.isDetailsCollapsed">
-                        Hide examples ▴
-                    </div>
-                </button>
-            </div>
+    @if (inspectionInfo.examples && inspectionInfo.examples.length > 0) {
+      <div
+        class="row my-3">
+        <div class="text-center">
+          <button class="btn btn-outline-dark btn-ducky rounded-pill w-auto" role="button" data-toggle="collapse" data-target="#featureItemBoxDetailsBody" aria-controls="featureItemBoxDetailsBody" (click)="item.isDetailsCollapsed = !item.isDetailsCollapsed">
+            @if (item && item.isDetailsCollapsed) {
+              <div>
+                Show examples ▾
+              </div>
+            }
+            @if (item && !item.isDetailsCollapsed) {
+              <div>
+                Hide examples ▴
+              </div>
+            }
+          </button>
         </div>
-        <div id="featureItemBoxDetailsBody" class="collapse" [ngClass]="{'show': !item.isDetailsCollapsed}">
-            <div class="row">
-                <div>
-                    <div id="inspectionInfoBody">
-                        <div *ngFor="let example of inspectionInfo.examples">
-                            <example-box [inspectionExample]="example"></example-box>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      </div>
+    }
+    <div id="featureItemBoxDetailsBody" class="collapse" [ngClass]="{'show': !item.isDetailsCollapsed}">
+      <div class="row">
+        <div>
+          <div id="inspectionInfoBody">
+            @for (example of inspectionInfo.examples; track example) {
+              <div>
+                <example-box [inspectionExample]="example"></example-box>
+              </div>
+            }
+          </div>
         </div>
+      </div>
+    </div>
 
+  </div>
+  <div class="modal-footer">
+    <div class="small text-muted text-center">
+      <a href="{{inspectionInfo.getGitHubViewLink()}}">View</a> | <a href="{{inspectionInfo.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
     </div>
-    <div class="modal-footer">
-        <div class="small text-muted text-center">
-            <a href="{{inspectionInfo.getGitHubViewLink()}}">View</a> | <a href="{{inspectionInfo.getGitHubEditLink()}}">Edit</a> this content on <fa-icon [icon]="['fab', 'github']"></fa-icon>&nbsp;GitHub
-        </div>
-        <a href="/inspections/{{inspectionInfo.name}}" class="btn btn-expand" title="Expand to page"><fa-icon [icon]="['fas', 'expand']"></fa-icon>&nbsp;View page</a>
-    </div>
+    <a href="/inspections/{{inspectionInfo.name}}" class="btn btn-expand" title="Expand to page"><fa-icon [icon]="['fas', 'expand']"></fa-icon>&nbsp;View page</a>
+  </div>
 </ng-template>

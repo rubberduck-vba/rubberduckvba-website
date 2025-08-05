@@ -1,13 +1,17 @@
 <div class="row">
-    <h2>Review Submitted Operation</h2>
-    <p>Any GitHub-authenticated visitor can submit edits to the site content, but only members of the <strong>rubberduck-vba</strong> organization can review these operations.</p>
+  <h2>Review Submitted Operation</h2>
+  <p>Any GitHub-authenticated visitor can submit edits to the site content, but only members of the <strong>rubberduck-vba</strong> organization can review these operations.</p>
 </div>
 <div class="row">
-    <div class="text-center">
-        <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
-    </div>
+  <div class="text-center">
+    <img class="ducky my-2 w-10 hover-enlarge" alt="Rubberduck logo" src="../../assets/vector-ducky-dark.svg" />
+  </div>
 </div>
 <div class="row my-2">
-    <audit-box *ngIf="isEdit" [collapsible]="false" [auditEdit]="featureEdit"></audit-box>
-    <audit-box *ngIf="!isEdit" [collapsible]="false" [auditOp]="featureOp"></audit-box>
+  @if (isEdit) {
+    <audit-box [collapsible]="false" [auditEdit]="featureEdit"></audit-box>
+  }
+  @if (!isEdit) {
+    <audit-box [collapsible]="false" [auditOp]="featureOp"></audit-box>
+  }
 </div>
