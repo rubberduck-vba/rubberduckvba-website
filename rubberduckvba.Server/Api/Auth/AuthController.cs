@@ -115,9 +115,9 @@ public class AuthController : RubberduckApiController
     [HttpPost("auth/github")]
     [EnableCors(CorsPolicies.AllowAll)]
     [AllowAnonymous]
-    public IActionResult OnGitHubCallback(SignInViewModel vm)
+    public async Task<IActionResult> OnGitHubCallback(SignInViewModel vm)
     {
-        return GuardInternalAction(() =>
+        return await GuardInternalAction(async () =>
         {
             Logger.LogInformation("OAuth code was received. State: {state}", vm.State);
             var clientId = configuration.Value.ClientId;
@@ -127,7 +127,7 @@ public class AuthController : RubberduckApiController
             var github = new GitHubClient(new ProductHeaderValue(agent));
             var request = new OauthTokenRequest(clientId, clientSecret, vm.Code);
 
-            var token = github.Oauth.CreateAccessToken(request).GetAwaiter().GetResult();
+            var token = await github.Oauth.CreateAccessToken(request);
 
             if (token is null)
             {
@@ -136,7 +136,7 @@ public class AuthController : RubberduckApiController
             }
 
             Logger.LogInformation("OAuth access token was created. Authorizing...");
-            var authorizedToken = AuthorizeAsync(token.AccessToken).GetAwaiter().GetResult();
+            var authorizedToken = await AuthorizeAsync(token.AccessToken);
 
             return authorizedToken is null ? Unauthorized() : Ok(vm with { Token = authorizedToken });
         });
@@ -176,7 +176,7 @@ public class AuthController : RubberduckApiController
                 Thread.CurrentPrincipal = HttpContext.User;
 
                 Logger.LogInformation("GitHub user with login {login} has signed in with role authorizations '{role}'.", githubUser.Login, configuration.Value.OwnerOrg);
-                Response.Cookies.Append(GitHubAuthenticationHandler.AuthCookie, token, new CookieOptions
+                Response.Cookies.Append(GitHubAuthenticationHandler.AuthTokenHeader, token, new CookieOptions
                 {
                     IsEssential = true,
                     HttpOnly = true,

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using rubberduckvba.Server.Api.Auth;
 using rubberduckvba.Server.Services;
-using System.Collections.Concurrent;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
@@ -10,103 +10,91 @@ namespace rubberduckvba.Server;
 
 public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    public static readonly string AuthCookie = "x-access-token";
+    public static readonly string AuthTokenHeader = "x-access-token";
+    public static readonly string AuthCookie = "x-auth";
 
     private readonly IGitHubClientService _github;
-    private readonly IMemoryCache _cache;
 
-    private static readonly MemoryCacheEntryOptions _options = new MemoryCacheEntryOptions
-    {
-        SlidingExpiration = TimeSpan.FromMinutes(60),
-    };
+    private readonly string _audience;
+    private readonly string _issuer;
+    private readonly string _secret;
 
-    public GitHubAuthenticationHandler(IGitHubClientService github, IMemoryCache cache,
-        IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)
+    public GitHubAuthenticationHandler(IGitHubClientService github, IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger,
+        UrlEncoder encoder, IOptions<ApiSettings> apiOptions)
         : base(options, logger, encoder)
     {
         _github = github;
-        _cache = cache;
-    }
 
-    private static readonly ConcurrentDictionary<string, Task<AuthenticateResult?>> _authApiTask = new();
+        _audience = apiOptions.Value.Audience;
+        _issuer = apiOptions.Value.Issuer;
+        _secret = apiOptions.Value.SymetricKey;
+    }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         try
         {
-            var token = Context.Request.Cookies[AuthCookie]
-                        ?? Context.Request.Headers[AuthCookie];
-
-            if (string.IsNullOrWhiteSpace(token))
+            if (TryAuthenticateJWT(out var jwtResult))
             {
-                return Task.FromResult(AuthenticateResult.Fail("Access token was not provided"));
+                return Task.FromResult(jwtResult!);
             }
 
-            if (TryAuthenticateFromCache(token, out var cachedResult))
+            var token = Context.Request.Headers[AuthTokenHeader].SingleOrDefault();
+            if (!string.IsNullOrEmpty(token))
             {
-                return Task.FromResult(cachedResult)!;
-            }
-
-            if (TryAuthenticateGitHubToken(token, out var result)
-                && result is AuthenticateResult
-                && result.Ticket is AuthenticationTicket ticket)
-            {
-                CacheAuthenticatedTicket(token, ticket);
-                return Task.FromResult(result!);
-            }
-
-            if (TryAuthenticateFromCache(token, out cachedResult))
-            {
-                return Task.FromResult(cachedResult!);
+                if (TryAuthenticateGitHubToken(token, out var result)
+                    && result is AuthenticateResult
+                    && result.Ticket is AuthenticationTicket)
+                {
+                    return Task.FromResult(result!);
+                }
             }
 
             return Task.FromResult(AuthenticateResult.Fail("Missing or invalid access token"));
         }
         catch (InvalidOperationException e)
         {
-            Logger.LogError(e, e.Message);
+            Logger.LogError(e, "{Message}", e.Message);
             return Task.FromResult(AuthenticateResult.NoResult());
         }
     }
 
-    private void CacheAuthenticatedTicket(string token, AuthenticationTicket ticket)
-    {
-        if (!string.IsNullOrWhiteSpace(token) && ticket.Principal.Identity?.IsAuthenticated == true)
-        {
-            _cache.Set(token, ticket, _options);
-        }
-    }
-
-    private bool TryAuthenticateFromCache(string token, out AuthenticateResult? result)
+    private bool TryAuthenticateJWT(out AuthenticateResult? result)
     {
         result = null;
-        if (_cache.TryGetValue(token, out var cached) && cached is AuthenticationTicket cachedTicket)
+
+        var jsonContent = Context.Request.Cookies[AuthCookie];
+        if (!string.IsNullOrEmpty(jsonContent))
         {
-            var cachedPrincipal = cachedTicket.Principal;
+            var payload = JwtPayload.Deserialize(jsonContent);
+            if (!payload.Iss.Equals(_issuer, StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.LogWarning("Invalid issuer in JWT payload: {Issuer}", payload.Iss);
+                return false;
+            }
+            if (!payload.Aud.Contains(_audience))
+            {
+                Logger.LogWarning("Invalid audience in JWT payload: {Audience}", payload.Aud);
+                return false;
+            }
 
-            Context.User = cachedPrincipal;
-            Thread.CurrentPrincipal = cachedPrincipal;
+            var principal = payload.ToClaimsPrincipal();
+            Context.User = principal;
+            Thread.CurrentPrincipal = principal;
 
-            Logger.LogInformation($"Successfully retrieved authentication ticket from cached token for {cachedPrincipal.Identity!.Name}; token will not be revalidated.");
-            result = AuthenticateResult.Success(cachedTicket);
+            var ticket = new AuthenticationTicket(principal, "github");
+            result = AuthenticateResult.Success(ticket);
             return true;
         }
+
         return false;
     }
 
     private bool TryAuthenticateGitHubToken(string token, out AuthenticateResult? result)
     {
-        result = null;
-        if (_authApiTask.TryGetValue(token, out var task) && task is not null)
-        {
-            result = task.GetAwaiter().GetResult();
-            return result is not null;
-        }
+        var task = AuthenticateGitHubAsync(token);
+        result = task.GetAwaiter().GetResult();
 
-        _authApiTask[token] = AuthenticateGitHubAsync(token);
-        result = _authApiTask[token].GetAwaiter().GetResult();
-
-        _authApiTask[token] = null!;
         return result is not null;
     }
 
@@ -117,6 +105,15 @@ public class GitHubAuthenticationHandler : AuthenticationHandler<AuthenticationS
         {
             Context.User = principal;
             Thread.CurrentPrincipal = principal;
+
+            var jwt = principal.ToJWT(_secret, _issuer, _audience);
+            Context.Response.Cookies.Append(AuthCookie, jwt, new CookieOptions
+            {
+                IsEssential = true,
+                HttpOnly = true,
+                Secure = true,
+                Expires = DateTimeOffset.UtcNow.AddHours(1)
+            });
 
             var ticket = new AuthenticationTicket(principal, "github");
             return AuthenticateResult.Success(ticket);
