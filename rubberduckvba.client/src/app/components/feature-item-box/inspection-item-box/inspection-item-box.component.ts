@@ -7,8 +7,9 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ApiClientService } from '../../../services/api-client.service';
 
 @Component({
-  selector: 'inspection-item-box',
-  templateUrl: './inspection-item-box.component.html'
+    selector: 'inspection-item-box',
+    templateUrl: './inspection-item-box.component.html',
+    standalone: false
 })
 export class InspectionItemBoxComponent implements OnInit, OnChanges {
 

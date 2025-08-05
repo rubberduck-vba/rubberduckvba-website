@@ -9,8 +9,9 @@ import { AdminAction } from '../edit-feature/edit-feature.component';
 import { ApiClientService } from '../../services/api-client.service';
 
 @Component({
-  selector: 'feature-box',
-  templateUrl: './feature-box.component.html'
+    selector: 'feature-box',
+    templateUrl: './feature-box.component.html',
+    standalone: false
 })
 export class FeatureBoxComponent implements OnInit {
 

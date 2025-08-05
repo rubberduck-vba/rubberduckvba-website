@@ -2,8 +2,9 @@ import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { BlogLink } from "../../../model/feature.model";
 
 @Component({
-  selector: 'edit-blog-link',
-  templateUrl: './edit-bloglink.component.html'
+    selector: 'edit-blog-link',
+    templateUrl: './edit-bloglink.component.html',
+    standalone: false
 })
 export class EditBlogLinkComponent implements OnInit {
 

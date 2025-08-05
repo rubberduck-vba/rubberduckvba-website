@@ -7,9 +7,10 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ApiClientService } from '../../services/api-client.service';
 
 @Component({
-  selector: 'example-box',
-  templateUrl: './example-box.component.html',
-  styleUrls: ['./example-box.component.css']
+    selector: 'example-box',
+    templateUrl: './example-box.component.html',
+    styleUrls: ['./example-box.component.css'],
+    standalone: false
 })
 export class ExampleBoxComponent implements OnInit {
 

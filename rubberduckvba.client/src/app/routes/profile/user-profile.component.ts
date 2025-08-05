@@ -7,8 +7,9 @@ import { IconDefinition, fas } from "@fortawesome/free-solid-svg-icons";
 import { ApiClientService } from "../../services/api-client.service";
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './user-profile.component.html',
+    selector: 'app-profile',
+    templateUrl: './user-profile.component.html',
+    standalone: false
 })
 export class UserProfileComponent implements OnInit {
 

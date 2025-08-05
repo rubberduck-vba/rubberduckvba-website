@@ -16,8 +16,9 @@ export interface IndenterOptionGroups {
 }
 
 @Component({
-  selector: 'app-indenter',
-  templateUrl: './indenter.component.html',
+    selector: 'app-indenter',
+    templateUrl: './indenter.component.html',
+    standalone: false
 })
 export class IndenterComponent implements OnInit, IndenterOptionGroups {
   private _model!: IndenterViewModel;

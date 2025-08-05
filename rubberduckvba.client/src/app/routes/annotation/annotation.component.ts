@@ -7,8 +7,9 @@ import { AnnotationViewModel } from "../../model/feature.model";
 import { ApiClientService } from "../../services/api-client.service";
 
 @Component({
-  selector: 'app-annotation',
-  templateUrl: './annotation.component.html',
+    selector: 'app-annotation',
+    templateUrl: './annotation.component.html',
+    standalone: false
 })
 export class AnnotationComponent implements OnInit {
 

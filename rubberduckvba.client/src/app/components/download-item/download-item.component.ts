@@ -4,8 +4,9 @@ import { BehaviorSubject } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'download-item',
-  templateUrl: './download-item.component.html',
+    selector: 'download-item',
+    templateUrl: './download-item.component.html',
+    standalone: false
 })
 export class DownloadItemComponent implements OnInit {
 

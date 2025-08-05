@@ -3,8 +3,9 @@ import { FeatureOperationViewModel } from "../../../model/feature.model";
 import { BehaviorSubject } from "rxjs";
 
 @Component({
-  selector: 'review-feature-delete',
-  templateUrl: './feature-delete.review.component.html'
+    selector: 'review-feature-delete',
+    templateUrl: './feature-delete.review.component.html',
+    standalone: false
 })
 export class AuditFeatureDeleteComponent implements OnInit {
 

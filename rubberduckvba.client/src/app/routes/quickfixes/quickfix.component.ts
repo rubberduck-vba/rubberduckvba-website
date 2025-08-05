@@ -7,8 +7,9 @@ import { QuickFixViewModel, QuickFixViewModelClass } from "../../model/feature.m
 import { ApiClientService } from "../../services/api-client.service";
 
 @Component({
-  selector: 'app-quickfix',
-  templateUrl: './quickfix.component.html',
+    selector: 'app-quickfix',
+    templateUrl: './quickfix.component.html',
+    standalone: false
 })
 export class QuickFixComponent implements OnInit {
 

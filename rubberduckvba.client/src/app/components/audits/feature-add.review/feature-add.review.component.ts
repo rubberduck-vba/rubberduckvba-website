@@ -6,8 +6,9 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import { ApiClientService } from "../../../services/api-client.service";
 
 @Component({
-  selector: 'review-feature-add',
-  templateUrl: './feature-add.review.component.html'
+    selector: 'review-feature-add',
+    templateUrl: './feature-add.review.component.html',
+    standalone: false
 })
 export class AuditFeatureAdditionComponent implements OnInit {
 

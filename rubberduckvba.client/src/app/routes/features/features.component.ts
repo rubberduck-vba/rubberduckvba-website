@@ -7,8 +7,9 @@ import { FeatureViewModel, PendingAuditsViewModel, QuickFixViewModel, UserViewMo
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-features',
-  templateUrl: './features.component.html',
+    selector: 'app-features',
+    templateUrl: './features.component.html',
+    standalone: false
 })
 export class FeaturesComponent implements OnInit {
 

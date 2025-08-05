@@ -5,9 +5,10 @@ import { Change, diffWords } from "diff";
 import { encode } from "html-entities";
 
 @Component({
-  selector: 'app-audits',
-  templateUrl: './audits.component.html',
-  styleUrls: ['./audits.component.css']
+    selector: 'app-audits',
+    templateUrl: './audits.component.html',
+    styleUrls: ['./audits.component.css'],
+    standalone: false
 })
 export class AuditsAdminComponent implements OnInit {
 

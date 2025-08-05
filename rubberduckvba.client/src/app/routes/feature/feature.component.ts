@@ -9,8 +9,9 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-feature',
-  templateUrl: './feature.component.html',
+    selector: 'app-feature',
+    templateUrl: './feature.component.html',
+    standalone: false
 })
 export class FeatureComponent implements OnInit {
 

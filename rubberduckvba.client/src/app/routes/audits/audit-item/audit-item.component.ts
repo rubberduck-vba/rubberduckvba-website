@@ -7,8 +7,9 @@ import { BehaviorSubject, switchMap } from "rxjs";
 import { AuditRecordViewModel, FeatureEditViewModel, FeatureOperationViewModel, UserActivityType } from "../../../model/feature.model";
 
 @Component({
-  selector: 'app-audit-item',
-  templateUrl: './audit-item.component.html',
+    selector: 'app-audit-item',
+    templateUrl: './audit-item.component.html',
+    standalone: false
 })
 export class AuditItemComponent implements OnInit {
 

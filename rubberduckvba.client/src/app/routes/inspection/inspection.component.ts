@@ -7,8 +7,9 @@ import { BehaviorSubject, switchMap } from "rxjs";
 import { ApiClientService } from "../../services/api-client.service";
 
 @Component({
-  selector: 'app-inspection',
-  templateUrl: './inspection.component.html',
+    selector: 'app-inspection',
+    templateUrl: './inspection.component.html',
+    standalone: false
 })
 export class InspectionComponent implements OnInit {
 

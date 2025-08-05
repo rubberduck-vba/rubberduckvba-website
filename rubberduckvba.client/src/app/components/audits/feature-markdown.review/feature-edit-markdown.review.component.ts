@@ -7,8 +7,9 @@ import { FeatureEditViewModel } from "../../../model/feature.model";
 import { Change, diffWords } from "diff";
 
 @Component({
-  selector: 'review-edit-markdown',
-  templateUrl: './feature-edit-markdown.review.component.html'
+    selector: 'review-edit-markdown',
+    templateUrl: './feature-edit-markdown.review.component.html',
+    standalone: false
 })
 export class AuditFeatureEditMarkdownComponent implements OnInit {
 

@@ -8,9 +8,10 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AngularDeviceInformationService } from 'angular-device-information';
 
 @Component({
-  //standalone: true,
-  selector: 'tag-download',
-  templateUrl: './tag-download.component.html'
+    //standalone: true,
+    selector: 'tag-download',
+    templateUrl: './tag-download.component.html',
+    standalone: false
 })
 export class TagDownloadComponent implements OnInit, OnDestroy, OnChanges {
 

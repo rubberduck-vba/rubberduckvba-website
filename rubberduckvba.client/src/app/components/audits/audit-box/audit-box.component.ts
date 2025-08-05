@@ -8,8 +8,9 @@ import { ApiClientService } from "../../../services/api-client.service";
 import { AuthService } from "../../../services/auth.service";
 
 @Component({
-  selector: 'audit-box',
-  templateUrl: './audit-box.component.html'
+    selector: 'audit-box',
+    templateUrl: './audit-box.component.html',
+    standalone: false
 })
 export class AuditBoxComponent implements OnInit {
   private readonly _audit: BehaviorSubject<AuditRecordViewModel> = new BehaviorSubject<AuditRecordViewModel>(null!);
