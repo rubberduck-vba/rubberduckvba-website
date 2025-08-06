@@ -38,9 +38,11 @@
               </div>
             }
           </div>
+          @if (user.isWriter) {
           <div class="text-end">
             <edit-feature [feature]="feature" [action]="editLinksAction"></edit-feature>
           </div>
+          }
         </div>
       }
     </div>
